@@ -130,6 +130,12 @@ When `(keymapp METHOD)`, it becomes:
                    (message ,hint))
                  (setq hydra-last (set-transient-map ',keymap t)))))
           heads names)
+       (defun ,(intern (format "hydra-%s-body" body)) ()
+         ,doc
+         (interactive)
+         (when hydra-is-helpful
+           (message ,hint))
+         (setq hydra-last (set-transient-map ',keymap t)))
        ,@(cl-mapcar
           (lambda (head name)
             `(,method ,(vconcat (kbd body) (kbd (car head))) #',name))
