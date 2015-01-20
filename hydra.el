@@ -63,6 +63,9 @@
   :type 'boolean
   :group 'hydra)
 
+(defvar hydra-last nil
+  "The result of the last `set-transient-map' call.")
+
 ;;;###autoload
 (defmacro hydra-create (body heads &optional method)
   "Create a hydra with a BODY prefix and HEADS with METHOD.
@@ -89,45 +92,43 @@ When `(keymapp METHOD)`, it becomes:
                  heads))
          (method (cond ((null method)
                         'global-set-key)
-
                        ((keymapp (eval method))
-                        `(lambda (key command) (define-key ,method key command)))
-
+                        `(lambda (key command)
+                           (define-key ,method key command)))
                        (t
                         method)))
          (hint (concat "hydra: "
                        (mapconcat
-                        (lambda (h) (if (caddr h)
-                                        (format "[%s]: %s"
-                                                (propertize (car h)
-                                                            'face 'font-lock-keyword-face)
-                                                (caddr h))
-                                      (propertize (car h) 'face 'font-lock-keyword-face)))
+                        (lambda (h)
+                          (if (caddr h)
+                              (format "[%s]: %s"
+                                      (propertize (car h)
+                                                  'face 'font-lock-keyword-face)
+                                      (caddr h))
+                            (propertize (car h) 'face 'font-lock-keyword-face)))
                         heads ", ")
-                       ".")))
+                       "."))
+         (doc (format
+               "Create a hydra with a \"%s\" body and the heads:\n\n%s."
+               body
+               (mapconcat
+                (lambda (x)
+                  (format "\"%s\":    `%S'" (car x) (cadr x)))
+                heads ",\n"))))
     `(progn
        (when (eq ',method 'global-set-key)
          (global-set-key ,(kbd body) nil))
        ,@(cl-mapcar
           (lambda (head name)
             `(defun ,name ()
-               ,(format
-                 "Create a hydra with a \"%s\" body and the heads:
-
-%s.
-
-Call the head: `%S'."
-                 body
-                 (mapconcat
-                  (lambda (x)
-                    (format "\"%s\":    `%S'" (car x) (cadr x)))
-                  heads ",\n")
-                 (cadr head))
+               ,(format "%s\n\nCall the head: `%S'." doc (cadr head))
                (interactive)
-               (call-interactively #',(cadr head))
-               (when hydra-is-helpful
-                 (message ,hint))
-               (set-transient-map ',keymap t)))
+               (if (null ',(cadr head))
+                   (funcall hydra-last)
+                 (call-interactively #',(cadr head))
+                 (when hydra-is-helpful
+                   (message ,hint))
+                 (setq hydra-last (set-transient-map ',keymap t)))))
           heads names)
        ,@(cl-mapcar
           (lambda (head name)
