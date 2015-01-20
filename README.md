@@ -20,8 +20,8 @@ Here's how I use the examples bundled with Hydra:
 You can expand the examples in-place, it still looks elegant:
 
     (hydra-create "<f2>"
-      '(("g" . text-scale-increase)
-        ("l" . text-scale-decrease)))
+      '(("g" text-scale-increase)
+        ("l" text-scale-decrease)))
 
 See the [introductory blog post](http://oremacs.com/2015/01/20/introducing-hydra/) for more information.
 
@@ -34,10 +34,10 @@ Here's an example:
 
 ```cl
 (hydra-create "z"
-  '(("l" . forward-char)
-    ("h" . backward-char)
-    ("j" . next-line)
-    ("k" . previous-line))
+  '(("l" forward-char)
+    ("h" backward-char)
+    ("j" next-line)
+    ("k" previous-line))
   (lambda (key command)
     (define-key lispy-mode-map key command)))
 ```
@@ -47,11 +47,30 @@ the lambda will be generated for you:
 
 ```cl
 (hydra-create "z"
-  '(("l" . forward-char)
-    ("h" . backward-char)
-    ("j" . next-line)
-    ("k" . previous-line))
+  '(("l" forward-char)
+    ("h" backward-char)
+    ("j" next-line)
+    ("k" previous-line))
     lispy-mode-map)
 ```
 
+## Can Hydras can be helpful?
 
+They can, if
+
+```cl
+(setq hydra-is-helpful t)
+```
+
+In that case, you'll get a hint in the echo area consisting of current Hydra's heads.
+You can even add comments to the heads like this:
+
+```
+(defvar hydra-example-text-scale
+  '(("g" text-scale-increase "zoom in")
+    ("l" text-scale-decrease "zoom out"))
+  "A two-headed hydra for text scale manipulation.")
+```
+
+With this, you'll see `hydra: [g]: zoom in, [l]: zoom out.` in your
+echo area, once the zoom Hydra becomes active.
