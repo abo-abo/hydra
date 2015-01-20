@@ -95,15 +95,16 @@ When `(keymapp METHOD)`, it becomes:
          (hint (concat "hydra: "
                        (mapconcat
                         (lambda (h) (if (caddr h)
-                                   (format "[%s]: %s"
-                                           (propertize (car h)
-                                                       'face 'font-lock-keyword-face)
-                                           (caddr h))
-                                 (propertize (car h) 'face 'font-lock-keyword-face)))
+                                        (format "[%s]: %s"
+                                                (propertize (car h)
+                                                            'face 'font-lock-keyword-face)
+                                                (caddr h))
+                                      (propertize (car h) 'face 'font-lock-keyword-face)))
                         heads ", ")
                        ".")))
     `(progn
-       (,method ,(kbd body) nil)
+       (when (eq ,method 'global-set-key)
+         (global-set-key ,(kbd body) nil))
        ,@(cl-mapcar
           (lambda (head name)
             `(defun ,name ()
