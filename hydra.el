@@ -51,15 +51,21 @@
 (require 'cl-lib)
 
 ;;;###autoload
-(defmacro hydra-create (body heads)
-  "Create a hydra with a BODY prefix and HEADS.
+(defmacro hydra-create (body heads &optional method)
+  "Create a hydra with a BODY prefix and HEADS with METHOD.
 This will result in `global-set-key' statements with the keys
 being the concatenation of BODY and each head in HEADS.  HEADS is
 an alist of (KEY . FUNCTION).
 
 After one of the HEADS is called via BODY+KEY, it and the other
 HEADS can be called with only KEY (no need for BODY).  This state
-is broken once any key binding that is not in HEADS is called."
+is broken once any key binding that is not in HEADS is called.
+
+METHOD is a lambda takes two arguments: a KEY and a COMMAND.
+It defaults to `global-set-key'.
+When `(keymapp METHOD)`, it becomes:
+
+    (lambda (key command) (define-key METHOD key command))"
   (declare (indent 1))
   (let* ((keymap (make-sparse-keymap))
          (heads (eval heads))
@@ -67,9 +73,17 @@ is broken once any key binding that is not in HEADS is called."
                  (lambda (x)
                    (define-key keymap (car x)
                      (intern (format "hydra-%s-%S" body (cdr x)))))
-                 heads)))
+                 heads))
+         (method (cond ((null method)
+                        'global-set-key)
+
+                       ((keymapp (eval method))
+                        `(lambda (key command) (define-key ,method key command)))
+
+                       (t
+                        method))))
     `(progn
-       (global-set-key ,(kbd body) nil)
+       (,method ,(kbd body) nil)
        ,@(cl-mapcar
           (lambda (head name)
             `(defun ,name ()
@@ -91,7 +105,7 @@ Call the head: `%S'."
           heads names)
        ,@(cl-mapcar
           (lambda (head name)
-            `(global-set-key ,(kbd (concat body " " (car head))) #',name))
+            `(,method ,(kbd (concat body " " (car head))) #',name))
           heads names))))
 
 (provide 'hydra)

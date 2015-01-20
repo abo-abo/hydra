@@ -26,3 +26,32 @@ You can expand the examples in-place, it still looks elegant:
 See the [introductory blog post](http://oremacs.com/2015/01/20/introducing-hydra/) for more information.
 
 ![hydra](http://oremacs.com/download/Hydra.png)
+
+## Using Hydra to define bindings other than global ones
+
+You can use the third optional argument of `hydra-create` for this (it defaults to `global-set-key`).
+Here's an example:
+
+```cl
+(hydra-create "z"
+  '(("l" . forward-char)
+    ("h" . backward-char)
+    ("j" . next-line)
+    ("k" . previous-line))
+  (lambda (key command)
+    (define-key lispy-mode-map key command)))
+```
+
+For this simple case, there's even a shortcut: if you give a keymap as the third argument,
+the lambda will be generated for you:
+
+```cl
+(hydra-create "z"
+  '(("l" . forward-char)
+    ("h" . backward-char)
+    ("j" . next-line)
+    ("k" . previous-line))
+    lispy-mode-map)
+```
+
+
