@@ -5,6 +5,7 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
 ;; Version: 0.1.0
+;; Package-Requires: ((cl-lib "0.5"))
 ;; Keywords: bindings
 
 ;; This file is not part of GNU Emacs
@@ -47,6 +48,7 @@
 ;;         ("l" . text-scale-decrease)))
 
 ;;; Code:
+(require 'cl-lib)
 
 ;;;###autoload
 (defmacro hydra-create (body heads)
