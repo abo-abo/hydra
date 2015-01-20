@@ -37,6 +37,7 @@
 ;;
 ;; Here's how I use the examples bundled with Hydra:
 ;;
+;;    (require 'hydra-examples)
 ;;    (hydra-create "C-M-w" hydra-example-move-window-splitter)
 ;;
 ;; You can expand the examples in-place, it still looks elegant:
@@ -47,6 +48,7 @@
 
 ;;; Code:
 
+;;;###autoload
 (defmacro hydra-create (body heads)
   "Create a hydra with a BODY prefix and HEADS.
 This will result in `global-set-key' statements with the keys
@@ -90,47 +92,6 @@ Call the head: `%S'."
           (lambda (head name)
             `(global-set-key ,(kbd (concat body " " (car head))) #',name))
           heads names))))
-
-(defvar hydra-example-text-scale
-  '(("g" . text-scale-increase)
-    ("l" . text-scale-decrease))
-  "A two-headed hydra for text scale manipulation.")
-
-(require 'windmove)
-
-(defun move-splitter-left ()
-  "Move window splitter left."
-  (interactive)
-  (if (windmove-find-other-window 'right)
-      (shrink-window-horizontally 1)
-    (enlarge-window-horizontally 1)))
-
-(defun move-splitter-right ()
-  "Move window splitter right."
-  (interactive)
-  (if (windmove-find-other-window 'right)
-      (enlarge-window-horizontally 1)
-    (shrink-window-horizontally 1)))
-
-(defun move-splitter-up ()
-  "Move window splitter up."
-  (interactive)
-  (if (windmove-find-other-window 'up)
-      (enlarge-window 1)
-    (shrink-window 1)))
-
-(defun move-splitter-down ()
-  "Move window splitter down."
-  (interactive)
-  (if (windmove-find-other-window 'up)
-      (shrink-window 1)
-    (enlarge-window 1)))
-
-(defvar hydra-example-move-window-splitter
-  '(("h" . move-splitter-left)
-    ("j" . move-splitter-down)
-    ("k" . move-splitter-up)
-    ("l" . move-splitter-right)))
 
 (provide 'hydra)
 
