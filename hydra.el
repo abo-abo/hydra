@@ -103,7 +103,7 @@ When `(keymapp METHOD)`, it becomes:
                         heads ", ")
                        ".")))
     `(progn
-       (when (eq ,method 'global-set-key)
+       (when (eq ',method 'global-set-key)
          (global-set-key ,(kbd body) nil))
        ,@(cl-mapcar
           (lambda (head name)
