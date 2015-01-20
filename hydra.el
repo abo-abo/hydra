@@ -50,6 +50,16 @@
 ;;; Code:
 (require 'cl-lib)
 
+(defgroup hydra nil
+  "Make bindings that stick around."
+  :group 'bindings
+  :prefix "hydra-")
+
+(defcustom hydra-is-helpful t
+  "When t, display a hint with possible bindings in the echo area."
+  :type 'boolean
+  :group 'hydra)
+
 ;;;###autoload
 (defmacro hydra-create (body heads &optional method)
   "Create a hydra with a BODY prefix and HEADS with METHOD.
@@ -81,7 +91,8 @@ When `(keymapp METHOD)`, it becomes:
                         `(lambda (key command) (define-key ,method key command)))
 
                        (t
-                        method))))
+                        method)))
+         (hint (concat "hydra: " (mapconcat #'car heads " "))))
     `(progn
        (,method ,(kbd body) nil)
        ,@(cl-mapcar
@@ -101,6 +112,8 @@ Call the head: `%S'."
                  (cdr head))
                (interactive)
                (call-interactively #',(cdr head))
+               (when hydra-is-helpful
+                 (message ,hint))
                (set-transient-map ',keymap t)))
           heads names)
        ,@(cl-mapcar
