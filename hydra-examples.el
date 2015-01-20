@@ -36,28 +36,32 @@
 (defun hydra-move-splitter-left ()
   "Move window splitter left."
   (interactive)
-  (if (windmove-find-other-window 'right)
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'right))
       (shrink-window-horizontally 1)
     (enlarge-window-horizontally 1)))
 
 (defun hydra-move-splitter-right ()
   "Move window splitter right."
   (interactive)
-  (if (windmove-find-other-window 'right)
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'right))
       (enlarge-window-horizontally 1)
     (shrink-window-horizontally 1)))
 
 (defun hydra-move-splitter-up ()
   "Move window splitter up."
   (interactive)
-  (if (windmove-find-other-window 'up)
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'up))
       (enlarge-window 1)
     (shrink-window 1)))
 
 (defun hydra-move-splitter-down ()
   "Move window splitter down."
   (interactive)
-  (if (windmove-find-other-window 'up)
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'up))
       (shrink-window 1)
     (enlarge-window 1)))
 
