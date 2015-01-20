@@ -67,8 +67,7 @@ is broken once any key binding that is not in HEADS is called."
                      (intern (format "hydra-%s-%S" body (cdr x)))))
                  heads)))
     `(progn
-       (when (global-key-binding ,(kbd body))
-         (global-set-key ,(kbd body) nil))
+       (global-set-key ,(kbd body) nil)
        ,@(cl-mapcar
           (lambda (head name)
             `(defun ,name ()
