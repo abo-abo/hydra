@@ -27,8 +27,8 @@
 (require 'hydra)
 
 (defvar hydra-example-text-scale
-  '(("g" . text-scale-increase)
-    ("l" . text-scale-decrease))
+  '(("g" text-scale-increase "zoom in")
+    ("l" text-scale-decrease "zoom out"))
   "A two-headed hydra for text scale manipulation.")
 
 (require 'windmove)
@@ -62,10 +62,10 @@
     (enlarge-window 1)))
 
 (defvar hydra-example-move-window-splitter
-  '(("h" . hydra-move-splitter-left)
-    ("j" . hydra-move-splitter-down)
-    ("k" . hydra-move-splitter-up)
-    ("l" . hydra-move-splitter-right)))
+  '(("h" hydra-move-splitter-left)
+    ("j" hydra-move-splitter-down)
+    ("k" hydra-move-splitter-up)
+    ("l" hydra-move-splitter-right)))
 
 (provide 'hydra-examples)
 

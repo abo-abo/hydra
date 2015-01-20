@@ -4,7 +4,7 @@
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.1.0
+;; Version: 0.2.0
 ;; Package-Requires: ((cl-lib "0.5"))
 ;; Keywords: bindings
 
@@ -44,8 +44,8 @@
 ;; You can expand the examples in-place, it still looks elegant:
 ;;
 ;;     (hydra-create "<f2>"
-;;       '(("g" . text-scale-increase)
-;;         ("l" . text-scale-decrease)))
+;;       '(("g" text-scale-increase)
+;;         ("l" text-scale-decrease)))
 
 ;;; Code:
 (require 'cl-lib)
@@ -65,7 +65,7 @@
   "Create a hydra with a BODY prefix and HEADS with METHOD.
 This will result in `global-set-key' statements with the keys
 being the concatenation of BODY and each head in HEADS.  HEADS is
-an alist of (KEY . FUNCTION).
+an list of (KEY FUNCTION &optional HINT).
 
 After one of the HEADS is called via BODY+KEY, it and the other
 HEADS can be called with only KEY (no need for BODY).  This state
@@ -82,7 +82,7 @@ When `(keymapp METHOD)`, it becomes:
          (names (mapcar
                  (lambda (x)
                    (define-key keymap (car x)
-                     (intern (format "hydra-%s-%S" body (cdr x)))))
+                     (intern (format "hydra-%s-%S" body (cadr x)))))
                  heads))
          (method (cond ((null method)
                         'global-set-key)
@@ -92,7 +92,16 @@ When `(keymapp METHOD)`, it becomes:
 
                        (t
                         method)))
-         (hint (concat "hydra: " (mapconcat #'car heads " "))))
+         (hint (concat "hydra: "
+                       (mapconcat
+                        (lambda (h) (if (caddr h)
+                                   (format "[%s]: %s"
+                                           (propertize (car h)
+                                                       'face 'font-lock-keyword-face)
+                                           (caddr h))
+                                 (propertize (car h) 'face 'font-lock-keyword-face)))
+                        heads ", ")
+                       ".")))
     `(progn
        (,method ,(kbd body) nil)
        ,@(cl-mapcar
@@ -107,11 +116,11 @@ Call the head: `%S'."
                  body
                  (mapconcat
                   (lambda (x)
-                    (format "\"%s\":    `%S'" (car x) (cdr x)))
+                    (format "\"%s\":    `%S'" (car x) (cadr x)))
                   heads ",\n")
-                 (cdr head))
+                 (cadr head))
                (interactive)
-               (call-interactively #',(cdr head))
+               (call-interactively #',(cadr head))
                (when hydra-is-helpful
                  (message ,hint))
                (set-transient-map ',keymap t)))
