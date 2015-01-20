@@ -1,16 +1,20 @@
-This package for GNU Emacs that can be used to tie related commands
-into a family of short bindings with a common prefix - a Hydra.
+This is a package for GNU Emacs that can be used to tie related
+commands into a family of short bindings with a common prefix - a
+Hydra.
 
-Once you summon a Hydra (through the prefixed binding), all the heads
-can be called in succession with only a short extension.  The Hydra is
-vanquished once Hercules, any binding that isn't the Hydra's head,
-arrives.  Note that Hercules, besides vanquishing the Hydra, will
-still serve his orignal purpose, calling his proper command.  This
-makes the Hydra very seamless, it's like a minor mode that disables
-itself auto-magically.
+Once you summon the Hydra through the prefixed binding (the body + any
+one head), all heads can be called in succession with only a short
+extension.
+
+The Hydra is vanquished once Hercules, any binding that isn't the
+Hydra's head, arrives.  Note that Hercules, besides vanquishing the
+Hydra, will still serve his orignal purpose, calling his proper
+command.  This makes the Hydra very seamless, it's like a minor mode
+that disables itself auto-magically.
 
 Here's how I use the examples bundled with Hydra:
 
+    (require 'hydra-examples)
     (hydra-create "C-M-w" hydra-example-move-window-splitter)
 
 You can expand the examples in-place, it still looks elegant:
