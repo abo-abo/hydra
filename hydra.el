@@ -90,13 +90,6 @@ When `(keymapp METHOD)`, it becomes:
                    (define-key keymap (kbd (car x))
                      (intern (format "hydra-%s-%S" body (cadr x)))))
                  heads))
-         (method (cond ((null method)
-                        'global-set-key)
-                       ((keymapp (eval method))
-                        `(lambda (key command)
-                           (define-key ,method key command)))
-                       (t
-                        method)))
          (hint (concat "hydra: "
                        (mapconcat
                         (lambda (h)
@@ -114,11 +107,21 @@ When `(keymapp METHOD)`, it becomes:
                (mapconcat
                 (lambda (x)
                   (format "\"%s\":    `%S'" (car x) (cadr x)))
-                heads ",\n"))))
+                heads ",\n")))
+         map
+         (method
+          (cond ((null method)
+                 (unless (keymapp (global-key-binding (kbd body)))
+                   (global-set-key (kbd body) nil))
+                 'global-set-key)
+                ((keymapp (setq map (eval method)))
+                 (unless (keymapp (lookup-key map (kbd body)))
+                   (define-key map (kbd body) nil))
+                 `(lambda (key command)
+                    (define-key ,method key command)))
+                (t
+                 method))))
     `(progn
-       (when (eq ',method 'global-set-key)
-         (unless (keymapp (global-key-binding ,(kbd body)))
-           (global-set-key ,(kbd body) nil)))
        ,@(cl-mapcar
           (lambda (head name)
             `(defun ,name ()
