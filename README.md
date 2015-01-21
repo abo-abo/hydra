@@ -16,6 +16,7 @@ Here's how I use the examples bundled with Hydra:
 
     (require 'hydra-examples)
     (hydra-create "C-M-w" hydra-example-move-window-splitter)
+    (hydra-create "M-g" hydra-example-goto-error)
 
 You can expand the examples in-place, it still looks elegant:
 

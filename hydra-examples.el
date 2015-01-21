@@ -69,7 +69,16 @@
   '(("h" hydra-move-splitter-left)
     ("j" hydra-move-splitter-down)
     ("k" hydra-move-splitter-up)
-    ("l" hydra-move-splitter-right)))
+    ("l" hydra-move-splitter-right))
+  "A four-headed hydra for the window splitter manipulation.
+Works best if you have not more than 4 windows.")
+
+(defvar hydra-example-goto-error
+  '(("h" first-error)
+    ("j" next-error)
+    ("k" previous-error))
+  "A three-headed hydra for jumping between \"errors\".
+Useful for e.g. `occur', `rgrep' and the like.")
 
 (provide 'hydra-examples)
 
