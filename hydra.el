@@ -117,7 +117,8 @@ When `(keymapp METHOD)`, it becomes:
                 heads ",\n"))))
     `(progn
        (when (eq ',method 'global-set-key)
-         (global-set-key ,(kbd body) nil))
+         (unless (keymapp (global-key-binding ,(kbd body)))
+           (global-set-key ,(kbd body) nil)))
        ,@(cl-mapcar
           (lambda (head name)
             `(defun ,name ()
