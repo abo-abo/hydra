@@ -74,9 +74,9 @@
 Works best if you have not more than 4 windows.")
 
 (defvar hydra-example-goto-error
-  '(("h" first-error)
-    ("j" next-error)
-    ("k" previous-error))
+  '(("h" first-error "first")
+    ("j" next-error "next")
+    ("k" previous-error "prev"))
   "A three-headed hydra for jumping between \"errors\".
 Useful for e.g. `occur', `rgrep' and the like.")
 
