@@ -128,12 +128,12 @@ When `(keymapp METHOD)`, it becomes:
             `(defun ,name ()
                ,(format "%s\n\nCall the head: `%S'." doc (cadr head))
                (interactive)
-               (if (null ',(cadr head))
-                   (funcall hydra-last)
-                 (call-interactively #',(cadr head))
-                 (when hydra-is-helpful
-                   (message ,hint))
-                 (setq hydra-last (set-transient-map ',keymap t)))))
+               ,@(if (null (cadr head))
+                     '((funcall hydra-last))
+                     `((call-interactively #',(cadr head))
+                       (when hydra-is-helpful
+                         (message ,hint))
+                       (setq hydra-last (set-transient-map ',keymap t))))))
           heads names)
        (defun ,(intern (format "hydra-%s-body" body)) ()
          ,doc
