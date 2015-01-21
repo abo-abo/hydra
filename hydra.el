@@ -84,7 +84,7 @@ When `(keymapp METHOD)`, it becomes:
          (heads (eval heads))
          (names (mapcar
                  (lambda (x)
-                   (define-key keymap (car x)
+                   (define-key keymap (kbd (car x))
                      (intern (format "hydra-%s-%S" body (cadr x)))))
                  heads))
          (method (cond ((null method)
@@ -131,7 +131,7 @@ Call the head: `%S'."
           heads names)
        ,@(cl-mapcar
           (lambda (head name)
-            `(,method ,(kbd (concat body " " (car head))) #',name))
+            `(,method ,(vconcat (kbd body) (kbd (car head))) #',name))
           heads names))))
 
 (provide 'hydra)
