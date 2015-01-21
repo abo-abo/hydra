@@ -15,7 +15,7 @@ that disables itself auto-magically.
 Here's how I use the examples bundled with Hydra:
 
     (require 'hydra-examples)
-    (hydra-create "C-M-w" hydra-example-move-window-splitter)
+    (hydra-create "C-M-y" hydra-example-move-window-splitter)
     (hydra-create "M-g" hydra-example-goto-error)
 
 You can expand the examples in-place, it still looks elegant:
@@ -34,7 +34,7 @@ You can use the third optional argument of `hydra-create` for this (it defaults 
 Here's an example:
 
 ```cl
-(hydra-create "z"
+(hydra-create "C-z"
   '(("l" forward-char)
     ("h" backward-char)
     ("j" next-line)
@@ -47,7 +47,7 @@ For this simple case, there's even a shortcut: if you give a keymap as the third
 the lambda will be generated for you:
 
 ```cl
-(hydra-create "z"
+(hydra-create "C-z"
   '(("l" forward-char)
     ("h" backward-char)
     ("j" next-line)

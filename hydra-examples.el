@@ -1,22 +1,23 @@
-;;; hydra-examples.el --- some applications for hydra
+;;; hydra-examples.el --- Some applications for Hydra
 
-;; Copyright (C) 2015 Oleh Krehel
+;; Copyright (C) 2015  Free Software Foundation, Inc.
 
-;; This file is not part of GNU Emacs
+;; Author: Oleh Krehel
 
-;; This file is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
-;; For a full copy of the GNU General Public License
-;; see <http://www.gnu.org/licenses/>.
-
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -81,5 +82,4 @@ Works best if you have not more than 4 windows.")
 Useful for e.g. `occur', `rgrep' and the like.")
 
 (provide 'hydra-examples)
-
 ;;; hydra-examples.el ends here
