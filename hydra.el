@@ -50,6 +50,9 @@
 ;;; Code:
 (require 'cl-lib)
 
+(eval-when-compile
+  (require 'cl))
+
 (defgroup hydra nil
   "Make bindings that stick around."
   :group 'bindings
