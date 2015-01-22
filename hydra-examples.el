@@ -81,5 +81,12 @@ Works best if you have not more than 4 windows.")
   "A three-headed hydra for jumping between \"errors\".
 Useful for e.g. `occur', `rgrep' and the like.")
 
+(defvar hydra-example-windmove
+  '(("h" windmove-left)
+    ("j" windmove-down)
+    ("k" windmove-up)
+    ("l" windmove-right))
+  "A four-headed hydra for `windmove'.")
+
 (provide 'hydra-examples)
 ;;; hydra-examples.el ends here
