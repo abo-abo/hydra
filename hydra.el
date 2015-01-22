@@ -112,20 +112,7 @@ When `(keymapp METHOD)`, it becomes:
                (mapconcat
                 (lambda (x)
                   (format "\"%s\":    `%S'" (car x) (cadr x)))
-                heads ",\n")))
-         map
-         (method
-          (cond ((null method)
-                 (unless (keymapp (global-key-binding (kbd body)))
-                   (global-set-key (kbd body) nil))
-                 'global-set-key)
-                ((keymapp (setq map (eval method)))
-                 (unless (keymapp (lookup-key map (kbd body)))
-                   (define-key map (kbd body) nil))
-                 `(lambda (key command)
-                    (define-key ,method key command)))
-                (t
-                 method))))
+                heads ",\n"))))
     `(progn
        ,@(cl-mapcar
           (lambda (head name)
@@ -137,7 +124,8 @@ When `(keymapp METHOD)`, it becomes:
                      `((call-interactively #',(cadr head))
                        (when hydra-is-helpful
                          (message ,hint))
-                       (setq hydra-last (hydra-set-transient-map ',keymap t))))))
+                       (setq hydra-last
+                             (hydra-set-transient-map ',keymap t))))))
           heads names)
        (defun ,(intern (format "hydra-%s-body" body)) ()
          ,doc
@@ -145,9 +133,27 @@ When `(keymapp METHOD)`, it becomes:
          (when hydra-is-helpful
            (message ,hint))
          (setq hydra-last (hydra-set-transient-map ',keymap t)))
+       ,@(cond ((null method)
+                `((unless (keymapp (global-key-binding (kbd ,body)))
+                    (global-set-key (kbd ,body) nil))))
+               ((or (functionp method)
+                    (and (consp method)
+                         (memq (car method) '(function quote))))
+                nil)
+               (t
+                `((unless (keymapp (lookup-key ,method (kbd ,body)))
+                    (define-key ,method (kbd ,body) nil)))))
        ,@(cl-mapcar
           (lambda (head name)
-            `(,method ,(vconcat (kbd body) (kbd (car head))) #',name))
+            `(,@(cond ((null method)
+                      (list 'global-set-key))
+                      ((or (functionp method)
+                           (and (consp method)
+                                (memq (car method) '(function quote))))
+                      (list 'funcall method))
+                     (t
+                      (list 'define-key method)))
+                ,(vconcat (kbd body) (kbd (car head))) #',name))
           heads names))))
 
 (provide 'hydra)
