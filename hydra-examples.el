@@ -22,6 +22,15 @@
 ;;; Commentary:
 ;;
 ;; These are the sample Hydras that you can use.
+;;
+;; Note that the better way to create Hydras is with `defhydra':
+;;
+;; (defhydra hydra-zoom (global-map "<f2>")
+;;   "zoom"
+;;   ("g" text-scale-increase "in")
+;;   ("l" text-scale-decrease "out"))
+;;
+;; This way, you have more options, and everything is in one place.
 
 ;;; Code:
 
