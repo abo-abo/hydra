@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/abo-abo/hydra.svg?branch=master)](https://travis-ci.org/abo-abo/hydra)
+
 This is a package for GNU Emacs that can be used to tie related
 commands into a family of short bindings with a common prefix - a
 Hydra.
@@ -12,17 +14,57 @@ Hydra, will still serve his orignal purpose, calling his proper
 command.  This makes the Hydra very seamless, it's like a minor mode
 that disables itself auto-magically.
 
-Here's how I use the examples bundled with Hydra:
+Here's how to quickly bind the examples bundled with Hydra:
 
-    (require 'hydra-examples)
-    (hydra-create "C-M-y" hydra-example-move-window-splitter)
-    (hydra-create "M-g" hydra-example-goto-error)
+```cl
+(require 'hydra-examples)
+(hydra-create "C-M-y" hydra-example-move-window-splitter)
+(hydra-create "M-g" hydra-example-goto-error)
+(hydra-create "<f2>" hydra-example-text-scale)
+```
 
-You can expand the examples in-place, it still looks elegant:
+But it's much better to just take the examples as a template and write
+down everything explicitly:
 
-    (hydra-create "<f2>"
-      '(("g" text-scale-increase)
-        ("l" text-scale-decrease)))
+```cl
+(defhydra hydra-zoom (global-map "<f2>")
+  "zoom"
+  ("g" text-scale-increase "in")
+  ("l" text-scale-decrease "out"))
+```
+
+With the example above, you can e.g.:
+
+```cl
+(key-chord-define-global "tt" 'hydra-zoom/body)
+```
+
+In fact, since `defhydra` returns the body symbol, you can even write
+it like this:
+
+```cl
+(key-chord-define-global
+ "tt"
+ (defhydra hydra-zoom (global-map "<f2>")
+  "zoom"
+  ("g" text-scale-increase "in")
+  ("l" text-scale-decrease "out")))
+```
+
+If you like key chords so much that you don't want to touch the global map at all, you can e.g.:
+
+```
+(key-chord-define-global
+ "hh"
+ (defhydra hydra-error ()
+   "goto-error"
+   ("h" first-error "first")
+   ("j" next-error "next")
+   ("k" previous-error "prev")))
+```
+
+You can also substitute `global-map` with any other keymap, like
+`c++-mode-map` or `yas-minor-mode-map`.
 
 See the [introductory blog post](http://oremacs.com/2015/01/20/introducing-hydra/) for more information.
 
@@ -30,29 +72,15 @@ See the [introductory blog post](http://oremacs.com/2015/01/20/introducing-hydra
 
 ## Using Hydra to define bindings other than global ones
 
-You can use the third optional argument of `hydra-create` for this (it defaults to `global-set-key`).
 Here's an example:
 
 ```cl
-(hydra-create "C-z"
-  '(("l" forward-char)
-    ("h" backward-char)
-    ("j" next-line)
-    ("k" previous-line))
-  (lambda (key command)
-    (define-key lispy-mode-map key command)))
-```
-
-For this simple case, there's even a shortcut: if you give a keymap as the third argument,
-the lambda will be generated for you:
-
-```cl
-(hydra-create "C-z"
-  '(("l" forward-char)
-    ("h" backward-char)
-    ("j" next-line)
-    ("k" previous-line))
-    lispy-mode-map)
+(defhydra lispy-vi (lispy-mode-map "C-z")
+  "vi"
+  ("l" forward-char)
+  ("h" backward-char)
+  ("j" next-line)
+  ("k" previous-line))
 ```
 
 ## Can Hydras can be helpful?
@@ -63,15 +91,16 @@ They can, if
 (setq hydra-is-helpful t)
 ```
 
-In that case, you'll get a hint in the echo area consisting of current Hydra's heads.
-You can even add comments to the heads like this:
+This is the default setting. In this case, you'll get a hint in the
+echo area consisting of current Hydra's base comment and heads.  You
+can even add comments to the heads like this:
 
 ```
-(defvar hydra-example-text-scale
-  '(("g" text-scale-increase "zoom in")
-    ("l" text-scale-decrease "zoom out"))
-  "A two-headed hydra for text scale manipulation.")
+(defhydra hydra-zoom (global-map "<f2>")
+  "zoom"
+  ("g" text-scale-increase "in")
+  ("l" text-scale-decrease "out"))
 ```
 
-With this, you'll see `hydra: [g]: zoom in, [l]: zoom out.` in your
-echo area, once the zoom Hydra becomes active.
+With this, you'll see `zoom: [g]: in, [l]: out.` in your echo area,
+once the zoom Hydra becomes active.
