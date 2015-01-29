@@ -90,14 +90,61 @@ When `(keymapp METHOD)`, it becomes:
 
     (lambda (key command) (define-key METHOD key command))"
   (declare (indent 1))
+  `(defhydra ,(intern
+               (concat
+                "hydra-" (replace-regexp-in-string " " "_" body)))
+       ,(cond ((hydra--callablep method)
+              method)
+             ((null method)
+              `(global-map ,body))
+             (t
+              (list method body)))
+     "hydra"
+     ,@(eval heads)))
+
+(defun hydra--callablep (x)
+  "Test if X looks like it's callable."
+  (or (functionp x)
+      (and (consp x)
+           (memq (car x) '(function quote)))))
+
+(defmacro defhydra (name body &optional docstring &rest heads)
+  "Create a hydra named NAME with a prefix BODY.
+
+NAME should be a symbol, it will be the prefix of all functions
+defined here.
+
+BODY should be either:
+
+    (BODY-MAP &optional BODY-KEY)
+or:
+
+    (lambda (KEY CMD) ...)
+
+BODY-MAP should be a keymap; `global-map' is acceptable here.
+BODY-KEY should be a string processable by `kbd'.
+
+DOCSTRING will be displayed in the echo area to identify the
+hydra.
+
+HEADS is a list of (KEY CMD &optional HINT)."
+  (unless (stringp docstring)
+    (setq heads (cons docstring heads))
+    (setq docstring "hydra"))
   (let* ((keymap (make-sparse-keymap))
-         (heads (eval heads))
          (names (mapcar
                  (lambda (x)
                    (define-key keymap (kbd (car x))
-                     (intern (format "hydra-%s-%S" body (cadr x)))))
+                     (intern (format "%S/%s" name (cadr x)))))
                  heads))
-         (hint (format "hydra: %s."
+         (body-name (intern (format "%S/body" name)))
+         (body-key (unless (hydra--callablep body)
+                     (cadr body)))
+         (method (if (hydra--callablep body)
+                     body
+                   (car body)))
+         (hint (format "%s: %s."
+                       docstring
                        (mapconcat
                         (lambda (h)
                           (format
@@ -107,12 +154,15 @@ When `(keymapp METHOD)`, it becomes:
                            (propertize (car h) 'face 'font-lock-keyword-face)))
                         heads ", ")))
          (doc (format
-               "Create a hydra with a \"%s\" body and the heads:\n\n%s."
-               body
+               "Create a hydra with %s body and the heads:\n\n%s\n\n%s"
+               (if body-key
+                   (format "a \"%s\"" body-key)
+                 "no")
                (mapconcat
                 (lambda (x)
                   (format "\"%s\":    `%S'" (car x) (cadr x)))
-                heads ",\n"))))
+                heads ",\n")
+               (format "The body can be accessed via `%S'." body-name))))
     `(progn
        ,@(cl-mapcar
           (lambda (head name)
@@ -127,34 +177,30 @@ When `(keymapp METHOD)`, it becomes:
                        (setq hydra-last
                              (hydra-set-transient-map ',keymap t))))))
           heads names)
-       (defun ,(intern (format "hydra-%s-body" body)) ()
+       ,@(unless (or (null body-key)
+                     (null method)
+                     (hydra--callablep method))
+                 `((unless (keymapp (lookup-key ,method (kbd ,body-key)))
+                     (define-key ,method (kbd ,body-key) nil))))
+       ,@(delq nil
+               (cl-mapcar
+                (lambda (head name)
+                  (unless (or (null body-key) (null method))
+                    (list
+                     (if (hydra--callablep method)
+                         'funcall
+                       'define-key)
+                     method
+                     (vconcat (kbd body-key) (kbd (car head)))
+                     (list 'function name))))
+                heads names))
+       (defun ,body-name ()
          ,doc
          (interactive)
          (when hydra-is-helpful
            (message ,hint))
-         (setq hydra-last (hydra-set-transient-map ',keymap t)))
-       ,@(cond ((null method)
-                `((unless (keymapp (global-key-binding (kbd ,body)))
-                    (global-set-key (kbd ,body) nil))))
-               ((or (functionp method)
-                    (and (consp method)
-                         (memq (car method) '(function quote))))
-                nil)
-               (t
-                `((unless (keymapp (lookup-key ,method (kbd ,body)))
-                    (define-key ,method (kbd ,body) nil)))))
-       ,@(cl-mapcar
-          (lambda (head name)
-            `(,@(cond ((null method)
-                      (list 'global-set-key))
-                      ((or (functionp method)
-                           (and (consp method)
-                                (memq (car method) '(function quote))))
-                      (list 'funcall method))
-                     (t
-                      (list 'define-key method)))
-                ,(vconcat (kbd body) (kbd (car head))) #',name))
-          heads names))))
+         (setq hydra-last
+               (hydra-set-transient-map ',keymap t))))))
 
 (provide 'hydra)
 ;;; hydra.el ends here
