@@ -170,7 +170,10 @@ HEADS is a list of (KEY CMD &optional HINT)."
                ,(format "%s\n\nCall the head: `%S'." doc (cadr head))
                (interactive)
                ,@(if (null (cadr head))
-                     '((when hydra-last (funcall hydra-last)))
+                     '((if (functionp hydra-last)
+                           (funcall hydra-last)
+                         (ignore-errors
+                           (funcall 'clear-temporary-overlay-map))))
                      `((call-interactively #',(cadr head))
                        (when hydra-is-helpful
                          (message ,hint))
