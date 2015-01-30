@@ -57,7 +57,7 @@ Call the head: `next-error'."
                  (107 . hydra-error/previous-error)
                  (106 . hydra-error/next-error)
                  (104 . hydra-error/first-error)) t)))
-      
+
       (defun hydra-error/previous-error ()
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -81,13 +81,13 @@ Call the head: `previous-error'."
                  (107 . hydra-error/previous-error)
                  (106 . hydra-error/next-error)
                  (104 . hydra-error/first-error)) t)))
-      
+
       (unless (keymapp (lookup-key global-map (kbd "M-g")))
         (define-key global-map (kbd "M-g") nil))
       (define-key global-map [134217831 104] #'hydra-error/first-error)
       (define-key global-map [134217831 106] #'hydra-error/next-error)
       (define-key global-map [134217831 107] #'hydra-error/previous-error)
-      
+
       (defun hydra-error/body ()
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -108,3 +108,5 @@ The body can be accessed via `hydra-error/body'."
                  (107 . hydra-error/previous-error)
                  (106 . hydra-error/next-error)
                  (104 . hydra-error/first-error)) t)))))))
+
+(provide 'hydra-test)

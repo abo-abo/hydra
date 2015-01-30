@@ -5,7 +5,7 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.4.0
+;; Version: 0.4.1
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -51,6 +51,14 @@
 ;;
 ;; The third element of each list is the optional doc string that will
 ;; be displayed in the echo area when `hydra-is-helpful' is t.
+;;
+;; It's better to take the examples simply as templates and use
+;; `defhydra' instead of `hydra-create', since it's more flexible.
+;;
+;;     (defhydra hydra-zoom (global-map "<f2>")
+;;       "zoom"
+;;       ("g" text-scale-increase "in")
+;;       ("l" text-scale-decrease "out"))
 
 ;;; Code:
 (require 'cl-lib)
@@ -170,10 +178,13 @@ HEADS is a list of (KEY CMD &optional HINT)."
                ,(format "%s\n\nCall the head: `%S'." doc (cadr head))
                (interactive)
                ,@(if (null (cadr head))
-                     '((if (functionp hydra-last)
+                     `((if (functionp hydra-last)
                            (funcall hydra-last)
-                         (ignore-errors
-                           (funcall 'clear-temporary-overlay-map))))
+                         (while (and (consp (car emulation-mode-map-alists))
+                                     (consp (caar emulation-mode-map-alists))
+                                     (equal (cl-cdaar emulation-mode-map-alists) ',keymap))
+                           (setq emulation-mode-map-alists
+                                 (cdr emulation-mode-map-alists)))))
                      `((call-interactively #',(cadr head))
                        (when hydra-is-helpful
                          (message ,hint))
