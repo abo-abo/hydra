@@ -1,6 +1,6 @@
 (require 'ert)
 
-(ert-deftest defhydra ()
+(ert-deftest defhydra-red-error ()
   (should
    (equal
     (macroexpand
@@ -108,5 +108,95 @@ The body can be accessed via `hydra-error/body'."
                  (107 . hydra-error/previous-error)
                  (106 . hydra-error/next-error)
                  (104 . hydra-error/first-error)) t)))))))
+
+(ert-deftest hydra-blue-toggle ()
+  (should
+   (equal
+    (macroexpand
+     '(defhydra toggle (:color blue)
+       "toggle"
+       ("t" toggle-truncate-lines "truncate")
+       ("f" auto-fill-mode "fill")
+       ("a" abbrev-mode "abbrev")
+       ("q" nil "cancel")))
+    '(progn
+      (defun toggle/toggle-truncate-lines ()
+        "Create a hydra with no body and the heads:
+
+\"t\":    `toggle-truncate-lines',
+\"f\":    `auto-fill-mode',
+\"a\":    `abbrev-mode',
+\"q\":    `nil'
+
+The body can be accessed via `toggle/body'.
+
+Call the head: `toggle-truncate-lines'."
+        (interactive)
+        (hydra-disable)
+        (call-interactively #'toggle-truncate-lines))
+      (defun toggle/auto-fill-mode ()
+        "Create a hydra with no body and the heads:
+
+\"t\":    `toggle-truncate-lines',
+\"f\":    `auto-fill-mode',
+\"a\":    `abbrev-mode',
+\"q\":    `nil'
+
+The body can be accessed via `toggle/body'.
+
+Call the head: `auto-fill-mode'."
+        (interactive)
+        (hydra-disable)
+        (call-interactively #'auto-fill-mode))
+      (defun toggle/abbrev-mode ()
+        "Create a hydra with no body and the heads:
+
+\"t\":    `toggle-truncate-lines',
+\"f\":    `auto-fill-mode',
+\"a\":    `abbrev-mode',
+\"q\":    `nil'
+
+The body can be accessed via `toggle/body'.
+
+Call the head: `abbrev-mode'."
+        (interactive)
+        (hydra-disable)
+        (call-interactively #'abbrev-mode))
+      (defun toggle/nil ()
+        "Create a hydra with no body and the heads:
+
+\"t\":    `toggle-truncate-lines',
+\"f\":    `auto-fill-mode',
+\"a\":    `abbrev-mode',
+\"q\":    `nil'
+
+The body can be accessed via `toggle/body'.
+
+Call the head: `nil'."
+        (interactive)
+        (hydra-disable))
+      (defun toggle/body ()
+        "Create a hydra with no body and the heads:
+
+\"t\":    `toggle-truncate-lines',
+\"f\":    `auto-fill-mode',
+\"a\":    `abbrev-mode',
+\"q\":    `nil'
+
+The body can be accessed via `toggle/body'."
+        (interactive)
+        (when hydra-is-helpful
+          (message #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel."
+                     9 10 (face hydra-face-blue)
+                     24 25 (face hydra-face-blue)
+                     35 36 (face hydra-face-blue)
+                     48 49 (face hydra-face-blue))))
+        (setq hydra-last
+              (hydra-set-transient-map
+               '(keymap (113 . toggle/nil)
+                 (97 . toggle/abbrev-mode)
+                 (102 . toggle/auto-fill-mode)
+                 (116 . toggle/toggle-truncate-lines))
+               t)))))))
 
 (provide 'hydra-test)

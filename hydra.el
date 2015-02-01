@@ -5,7 +5,7 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.4.1
+;; Version: 0.5.0
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -73,6 +73,15 @@
   :type 'boolean
   :group 'hydra)
 
+(defface hydra-face-red
+    '((t (:foreground "#7F0055" :bold t)))
+  "Red Hydra heads will persist indefinitely."
+  :group 'hydra)
+
+(defface hydra-face-blue
+    '((t (:foreground "#758BC6" :bold t)))
+  "Blue Hydra heads will vanquish the Hydra.")
+
 (defalias 'hydra-set-transient-map
   (if (fboundp 'set-transient-map)
       'set-transient-map
@@ -111,11 +120,70 @@ When `(keymapp METHOD)`, it becomes:
      ,@(eval heads)))
 
 (defun hydra--callablep (x)
-  "Test if X looks like it's callable."
+  "Test if X is callable."
   (or (functionp x)
       (and (consp x)
            (memq (car x) '(function quote)))))
 
+(defun hydra--color (h body-color)
+  "Return the color of a Hydra head H with BODY-COLOR."
+  (if (null (cadr h))
+      'blue
+    (let ((plist (if (stringp (cl-caddr h))
+                     (cl-cdddr h)
+                   (cddr h))))
+      (or (plist-get plist :color) body-color))))
+
+(defun hydra--face (h body-color)
+  "Return the face for a Hydra head H with BODY-COLOR."
+  (cl-case (hydra--color h body-color)
+    (blue 'hydra-face-blue)
+    (red 'hydra-face-red)
+    (t (error "Unknown color for %S" h))))
+
+(defun hydra--hint (docstring heads)
+  "Generate a hint from DOCSTRING and HEADS.
+It's intended for the echo area, when a Hydra is active."
+  (format "%s: %s."
+          docstring
+          (mapconcat
+           (lambda (h)
+             (format
+              (if (stringp (cl-caddr h))
+                  (concat "[%s]: " (cl-caddr h))
+                "%s")
+              (propertize
+               (car h) 'face
+               (hydra--face h body-color))))
+           heads ", ")))
+
+(defun hydra-disable ()
+  "Disable the current Hydra."
+  (if (functionp hydra-last)
+      (funcall hydra-last)
+    (while (and (consp (car emulation-mode-map-alists))
+                (consp (caar emulation-mode-map-alists))
+                (equal (cl-cdaar emulation-mode-map-alists) ',keymap))
+      (setq emulation-mode-map-alists
+            (cdr emulation-mode-map-alists)))))
+
+(defun hydra--doc (body-key body-name heads)
+  "Generate a part of Hydra docstring.
+BODY-KEY is the body key binding.
+BODY-NAME is the symbol that identifies the Hydra.
+HEADS is a list of heads."
+  (format
+   "Create a hydra with %s body and the heads:\n\n%s\n\n%s"
+   (if body-key
+       (format "a \"%s\"" body-key)
+     "no")
+   (mapconcat
+    (lambda (x)
+      (format "\"%s\":    `%S'" (car x) (cadr x)))
+    heads ",\n")
+   (format "The body can be accessed via `%S'." body-name)))
+
+;;;###autoload
 (defmacro defhydra (name body &optional docstring &rest heads)
   "Create a hydra named NAME with a prefix BODY.
 
@@ -124,7 +192,7 @@ defined here.
 
 BODY should be either:
 
-    (BODY-MAP &optional BODY-KEY)
+    (BODY-MAP &optional BODY-KEY &rest PLIST)
 or:
 
     (lambda (KEY CMD) ...)
@@ -135,10 +203,15 @@ BODY-KEY should be a string processable by `kbd'.
 DOCSTRING will be displayed in the echo area to identify the
 hydra.
 
-HEADS is a list of (KEY CMD &optional HINT)."
+HEADS is a list of (KEY CMD &optional HINT &rest PLIST).
+
+PLIST in both cases recognizes only the :color key so far, which
+in turn can be either red or blue."
   (unless (stringp docstring)
     (setq heads (cons docstring heads))
     (setq docstring "hydra"))
+  (when (keywordp (car body))
+    (setq body (cons nil (cons nil body))))
   (let* ((keymap (make-sparse-keymap))
          (names (mapcar
                  (lambda (x)
@@ -148,43 +221,25 @@ HEADS is a list of (KEY CMD &optional HINT)."
          (body-name (intern (format "%S/body" name)))
          (body-key (unless (hydra--callablep body)
                      (cadr body)))
+         (body-color (if (hydra--callablep body)
+                         'red
+                       (or (plist-get (cddr body) :color)
+                           'red)))
          (method (if (hydra--callablep body)
                      body
                    (car body)))
-         (hint (format "%s: %s."
-                       docstring
-                       (mapconcat
-                        (lambda (h)
-                          (format
-                           (if (cl-caddr h)
-                               (concat "[%s]: " (cl-caddr h))
-                             "%s")
-                           (propertize (car h) 'face 'font-lock-keyword-face)))
-                        heads ", ")))
-         (doc (format
-               "Create a hydra with %s body and the heads:\n\n%s\n\n%s"
-               (if body-key
-                   (format "a \"%s\"" body-key)
-                 "no")
-               (mapconcat
-                (lambda (x)
-                  (format "\"%s\":    `%S'" (car x) (cadr x)))
-                heads ",\n")
-               (format "The body can be accessed via `%S'." body-name))))
+         (hint (hydra--hint docstring heads))
+         (doc (hydra--doc body-key body-name heads)))
     `(progn
        ,@(cl-mapcar
           (lambda (head name)
             `(defun ,name ()
                ,(format "%s\n\nCall the head: `%S'." doc (cadr head))
                (interactive)
-               ,@(if (null (cadr head))
-                     `((if (functionp hydra-last)
-                           (funcall hydra-last)
-                         (while (and (consp (car emulation-mode-map-alists))
-                                     (consp (caar emulation-mode-map-alists))
-                                     (equal (cl-cdaar emulation-mode-map-alists) ',keymap))
-                           (setq emulation-mode-map-alists
-                                 (cdr emulation-mode-map-alists)))))
+               ,@(if (eq (hydra--color head body-color) 'blue)
+                     `((hydra-disable)
+                       ,@(unless (null (cadr head))
+                                 `((call-interactively #',(cadr head)))))
                      `((call-interactively #',(cadr head))
                        (when hydra-is-helpful
                          (message ,hint))
