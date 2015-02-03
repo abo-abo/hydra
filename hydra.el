@@ -286,7 +286,10 @@ in turn can be either red or blue."
          (names (mapcar
                  (lambda (x)
                    (define-key keymap (kbd (car x))
-                     (intern (format "%S/%s" name (cadr x)))))
+                     (intern (format "%S/%s" name
+                                     (if (symbolp (cadr x))
+                                         (cadr x)
+                                       (concat "lambda-" (car x)))))))
                  heads))
          (body-name (intern (format "%S/body" name)))
          (body-key (unless (hydra--callablep body)
