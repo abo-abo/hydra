@@ -188,13 +188,22 @@ It's intended for the echo area, when a Hydra is active."
 
 (defun hydra-disable ()
   "Disable the current Hydra."
-  (if (functionp hydra-last)
-      (funcall hydra-last)
-    (while (and (consp (car emulation-mode-map-alists))
-                (consp (caar emulation-mode-map-alists))
-                (equal (cl-cdaar emulation-mode-map-alists) ',keymap))
-      (setq emulation-mode-map-alists
-            (cdr emulation-mode-map-alists)))))
+  (cond
+    ;; Emacs 25
+    ((functionp hydra-last)
+     (funcall hydra-last))
+
+    ;; Emacs 24.4.1
+    ((boundp 'overriding-terminal-local-map)
+     (setq overriding-terminal-local-map nil))
+
+    ;; older
+    (t
+     (while (and (consp (car emulation-mode-map-alists))
+                 (consp (caar emulation-mode-map-alists))
+                 (equal (cl-cdaar emulation-mode-map-alists) ',keymap))
+       (setq emulation-mode-map-alists
+             (cdr emulation-mode-map-alists))))))
 
 (defun hydra--doc (body-key body-name heads)
   "Generate a part of Hydra docstring.
