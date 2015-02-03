@@ -163,3 +163,11 @@ However, there are two important differences:
 
 - you can cancel <kbd>C-c C-v</kbd> with a command while executing that command, instead of e.g.
 getting an error `C-c C-v C-n is undefined` for <kbd>C-c C-v C-n</kbd>.
+
+## Hydras and numeric arguments
+
+Since version `0.6.0`, for any Hydra:
+
+- `digit-argment` can be called with <kbd>0</kbd>-<kbd>9</kbd>.
+- `negative-argument` can be called with <kbd>-</kbd>
+- `universal-argument` can be called with <kbd>C-u</kbd>
