@@ -313,11 +313,19 @@ in turn can be either red or blue."
                      `((hydra-disable)
                        ,@(unless (null (cadr head))
                                  `((call-interactively #',(cadr head)))))
-                     `((when hydra-is-helpful
-                         (message ,hint))
-                       (setq hydra-last
-                             (hydra-set-transient-map (setq hydra-curr-map ',keymap) t))
-                       (call-interactively #',(cadr head))))))
+                     `((catch 'hydra-disable
+                         (hydra-disable)
+                         (condition-case err
+                             (prog1 t
+                               (call-interactively #',(cadr head)))
+                           ((debug error)
+                            (message "%S" err)
+                            (sit-for 0.8)
+                            nil))
+                         (when hydra-is-helpful
+                           (message ,hint))
+                         (setq hydra-last
+                               (hydra-set-transient-map (setq hydra-curr-map ',keymap) t)))))))
           heads names)
        ,@(unless (or (null body-key)
                      (null method)
