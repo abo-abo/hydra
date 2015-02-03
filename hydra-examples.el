@@ -43,37 +43,37 @@
 
 (require 'windmove)
 
-(defun hydra-move-splitter-left ()
+(defun hydra-move-splitter-left (arg)
   "Move window splitter left."
-  (interactive)
+  (interactive "p")
   (if (let ((windmove-wrap-around))
         (windmove-find-other-window 'right))
-      (shrink-window-horizontally 1)
-    (enlarge-window-horizontally 1)))
+      (shrink-window-horizontally arg)
+    (enlarge-window-horizontally arg)))
 
-(defun hydra-move-splitter-right ()
+(defun hydra-move-splitter-right (arg)
   "Move window splitter right."
-  (interactive)
+  (interactive "p")
   (if (let ((windmove-wrap-around))
         (windmove-find-other-window 'right))
-      (enlarge-window-horizontally 1)
-    (shrink-window-horizontally 1)))
+      (enlarge-window-horizontally arg)
+    (shrink-window-horizontally arg)))
 
-(defun hydra-move-splitter-up ()
+(defun hydra-move-splitter-up (arg)
   "Move window splitter up."
-  (interactive)
+  (interactive "p")
   (if (let ((windmove-wrap-around))
         (windmove-find-other-window 'up))
-      (enlarge-window 1)
-    (shrink-window 1)))
+      (enlarge-window arg)
+    (shrink-window arg)))
 
-(defun hydra-move-splitter-down ()
+(defun hydra-move-splitter-down (arg)
   "Move window splitter down."
-  (interactive)
+  (interactive "p")
   (if (let ((windmove-wrap-around))
         (windmove-find-other-window 'up))
-      (shrink-window 1)
-    (enlarge-window 1)))
+      (shrink-window arg)
+    (enlarge-window arg)))
 
 (defvar hydra-example-move-window-splitter
   '(("h" hydra-move-splitter-left)
