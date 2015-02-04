@@ -171,3 +171,27 @@ Since version `0.6.0`, for any Hydra:
 - `digit-argment` can be called with <kbd>0</kbd>-<kbd>9</kbd>.
 - `negative-argument` can be called with <kbd>-</kbd>
 - `universal-argument` can be called with <kbd>C-u</kbd>
+
+## Hydras can have `:pre` and `:post` statements
+
+Since version `0.7.0`, you can specify code that will be called before each head, and
+after the body. For example:
+
+```cl
+(global-set-key
+ (kbd "C-z")
+ (defhydra hydra-vi
+     (:pre
+      (set-cursor-color "#40e0d0")
+      :post
+      (progn
+        (set-cursor-color "#ffffff")
+        (message
+         "Thank you, come again.")))
+   "vi"
+   ("l" forward-char)
+   ("h" backward-char)
+   ("j" next-line)
+   ("k" previous-line)
+   ("q" nil "quit")))
+```
