@@ -163,14 +163,18 @@ It's possible to set this to nil.")
       (and (consp x)
            (memq (car x) '(function quote)))))
 
+(defun hydra--head-property (h prop)
+  "Return the value of property PROP for Hydra head H."
+  (let ((plist (if (stringp (cl-caddr h))
+                   (cl-cdddr h)
+                 (cddr h))))
+    (plist-get plist prop)))
+
 (defun hydra--color (h body-color)
   "Return the color of a Hydra head H with BODY-COLOR."
   (if (null (cadr h))
       'blue
-    (let ((plist (if (stringp (cl-caddr h))
-                     (cl-cdddr h)
-                   (cddr h))))
-      (or (plist-get plist :color) body-color))))
+    (or (hydra--head-property h :color) body-color)))
 
 (defun hydra--face (h body-color)
   "Return the face for a Hydra head H with BODY-COLOR."
@@ -393,7 +397,9 @@ in turn can be either red or blue."
        ,@(delq nil
                (cl-mapcar
                 (lambda (head name)
-                  (unless (or (null body-key) (null method))
+                  (unless (or (null body-key)
+                              (null method)
+                              (hydra--head-property head :local))
                     (list
                      (if (hydra--callablep method)
                          'funcall
