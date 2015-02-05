@@ -5,7 +5,7 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.8.0
+;; Version: 0.8.1
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -321,6 +321,7 @@ HEADS is a list of (KEY CMD &optional HINT &rest PLIST).
 
 PLIST in both cases recognizes only the :color key so far, which
 in turn can be either red or blue."
+  (declare (indent 2))
   (unless (stringp docstring)
     (setq heads (cons docstring heads))
     (setq docstring "hydra"))
