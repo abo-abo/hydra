@@ -344,11 +344,7 @@ The body can be accessed via `toggle/body'."
    (equal
     (macroexpand
      '(defhydra hydra-vi
-       (:pre
-        (set-cursor-color "#40e0d0")
-        :post
-        (set-cursor-color "#ffffff")
-        :color amaranth)
+       (:color amaranth)
        "vi"
        ("l" forward-char)
        ("h" backward-char)
@@ -368,7 +364,6 @@ The body can be accessed via `hydra-vi/body'.
 
 Call the head: `forward-char'."
              (interactive)
-             (set-cursor-color "#40e0d0")
              (catch (quote hydra-disable)
                (hydra-disable)
                (condition-case err (prog1 t (call-interactively (function forward-char)))
@@ -421,7 +416,7 @@ Call the head: `forward-char'."
                                            (48 . hydra--digit-argument)
                                            (45 . hydra--negative-argument)
                                            (21 . hydra--universal-argument))))
-                      t (lambda nil (set-cursor-color "#ffffff"))))))
+                      t))))
       (defun hydra-vi/backward-char nil "Create a hydra with no body and the heads:
 
 \"l\":    `forward-char',
@@ -434,8 +429,8 @@ The body can be accessed via `hydra-vi/body'.
 
 Call the head: `backward-char'."
              (interactive)
-             (set-cursor-color "#40e0d0")
-             (catch (quote hydra-disable)
+             (catch
+                 (quote hydra-disable)
                (hydra-disable)
                (condition-case err (prog1 t (call-interactively (function backward-char)))
                  ((debug error)
@@ -487,7 +482,7 @@ Call the head: `backward-char'."
                                            (48 . hydra--digit-argument)
                                            (45 . hydra--negative-argument)
                                            (21 . hydra--universal-argument))))
-                      t (lambda nil (set-cursor-color "#ffffff"))))))
+                      t))))
       (defun hydra-vi/next-line nil "Create a hydra with no body and the heads:
 
 \"l\":    `forward-char',
@@ -500,8 +495,8 @@ The body can be accessed via `hydra-vi/body'.
 
 Call the head: `next-line'."
              (interactive)
-             (set-cursor-color "#40e0d0")
-             (catch (quote hydra-disable)
+             (catch
+                 (quote hydra-disable)
                (hydra-disable)
                (condition-case err (prog1 t (call-interactively (function next-line)))
                  ((debug error)
@@ -553,7 +548,7 @@ Call the head: `next-line'."
                                            (48 . hydra--digit-argument)
                                            (45 . hydra--negative-argument)
                                            (21 . hydra--universal-argument))))
-                      t (lambda nil (set-cursor-color "#ffffff"))))))
+                      t))))
       (defun hydra-vi/previous-line nil "Create a hydra with no body and the heads:
 
 \"l\":    `forward-char',
@@ -566,7 +561,6 @@ The body can be accessed via `hydra-vi/body'.
 
 Call the head: `previous-line'."
              (interactive)
-             (set-cursor-color "#40e0d0")
              (catch (quote hydra-disable)
                (hydra-disable)
                (condition-case err (prog1 t (call-interactively (function previous-line)))
@@ -619,7 +613,7 @@ Call the head: `previous-line'."
                                            (48 . hydra--digit-argument)
                                            (45 . hydra--negative-argument)
                                            (21 . hydra--universal-argument))))
-                      t (lambda nil (set-cursor-color "#ffffff"))))))
+                      t))))
       (defun hydra-vi/nil nil "Create a hydra with no body and the heads:
 
 \"l\":    `forward-char',
@@ -632,9 +626,7 @@ The body can be accessed via `hydra-vi/body'.
 
 Call the head: `nil'."
              (interactive)
-             (set-cursor-color "#40e0d0")
-             (hydra-disable)
-             (set-cursor-color "#ffffff"))
+             (hydra-disable))
       (defun hydra-vi/body nil "Create a hydra with no body and the heads:
 
 \"l\":    `forward-char',
@@ -645,7 +637,6 @@ Call the head: `nil'."
 
 The body can be accessed via `hydra-vi/body'."
              (interactive)
-             (set-cursor-color "#40e0d0")
              (when hydra-is-helpful (message #("vi: l, h, j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
                                                7 8 (face hydra-face-amaranth)
                                                10 11 (face hydra-face-amaranth)
@@ -690,7 +681,7 @@ The body can be accessed via `hydra-vi/body'."
                                    (48 . hydra--digit-argument)
                                    (45 . hydra--negative-argument)
                                    (21 . hydra--universal-argument)))
-                    t (lambda nil (set-cursor-color "#ffffff")))))))))
+                    t)))))))
 
 (provide 'hydra-test)
 
