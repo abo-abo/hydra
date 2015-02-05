@@ -353,7 +353,8 @@ in turn can be either red or blue."
                                (hydra-set-transient-map
                                 (setq hydra-curr-map ',keymap)
                                 t
-                                ,@(if body-post `((lambda () ,body-post))))))))))
+                                ,@(if (and body-post (not (eq body-color 'amaranth)))
+                                      `((lambda () ,body-post))))))))))
           heads names)
        ,@(unless (or (null body-key)
                      (null method)
@@ -382,7 +383,8 @@ in turn can be either red or blue."
                (hydra-set-transient-map
                 ',keymap
                 t
-                ,@(if body-post `((lambda () ,body-post)))))))))
+                ,@(if (and body-post (not (eq body-color 'amaranth)))
+                      `((lambda () ,body-post)))))))))
 
 (provide 'hydra)
 
