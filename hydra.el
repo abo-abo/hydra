@@ -226,6 +226,39 @@ HEADS is a list of heads."
     heads ",\n")
    (format "The body can be accessed via `%S'." body-name)))
 
+(defun hydra--make-defun (name cmd color
+                          doc hint keymap
+                          body-color body-pre body-post)
+  "Make a defun wrapper, using NAME, CMD, COLOR, DOC, HINT, and KEYMAP.
+BODY-COLOR, BODY-PRE, and BODY-POST are used as well."
+  `(defun ,name ()
+     ,doc
+     (interactive)
+     ,@(when body-pre (list body-pre))
+     ,@(delq nil
+             (if (eq color 'blue)
+                 `((hydra-disable)
+                   ,(when cmd `(call-interactively #',cmd))
+                   ,body-post)
+               `(,(when cmd
+                        `(catch 'hydra-disable
+                           (hydra-disable)
+                           (condition-case err
+                               (prog1 t
+                                 (call-interactively #',cmd))
+                             ((debug error)
+                              (message "%S" err)
+                              (sit-for 0.8)
+                              nil))))
+                  (when hydra-is-helpful
+                    (message ,hint))
+                  (setq hydra-last
+                        (hydra-set-transient-map
+                         (setq hydra-curr-map ',keymap)
+                         t
+                         ,@(if (and (not (eq body-color 'amaranth)) body-post)
+                               `((lambda () ,body-post))))))))))
+
 ;;* Macros
 ;;** hydra-create
 ;;;###autoload
@@ -329,32 +362,11 @@ in turn can be either red or blue."
     `(progn
        ,@(cl-mapcar
           (lambda (head name)
-            `(defun ,name ()
-               ,(format "%s\n\nCall the head: `%S'." doc (cadr head))
-               (interactive)
-               ,@(if body-pre (list body-pre))
-               ,@(if (eq (hydra--color head body-color) 'blue)
-                     `((hydra-disable)
-                       ,@(unless (null (cadr head))
-                                 `((call-interactively #',(cadr head))))
-                       ,@(if body-post (list body-post)))
-                     `((catch 'hydra-disable
-                         (hydra-disable)
-                         (condition-case err
-                             (prog1 t
-                               (call-interactively #',(cadr head)))
-                           ((debug error)
-                            (message "%S" err)
-                            (sit-for 0.8)
-                            nil))
-                         (when hydra-is-helpful
-                           (message ,hint))
-                         (setq hydra-last
-                               (hydra-set-transient-map
-                                (setq hydra-curr-map ',keymap)
-                                t
-                                ,@(if (and body-post (not (eq body-color 'amaranth)))
-                                      `((lambda () ,body-post))))))))))
+            (hydra--make-defun
+             name (cadr head) (hydra--color head body-color)
+             (format "%s\n\nCall the head: `%S'." doc (cadr head))
+             hint keymap
+             body-color body-pre body-post))
           heads names)
        ,@(unless (or (null body-key)
                      (null method)
@@ -373,18 +385,8 @@ in turn can be either red or blue."
                      (vconcat (kbd body-key) (kbd (car head)))
                      (list 'function name))))
                 heads names))
-       (defun ,body-name ()
-         ,doc
-         (interactive)
-         ,@(if body-pre (list body-pre))
-         (when hydra-is-helpful
-           (message ,hint))
-         (setq hydra-last
-               (hydra-set-transient-map
-                ',keymap
-                t
-                ,@(if (and body-post (not (eq body-color 'amaranth)))
-                      `((lambda () ,body-post)))))))))
+       ,(hydra--make-defun body-name nil nil doc hint keymap
+                           body-color body-pre body-post))))
 
 (provide 'hydra)
 
