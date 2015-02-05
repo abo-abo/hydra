@@ -89,6 +89,10 @@
     '((t (:foreground "#758BC6" :bold t)))
   "Blue Hydra heads will vanquish the Hydra.")
 
+(defface hydra-face-amaranth
+    '((t (:foreground "#E52B50" :bold t)))
+  "Amaranth Hydra can exit only through a blue head.")
+
 ;;* Universal Argument
 (defvar hydra-base-map
   (let ((map (make-sparse-keymap)))
@@ -168,6 +172,7 @@
   (cl-case (hydra--color h body-color)
     (blue 'hydra-face-blue)
     (red 'hydra-face-red)
+    (amaranth 'hydra-face-amaranth)
     (t (error "Unknown color for %S" h))))
 
 (defun hydra--hint (docstring heads body-color)
@@ -308,6 +313,19 @@ in turn can be either red or blue."
     (when (and (or body-pre body-post)
                (version< emacs-version "24.4"))
       (error "At least Emacs 24.4 is needed for :pre and :post"))
+    (when (eq body-color 'amaranth)
+      (if (cl-some `(lambda (h)
+                      (eq (hydra--color h ',body-color) 'blue))
+                   heads)
+          (define-key keymap [t]
+            `(lambda ()
+               (interactive)
+               (message "An amaranth Hydra can only exit through a blue head")
+               (hydra-set-transient-map hydra-curr-map t)
+               (when hydra-is-helpful
+                 (sit-for 0.8)
+                 (message ,hint))))
+        (error "An amaranth Hydra must have at least one blue head in order to exit")))
     `(progn
        ,@(cl-mapcar
           (lambda (head name)
