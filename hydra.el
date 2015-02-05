@@ -80,6 +80,11 @@
   :type 'boolean
   :group 'hydra)
 
+(defcustom hydra-keyboard-quit ""
+  "This binding will quit an amaranth Hydra.
+It's the only other way to quit it besides though a blue head.
+It's possible to set this to nil.")
+
 (defface hydra-face-red
     '((t (:foreground "#7F0055" :bold t)))
   "Red Hydra heads will persist indefinitely."
@@ -277,7 +282,8 @@ It defaults to `global-set-key'.
 When `(keymapp METHOD)`, it becomes:
 
     (lambda (key command) (define-key METHOD key command))"
-  (declare (indent 1))
+  (declare (indent 1)
+           (obsolete defhydra "0.8.0"))
   `(defhydra ,(intern
                (concat
                 "hydra-" (replace-regexp-in-string " " "_" body)))
@@ -358,7 +364,13 @@ in turn can be either red or blue."
                (when hydra-is-helpful
                  (sit-for 0.8)
                  (message ,hint))))
-        (error "An amaranth Hydra must have at least one blue head in order to exit")))
+        (error "An amaranth Hydra must have at least one blue head in order to exit"))
+      (when hydra-keyboard-quit
+        (define-key keymap hydra-keyboard-quit
+          `(lambda ()
+             (interactive)
+             (hydra-disable)
+             ,body-post))))
     `(progn
        ,@(cl-mapcar
           (lambda (head name)

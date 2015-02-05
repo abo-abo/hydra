@@ -361,7 +361,8 @@ The body can be accessed via `toggle/body'."
          ("j" next-line)
          ("k" previous-line)
          ("q" nil "quit")))
-      '(progn (defun hydra-vi/forward-char nil "Create a hydra with no body and the heads:
+      '(progn
+        (defun hydra-vi/forward-char nil "Create a hydra with no body and the heads:
 
 \"l\":    `forward-char',
 \"h\":    `backward-char',
@@ -372,61 +373,64 @@ The body can be accessed via `toggle/body'."
 The body can be accessed via `hydra-vi/body'.
 
 Call the head: `forward-char'."
-                     (interactive)
-                     (set-cursor-color "#e52b50")
-                     (catch (quote hydra-disable)
-                       (hydra-disable)
-                       (condition-case err (prog1 t (call-interactively (function forward-char)))
-                         ((debug error)
-                          (message "%S" err)
-                          (sit-for 0.8)
-                          nil)))
-                     (when hydra-is-helpful (message #("vi: l, h, j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
-                                                       7 8 (face hydra-face-amaranth)
-                                                       10 11 (face hydra-face-amaranth)
-                                                       13 14 (face hydra-face-amaranth)
-                                                       17 18 (face hydra-face-blue))))
-                     (setq hydra-last
-                           (hydra-set-transient-map
-                            (setq hydra-curr-map
-                                  (quote (keymap (t lambda nil (interactive)
-                                                    (message "An amaranth Hydra can only exit through a blue head")
-                                                    (hydra-set-transient-map hydra-curr-map t)
-                                                    (when hydra-is-helpful (sit-for 0.8)
-                                                          (message #("vi: l, h, j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
-                                                                     7 8 (face hydra-face-amaranth)
-                                                                     10 11 (face hydra-face-amaranth)
-                                                                     13 14 (face hydra-face-amaranth)
-                                                                     17 18 (face hydra-face-blue)))))
-                                                 (113 . hydra-vi/nil)
-                                                 (107 . hydra-vi/previous-line)
-                                                 (106 . hydra-vi/next-line)
-                                                 (104 . hydra-vi/backward-char)
-                                                 (108 . hydra-vi/forward-char)
-                                                 (kp-subtract . hydra--negative-argument)
-                                                 (kp-9 . hydra--digit-argument)
-                                                 (kp-8 . hydra--digit-argument)
-                                                 (kp-7 . hydra--digit-argument)
-                                                 (kp-6 . hydra--digit-argument)
-                                                 (kp-5 . hydra--digit-argument)
-                                                 (kp-4 . hydra--digit-argument)
-                                                 (kp-3 . hydra--digit-argument)
-                                                 (kp-2 . hydra--digit-argument)
-                                                 (kp-1 . hydra--digit-argument)
-                                                 (kp-0 . hydra--digit-argument)
-                                                 (57 . hydra--digit-argument)
-                                                 (56 . hydra--digit-argument)
-                                                 (55 . hydra--digit-argument)
-                                                 (54 . hydra--digit-argument)
-                                                 (53 . hydra--digit-argument)
-                                                 (52 . hydra--digit-argument)
-                                                 (51 . hydra--digit-argument)
-                                                 (50 . hydra--digit-argument)
-                                                 (49 . hydra--digit-argument)
-                                                 (48 . hydra--digit-argument)
-                                                 (45 . hydra--negative-argument)
-                                                 (21 . hydra--universal-argument))))
-                            t)))
+               (interactive)
+               (set-cursor-color "#e52b50")
+               (catch (quote hydra-disable)
+                 (hydra-disable)
+                 (condition-case err (prog1 t (call-interactively (function forward-char)))
+                   ((debug error)
+                    (message "%S" err)
+                    (sit-for 0.8)
+                    nil)))
+               (when hydra-is-helpful (message #("vi: l, h, j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
+                                                 7 8 (face hydra-face-amaranth)
+                                                 10 11 (face hydra-face-amaranth)
+                                                 13 14 (face hydra-face-amaranth)
+                                                 17 18 (face hydra-face-blue))))
+               (setq hydra-last
+                     (hydra-set-transient-map
+                      (setq hydra-curr-map
+                            (quote (keymap (7 lambda nil (interactive)
+                                              (hydra-disable)
+                                              (set-cursor-color "#ffffff"))
+                                           (t lambda nil (interactive)
+                                              (message "An amaranth Hydra can only exit through a blue head")
+                                              (hydra-set-transient-map hydra-curr-map t)
+                                              (when hydra-is-helpful (sit-for 0.8)
+                                                    (message #("vi: l, h, j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
+                                                               7 8 (face hydra-face-amaranth)
+                                                               10 11 (face hydra-face-amaranth)
+                                                               13 14 (face hydra-face-amaranth)
+                                                               17 18 (face hydra-face-blue)))))
+                                           (113 . hydra-vi/nil)
+                                           (107 . hydra-vi/previous-line)
+                                           (106 . hydra-vi/next-line)
+                                           (104 . hydra-vi/backward-char)
+                                           (108 . hydra-vi/forward-char)
+                                           (kp-subtract . hydra--negative-argument)
+                                           (kp-9 . hydra--digit-argument)
+                                           (kp-8 . hydra--digit-argument)
+                                           (kp-7 . hydra--digit-argument)
+                                           (kp-6 . hydra--digit-argument)
+                                           (kp-5 . hydra--digit-argument)
+                                           (kp-4 . hydra--digit-argument)
+                                           (kp-3 . hydra--digit-argument)
+                                           (kp-2 . hydra--digit-argument)
+                                           (kp-1 . hydra--digit-argument)
+                                           (kp-0 . hydra--digit-argument)
+                                           (57 . hydra--digit-argument)
+                                           (56 . hydra--digit-argument)
+                                           (55 . hydra--digit-argument)
+                                           (54 . hydra--digit-argument)
+                                           (53 . hydra--digit-argument)
+                                           (52 . hydra--digit-argument)
+                                           (51 . hydra--digit-argument)
+                                           (50 . hydra--digit-argument)
+                                           (49 . hydra--digit-argument)
+                                           (48 . hydra--digit-argument)
+                                           (45 . hydra--negative-argument)
+                                           (21 . hydra--universal-argument))))
+                      t)))
         (defun hydra-vi/backward-char nil "Create a hydra with no body and the heads:
 
 \"l\":    `forward-char',
@@ -455,7 +459,10 @@ Call the head: `backward-char'."
                (setq hydra-last
                      (hydra-set-transient-map
                       (setq hydra-curr-map
-                            (quote (keymap (t lambda nil (interactive)
+                            (quote (keymap (7 lambda nil (interactive)
+                                              (hydra-disable)
+                                              (set-cursor-color "#ffffff"))
+                                           (t lambda nil (interactive)
                                               (message "An amaranth Hydra can only exit through a blue head")
                                               (hydra-set-transient-map hydra-curr-map t)
                                               (when hydra-is-helpful (sit-for 0.8)
@@ -521,7 +528,10 @@ Call the head: `next-line'."
                (setq hydra-last
                      (hydra-set-transient-map
                       (setq hydra-curr-map
-                            (quote (keymap (t lambda nil (interactive)
+                            (quote (keymap (7 lambda nil (interactive)
+                                              (hydra-disable)
+                                              (set-cursor-color "#ffffff"))
+                                           (t lambda nil (interactive)
                                               (message "An amaranth Hydra can only exit through a blue head")
                                               (hydra-set-transient-map hydra-curr-map t)
                                               (when hydra-is-helpful (sit-for 0.8)
@@ -587,7 +597,10 @@ Call the head: `previous-line'."
                (setq hydra-last
                      (hydra-set-transient-map
                       (setq hydra-curr-map
-                            (quote (keymap (t lambda nil (interactive)
+                            (quote (keymap (7 lambda nil (interactive)
+                                              (hydra-disable)
+                                              (set-cursor-color "#ffffff"))
+                                           (t lambda nil (interactive)
                                               (message "An amaranth Hydra can only exit through a blue head")
                                               (hydra-set-transient-map hydra-curr-map t)
                                               (when hydra-is-helpful (sit-for 0.8)
@@ -659,7 +672,10 @@ The body can be accessed via `hydra-vi/body'."
                (setq hydra-last
                      (hydra-set-transient-map
                       (setq hydra-curr-map
-                            (quote (keymap (t lambda nil (interactive)
+                            (quote (keymap (7 lambda nil (interactive)
+                                              (hydra-disable)
+                                              (set-cursor-color "#ffffff"))
+                                           (t lambda nil (interactive)
                                               (message "An amaranth Hydra can only exit through a blue head")
                                               (hydra-set-transient-map hydra-curr-map t)
                                               (when hydra-is-helpful (sit-for 0.8)
