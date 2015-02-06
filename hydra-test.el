@@ -237,7 +237,8 @@ The body can be accessed via `hydra-error/body'."
                                            (48 . hydra--digit-argument)
                                            (45 . hydra--negative-argument)
                                            (21 . hydra--universal-argument))))
-                      t))))))))
+                      t))
+               (setq prefix-arg current-prefix-arg)))))))
 
 (ert-deftest hydra-blue-toggle ()
   (should
@@ -350,7 +351,8 @@ The body can be accessed via `toggle/body'."
                                            (48 . hydra--digit-argument)
                                            (45 . hydra--negative-argument)
                                            (21 . hydra--universal-argument))))
-                      t))))))))
+                      t))
+               (setq prefix-arg current-prefix-arg)))))))
 
 (ert-deftest hydra-amaranth-vi ()
   (unless (version< emacs-version "24.4")
@@ -557,7 +559,8 @@ The body can be accessed via `hydra-vi/body'."
                                              (48 . hydra--digit-argument)
                                              (45 . hydra--negative-argument)
                                              (21 . hydra--universal-argument))))
-                        t)))))))))
+                        t))
+                 (setq prefix-arg current-prefix-arg))))))))
 
 (provide 'hydra-test)
 

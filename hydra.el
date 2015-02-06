@@ -240,7 +240,7 @@ HEADS is a list of heads."
 
 (defun hydra--make-defun (name cmd color
                           doc hint keymap
-                          body-color body-pre body-post)
+                          body-color body-pre body-post &optional other-post)
   "Make a defun wrapper, using NAME, CMD, COLOR, DOC, HINT, and KEYMAP.
 BODY-COLOR, BODY-PRE, and BODY-POST are used as well."
   `(defun ,name ()
@@ -268,7 +268,8 @@ BODY-COLOR, BODY-PRE, and BODY-POST are used as well."
                            (setq hydra-curr-map ',keymap)
                            t
                            ,@(if (and (not (eq body-color 'amaranth)) body-post)
-                                 `((lambda () ,body-post)))))))))))
+                                 `((lambda () ,body-post)))))
+                    ,other-post))))))
 
 ;;* Macros
 ;;** hydra-create
@@ -417,7 +418,8 @@ in turn can be either red or blue."
                              (error "Invalid :bind property %S" head))))))
                 heads names))
        ,(hydra--make-defun body-name nil nil doc hint keymap
-                           body-color body-pre body-post))))
+                           body-color body-pre body-post
+                           '(setq prefix-arg current-prefix-arg)))))
 
 (provide 'hydra)
 
