@@ -163,12 +163,15 @@ It's possible to set this to nil.")
       (and (consp x)
            (memq (car x) '(function quote)))))
 
-(defun hydra--head-property (h prop)
-  "Return the value of property PROP for Hydra head H."
+(defun hydra--head-property (h prop &optional default)
+  "Return the value of property PROP for Hydra head H.
+Return DEFAULT if PROP is not in H."
   (let ((plist (if (stringp (cl-caddr h))
                    (cl-cdddr h)
                  (cddr h))))
-    (plist-get plist prop)))
+    (if (memq prop h)
+        (plist-get plist prop)
+      default)))
 
 (defun hydra--color (h body-color)
   "Return the color of a Hydra head H with BODY-COLOR."
@@ -398,15 +401,21 @@ in turn can be either red or blue."
                (cl-mapcar
                 (lambda (head name)
                   (unless (or (null body-key)
-                              (null method)
-                              (hydra--head-property head :local))
-                    (list
-                     (if (hydra--callablep method)
-                         'funcall
-                       'define-key)
-                     method
-                     (vconcat (kbd body-key) (kbd (car head)))
-                     (list 'function name))))
+                              (null method))
+                    (let ((bind (hydra--head-property head :bind 'default)))
+                      (cond ((null bind) nil)
+
+                            ((eq bind 'default)
+                             (list
+                              (if (hydra--callablep method)
+                                  'funcall
+                                'define-key)
+                              method
+                              (vconcat (kbd body-key) (kbd (car head)))
+                              (list 'function name)))
+
+                            (t
+                             (error "Invalid :bind property %S" head))))))
                 heads names))
        ,(hydra--make-defun body-name nil nil doc hint keymap
                            body-color body-pre body-post))))
