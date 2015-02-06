@@ -247,29 +247,28 @@ BODY-COLOR, BODY-PRE, and BODY-POST are used as well."
      ,doc
      (interactive)
      ,@(when body-pre (list body-pre))
-     ,@(delq nil
-             (if (eq color 'blue)
-                 `((hydra-disable)
-                   ,(when cmd `(call-interactively #',cmd))
-                   ,body-post)
-               `(,(when cmd
-                        `(catch 'hydra-disable
-                           (hydra-disable)
-                           (condition-case err
+     (hydra-disable)
+     (catch 'hydra-disable
+       ,@(delq nil
+               (if (eq color 'blue)
+                   `(,(when cmd `(call-interactively #',cmd))
+                      ,body-post)
+                 `(,(when cmd
+                          `(condition-case err
                                (prog1 t
                                  (call-interactively #',cmd))
                              ((debug error)
                               (message "%S" err)
                               (sit-for 0.8)
-                              nil))))
-                  (when hydra-is-helpful
-                    (message ,hint))
-                  (setq hydra-last
-                        (hydra-set-transient-map
-                         (setq hydra-curr-map ',keymap)
-                         t
-                         ,@(if (and (not (eq body-color 'amaranth)) body-post)
-                               `((lambda () ,body-post))))))))))
+                              nil)))
+                    (when hydra-is-helpful
+                      (message ,hint))
+                    (setq hydra-last
+                          (hydra-set-transient-map
+                           (setq hydra-curr-map ',keymap)
+                           t
+                           ,@(if (and (not (eq body-color 'amaranth)) body-post)
+                                 `((lambda () ,body-post)))))))))))
 
 ;;* Macros
 ;;** hydra-create
