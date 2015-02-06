@@ -234,6 +234,6 @@ use an amaranth Hydra instead of a red one, if for you the cost of being able to
 though certain bindings is less than the cost of accidentally exiting a red Hydra by
 pressing the wrong prefix.
 
-Note that it does not make sense to define a singe amaranth head, so this color can only
+Note that it does not make sense to define a single amaranth head, so this color can only
 be assigned to the body. An amaranth body will always have some amaranth heads and some
 blue heads (otherwise, it's impossible to exit), no reds.
