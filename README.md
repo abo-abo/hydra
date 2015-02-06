@@ -216,7 +216,8 @@ Here's an example of an amaranth Hydra:
 (global-set-key
  (kbd "C-z")
  (defhydra hydra-vi
-     (:pre
+     (:color blue
+      :pre
       (set-cursor-color "#40e0d0")
       :post
       (set-cursor-color "#ffffff")
