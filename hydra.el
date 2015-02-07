@@ -164,7 +164,7 @@ It's possible to set this to nil.")
            (memq (car x) '(function quote)))))
 
 (defun hydra--head-property (h prop &optional default)
-  "Return the value of property PROP for Hydra head H.
+  "Return for Hydra head H the value of property PROP.
 Return DEFAULT if PROP is not in H."
   (let ((plist (if (stringp (cl-caddr h))
                    (cl-cdddr h)
@@ -242,7 +242,7 @@ HEADS is a list of heads."
                           doc hint keymap
                           body-color body-pre body-post &optional other-post)
   "Make a defun wrapper, using NAME, CMD, COLOR, DOC, HINT, and KEYMAP.
-BODY-COLOR, BODY-PRE, and BODY-POST are used as well."
+BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
   `(defun ,name ()
      ,doc
      (interactive)
@@ -306,28 +306,40 @@ When `(keymapp METHOD)`, it becomes:
 ;;** defhydra
 ;;;###autoload
 (defmacro defhydra (name body &optional docstring &rest heads)
-  "Create a hydra named NAME with a prefix BODY.
+  "Create a Hydra - a family of functions with prefix NAME.
 
 NAME should be a symbol, it will be the prefix of all functions
 defined here.
 
-BODY should be either:
+BODY has the format:
 
-    (BODY-MAP &optional BODY-KEY &rest PLIST)
-or:
-
-    (lambda (KEY CMD) ...)
-
-BODY-MAP should be a keymap; `global-map' is acceptable here.
-BODY-KEY should be a string processable by `kbd'.
+    (BODY-MAP BODY-KEY &rest PLIST)
 
 DOCSTRING will be displayed in the echo area to identify the
-hydra.
+Hydra.
 
-HEADS is a list of (KEY CMD &optional HINT &rest PLIST).
+Functions are created on basis of HEADS, each of which has the
+format:
 
-PLIST in both cases recognizes only the :color key so far, which
-in turn can be either red or blue."
+    (KEY CMD &optional HINT &rest PLIST)
+
+BODY-MAP is a keymap; `global-map' is used quite often.  Each
+function generated from HEADS will be bound in BODY-MAP to
+BODY-KEY + KEY, and will set the transient map so that all
+following heads can be called though KEY only.
+
+The heads inherit their PLIST from the body and are allowed to
+override each key.  The keys recognized are :color and :bind.
+:color can be:
+
+- red (default): this head will continue the Hydra state.
+- blue: this head will stop the Hydra state.
+- amaranth (applies to body only): similar to red, but no binding
+except a blue head can stop the Hydra state.
+
+:bind can be:
+- nil: this head will not be bound in BODY-MAP.
+- a lambda taking KEY and CMD used to bind a head"
   (declare (indent 2))
   (unless (stringp docstring)
     (setq heads (cons docstring heads))
@@ -352,9 +364,8 @@ in turn can be either red or blue."
                            'red)))
          (body-pre (plist-get (cddr body) :pre))
          (body-post (plist-get (cddr body) :post))
-         (method (if (hydra--callablep body)
-                     body
-                   (car body)))
+         (method (or (plist-get body :bind)
+                     (car body)))
          (hint (hydra--hint docstring heads body-color))
          (doc (hydra--doc body-key body-name heads)))
     (when (and (or body-pre body-post)
@@ -400,9 +411,11 @@ in turn can be either red or blue."
        ,@(delq nil
                (cl-mapcar
                 (lambda (head name)
-                  (unless (or (null body-key)
-                              (null method))
-                    (let ((bind (hydra--head-property head :bind 'default)))
+                  (when (or body-key method)
+                    (let ((bind (hydra--head-property head :bind 'default))
+                          (final-key (if body-key
+                                         (vconcat (kbd body-key) (kbd (car head)))
+                                       (kbd (car head)))))
                       (cond ((null bind) nil)
 
                             ((eq bind 'default)
@@ -411,8 +424,13 @@ in turn can be either red or blue."
                                   'funcall
                                 'define-key)
                               method
-                              (vconcat (kbd body-key) (kbd (car head)))
+                              final-key
                               (list 'function name)))
+
+                            ((hydra--callablep bind)
+                             `(funcall (function ,bind)
+                                       ,final-key
+                                       (function ,name)))
 
                             (t
                              (error "Invalid :bind property %S" head))))))
