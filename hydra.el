@@ -37,28 +37,42 @@
 ;; command.  This makes the Hydra very seamless, it's like a minor
 ;; mode that disables itself automagically.
 ;;
-;; Here's how to use the examples bundled with Hydra:
-;;
-;;    (require 'hydra-examples)
-;;    (hydra-create "C-M-y" hydra-example-move-window-splitter)
-;;    (hydra-create "M-g" hydra-example-goto-error)
-;;
-;; You can expand the examples in-place, it still looks elegant:
-;;
-;;     (hydra-create "<f2>"
-;;       '(("g" text-scale-increase "zoom in")
-;;         ("l" text-scale-decrease "zoom out")))
-;;
-;; The third element of each list is the optional doc string that will
-;; be displayed in the echo area when `hydra-is-helpful' is t.
-;;
-;; It's better to take the examples simply as templates and use
-;; `defhydra' instead of `hydra-create', since it's more flexible.
+;; Here's an example Hydra, bound in the global map (you can use any
+;; keymap in place of `global-map'):
 ;;
 ;;     (defhydra hydra-zoom (global-map "<f2>")
 ;;       "zoom"
 ;;       ("g" text-scale-increase "in")
 ;;       ("l" text-scale-decrease "out"))
+;;
+;; It allows to start a command chain either like this:
+;; "<f2> gg4ll5g", or "<f2> lgllg".
+;;
+;; Here's another approach, when you just want a "callable keymap":
+;;
+;;     (defhydra hydra-toggle (:color blue)
+;;       "toggle"
+;;       ("a" abbrev-mode "abbrev")
+;;       ("d" toggle-debug-on-error "debug")
+;;       ("f" auto-fill-mode "fill")
+;;       ("t" toggle-truncate-lines "truncate")
+;;       ("w" whitespace-mode "whitespace")
+;;       ("q" nil "cancel"))
+;;
+;; This binds nothing so far, but if you follow up with:
+;;
+;;     (global-set-key (kbd "C-c C-v") 'hydra-toggle/body)
+;;
+;; you will have bound "C-c C-v a", "C-c C-v d" etc.
+;;
+;; Knowing that `defhydra' defines e.g. `hydra-toggle/body' command,
+;; you can nest Hydras if you wish, with `hydra-toggle/body' possibly
+;; becoming a blue head of another Hydra.
+;;
+;; Initially, Hydra shipped with a simplified `hydra-create' macro, to
+;; which you could hook up the examples from hydra-examples.el.  It's
+;; better to take the examples simply as templates and use `defhydra'
+;; instead of `hydra-create', since it's more flexible.
 
 ;;; Code:
 ;;* Requires
