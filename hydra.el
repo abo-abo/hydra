@@ -329,6 +329,12 @@ HEADS is a list of (KEY CMD &optional HINT &rest PLIST).
 PLIST in both cases recognizes only the :color key so far, which
 in turn can be either red or blue."
   (declare (indent 2))
+  (mapc (lambda (x)
+          (let ((l (cadr x)))
+            (when (and (not (null l))
+                       (listp l))
+              (setcar (cdr x) (eval l)))))
+        heads)
   (unless (stringp docstring)
     (setq heads (cons docstring heads))
     (setq docstring "hydra"))
@@ -395,8 +401,8 @@ in turn can be either red or blue."
        ,@(unless (or (null body-key)
                      (null method)
                      (hydra--callablep method))
-                 `((unless (keymapp (lookup-key ,method (kbd ,body-key)))
-                     (define-key ,method (kbd ,body-key) nil))))
+           `((unless (keymapp (lookup-key ,method (kbd ,body-key)))
+               (define-key ,method (kbd ,body-key) nil))))
        ,@(delq nil
                (cl-mapcar
                 (lambda (head name)
