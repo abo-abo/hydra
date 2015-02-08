@@ -365,6 +365,12 @@ except a blue head can stop the Hydra state.
 - nil: this head will not be bound in BODY-MAP.
 - a lambda taking KEY and CMD used to bind a head"
   (declare (indent 2))
+  (mapc (lambda (x)
+          (let ((l (cadr x)))
+            (when (and (not (null l))
+                       (listp l))
+              (setcar (cdr x) (eval l)))))
+        heads)
   (unless (stringp docstring)
     (setq heads (cons docstring heads))
     (setq docstring "hydra"))
@@ -430,8 +436,8 @@ except a blue head can stop the Hydra state.
        ,@(unless (or (null body-key)
                      (null method)
                      (hydra--callablep method))
-                 `((unless (keymapp (lookup-key ,method (kbd ,body-key)))
-                     (define-key ,method (kbd ,body-key) nil))))
+           `((unless (keymapp (lookup-key ,method (kbd ,body-key)))
+               (define-key ,method (kbd ,body-key) nil))))
        ,@(delq nil
                (cl-mapcar
                 (lambda (head name)
