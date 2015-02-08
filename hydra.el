@@ -5,7 +5,7 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.8.1
+;; Version: 0.9.0
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -176,6 +176,16 @@ It's possible to set this to nil.")
   (or (functionp x)
       (and (consp x)
            (memq (car x) '(function quote)))))
+
+(defun hydra--make-callable (x)
+  "Generate a callable symbol from X.
+If X is a function symbol or a lambda, return it.  Otherwise, it
+should be a single statement. Wrap it in an interactive lambda."
+  (if (or (symbolp x) (functionp x))
+      x
+    `(lambda ()
+       (interactive)
+       ,x)))
 
 (defun hydra--head-property (h prop &optional default)
   "Return for Hydra head H the value of property PROP.
@@ -412,7 +422,7 @@ except a blue head can stop the Hydra state.
        ,@(cl-mapcar
           (lambda (head name)
             (hydra--make-defun
-             name (cadr head) (hydra--color head body-color)
+             name (hydra--make-callable (cadr head)) (hydra--color head body-color)
              (format "%s\n\nCall the head: `%S'." doc (cadr head))
              hint keymap
              body-color body-pre body-post))
