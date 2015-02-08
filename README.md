@@ -250,3 +250,19 @@ pressing the wrong prefix.
 Note that it does not make sense to define a single amaranth head, so this color can only
 be assigned to the body. An amaranth body will always have some amaranth heads and some
 blue heads (otherwise, it's impossible to exit), no reds.
+
+## Generate simple lambdas in-place:
+
+Since version `0.9.0` it's possible to pass a single sexp instead of a function name or a lambda
+to a head. This sexp will be wrapped in an interactive lambda. Here's an example:
+
+```cl
+(defhydra hydra-launcher (:color blue)
+   "Launch"
+   ("h" man "man")
+   ("r" (browse-url "http://www.reddit.com/r/emacs/") "reddit")
+   ("w" (browse-url "http://www.emacswiki.org/") "emacswiki")
+   ("s" shell "shell")
+   ("q" nil "cancel"))
+(global-set-key (kbd "C-c r") 'hydra-launcher/body)
+```
