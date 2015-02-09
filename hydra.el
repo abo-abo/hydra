@@ -190,7 +190,8 @@ should be a single statement. Wrap it in an interactive lambda."
 (defun hydra--head-property (h prop &optional default)
   "Return for Hydra head H the value of property PROP.
 Return DEFAULT if PROP is not in H."
-  (let ((plist (if (stringp (cl-caddr h))
+  (let ((plist (if (or (stringp (cl-caddr h))
+                       (null (cl-caddr h)))
                    (cl-cdddr h)
                  (cddr h))))
     (if (memq prop h)
