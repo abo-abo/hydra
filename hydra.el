@@ -225,7 +225,12 @@ It's intended for the echo area, when a Hydra is active."
               (propertize
                (car h) 'face
                (hydra--face h body-color))))
-           heads ", ")))
+           (cl-remove-if
+            (lambda (x)
+              (and (> (length x) 2)
+                   (null (cl-caddr x))))
+            heads)
+           ", ")))
 
 (defun hydra-disable ()
   "Disable the current Hydra."
