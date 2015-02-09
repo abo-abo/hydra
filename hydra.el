@@ -214,23 +214,33 @@ Return DEFAULT if PROP is not in H."
 (defun hydra--hint (docstring heads body-color)
   "Generate a hint from DOCSTRING and HEADS and BODY-COLOR.
 It's intended for the echo area, when a Hydra is active."
-  (format "%s: %s."
-          docstring
-          (mapconcat
-           (lambda (h)
-             (format
-              (if (stringp (cl-caddr h))
-                  (concat "[%s]: " (cl-caddr h))
-                "%s")
-              (propertize
-               (car h) 'face
-               (hydra--face h body-color))))
-           (cl-remove-if
-            (lambda (x)
-              (and (> (length x) 2)
-                   (null (cl-caddr x))))
-            heads)
-           ", ")))
+  (let (alist)
+    (dolist (h heads)
+      (let ((val (assoc (cadr h) alist))
+            (pstr (propertize (car h) 'face
+                              (hydra--face h body-color))))
+        (unless (and (> (length h) 2)
+                     (null (cl-caddr h)))
+          (if val
+              (setf (cadr val)
+                    (concat (cadr val) " " pstr))
+            (push
+             (cons (cadr h)
+                   (cons pstr
+                         (and (stringp (cl-caddr h)) (cl-caddr h))))
+             alist)))))
+
+    (format "%s: %s."
+            docstring
+            (mapconcat
+             (lambda (x)
+               (format
+                (if (cdr x)
+                    (concat "[%s]: " (cdr x))
+                  "%s")
+                (car x)))
+             (nreverse (mapcar #'cdr alist))
+             ", "))))
 
 (defun hydra-disable ()
   "Disable the current Hydra."
