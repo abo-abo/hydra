@@ -180,7 +180,7 @@ It's possible to set this to nil.")
 (defun hydra--make-callable (x)
   "Generate a callable symbol from X.
 If X is a function symbol or a lambda, return it.  Otherwise, it
-should be a single statement. Wrap it in an interactive lambda."
+should be a single statement.  Wrap it in an interactive lambda."
   (if (or (symbolp x) (functionp x))
       x
     `(lambda ()
@@ -419,14 +419,19 @@ except a blue head can stop the Hydra state.
       (if (cl-some `(lambda (h)
                       (eq (hydra--color h ',body-color) 'blue))
                    heads)
-          (define-key keymap [t]
-            `(lambda ()
-               (interactive)
-               (message "An amaranth Hydra can only exit through a blue head")
-               (hydra-set-transient-map hydra-curr-map t)
-               (when hydra-is-helpful
-                 (sit-for 0.8)
-                 (message ,hint))))
+          (progn
+            (when (cl-some `(lambda (h)
+                              (eq (hydra--color h ',body-color) 'red))
+                           heads)
+              (warn "Amaranth body color: upgrading all red heads to amaranth"))
+            (define-key keymap [t]
+              `(lambda ()
+                 (interactive)
+                 (message "An amaranth Hydra can only exit through a blue head")
+                 (hydra-set-transient-map hydra-curr-map t)
+                 (when hydra-is-helpful
+                   (sit-for 0.8)
+                   (message ,hint)))))
         (error "An amaranth Hydra must have at least one blue head in order to exit"))
       (when hydra-keyboard-quit
         (define-key keymap hydra-keyboard-quit
