@@ -297,7 +297,7 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
                           `(condition-case err
                                (prog1 t
                                  (call-interactively #',cmd))
-                             ((debug error)
+                             (error
                               (message "%S" err)
                               (sit-for 0.8)
                               nil)))

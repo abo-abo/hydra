@@ -49,7 +49,7 @@ Call the head: `first-error'."
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function first-error)))
-                 ((debug error)
+                 (error
                   (message "%S" err)
                   (sit-for 0.8)
                   nil))
@@ -99,7 +99,7 @@ Call the head: `next-error'."
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function next-error)))
-                 ((debug error)
+                 (error
                   (message "%S" err)
                   (sit-for 0.8)
                   nil))
@@ -149,7 +149,7 @@ Call the head: `previous-error'."
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function previous-error)))
-                 ((debug error)
+                 (error
                   (message "%S" err)
                   (sit-for 0.8)
                   nil))
@@ -384,7 +384,7 @@ Call the head: `next-line'."
                (hydra-disable)
                (catch (quote hydra-disable)
                  (condition-case err (prog1 t (call-interactively (function next-line)))
-                   ((debug error)
+                   (error
                     (message "%S" err)
                     (sit-for 0.8)
                     nil))
@@ -445,7 +445,7 @@ Call the head: `previous-line'."
                (hydra-disable)
                (catch (quote hydra-disable)
                  (condition-case err (prog1 t (call-interactively (function previous-line)))
-                   ((debug error)
+                   (error
                     (message "%S" err)
                     (sit-for 0.8)
                     nil))
