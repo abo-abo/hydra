@@ -111,6 +111,14 @@ It's possible to set this to nil.")
 (defface hydra-face-amaranth
     '((t (:foreground "#E52B50" :bold t)))
   "Amaranth Hydra can exit only through a blue head.")
+;;* Fontification
+(defun hydra-add-font-lock ()
+  "Fontify `defhydra' statements."
+  (font-lock-add-keywords
+   'emacs-lisp-mode
+   '(("(\\(defhydra\\)\\_> +\\(.*?\\)\\_>"
+      (1 font-lock-keyword-face)
+      (2 font-lock-type-face)))))
 
 ;;* Universal Argument
 (defvar hydra-base-map
