@@ -388,7 +388,7 @@ except a blue head can stop the Hydra state.
 :bind can be:
 - nil: this head will not be bound in BODY-MAP.
 - a lambda taking KEY and CMD used to bind a head"
-  (declare (indent 2))
+  (declare (indent defun))
   (unless (stringp docstring)
     (setq heads (cons docstring heads))
     (setq docstring "hydra"))
