@@ -1,7 +1,7 @@
 EMACS = emacs
 # EMACS = emacs-24.3
 
-LOAD = -l hydra.el -l hydra-test.el
+LOAD = -l lv.el -l hydra.el -l hydra-test.el
 
 .PHONY: all test clean
 

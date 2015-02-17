@@ -266,3 +266,14 @@ to a head. This sexp will be wrapped in an interactive lambda. Here's an example
    ("q" nil "cancel"))
 (global-set-key (kbd "C-c r") 'hydra-launcher/body)
 ```
+
+## Define Hydra heads that don't show up in the hint at all
+
+This can be done by setting the head's hint explicitly to `nil`, instead of the usual string.
+
+## Use a dedicated window for Hydra hints
+
+Since version `0.10.0`, setting `hydra-lv` to `t` (the default setting) will make it use a dedicated
+window right above the Echo Area for hints. This has the advantage that you can immediately see
+any `message` output from the functions that you call, since Hydra no longer uses `message` to display
+the hint. You can still have the old behavior by setting `hydra-lv` to `nil`.

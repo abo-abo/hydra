@@ -5,7 +5,7 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.9.0
+;; Version: 0.10.0
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -77,6 +77,7 @@
 ;;; Code:
 ;;* Requires
 (require 'cl-lib)
+(require 'lv)
 
 (defalias 'hydra-set-transient-map
   (if (fboundp 'set-transient-map)
@@ -98,6 +99,10 @@
   "This binding will quit an amaranth Hydra.
 It's the only other way to quit it besides though a blue head.
 It's possible to set this to nil.")
+
+(defcustom hydra-lv t
+  "When non-nil, `lv-message' will be used to display hints instead of `message'."
+  :type 'boolean)
 
 (defface hydra-face-red
     '((t (:foreground "#7F0055" :bold t)))
@@ -251,8 +256,9 @@ It's intended for the echo area, when a Hydra is active."
              (nreverse (mapcar #'cdr alist))
              ", "))))
 
-(defun hydra-disable ()
-  "Disable the current Hydra."
+(defun hydra-disable (&optional kill-lv)
+  "Disable the current Hydra.
+When KILL-LV is non-nil, kill LV window and buffer."
   (cond
     ;; Emacs 25
     ((functionp hydra-last)
@@ -268,7 +274,17 @@ It's intended for the echo area, when a Hydra is active."
                  (consp (caar emulation-mode-map-alists))
                  (equal (cl-cdaar emulation-mode-map-alists) ',keymap))
        (setq emulation-mode-map-alists
-             (cdr emulation-mode-map-alists))))))
+             (cdr emulation-mode-map-alists)))))
+  (when (and kill-lv (window-live-p lv-wnd))
+    (kill-buffer (window-buffer lv-wnd))
+    (delete-window lv-wnd)))
+
+(defun hydra--message (format-str &rest args)
+  "Forward to (`message' FORMAT-STR ARGS).
+Or to `lv-message' if `hydra-lv' is non-nil."
+  (if hydra-lv
+      (apply #'lv-message format-str args)
+    (apply #'message format-str args)))
 
 (defun hydra--doc (body-key body-name heads)
   "Generate a part of Hydra docstring.
@@ -295,7 +311,7 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
      ,doc
      (interactive)
      ,@(when body-pre (list body-pre))
-     (hydra-disable)
+     (hydra-disable ,(eq color 'blue))
      (catch 'hydra-disable
        ,@(delq nil
                (if (eq color 'blue)
@@ -307,16 +323,18 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
                                  (call-interactively #',cmd))
                              (error
                               (message "%S" err)
-                              (sit-for 0.8)
+                              (unless hydra-lv
+                                (sit-for 0.8))
                               nil)))
                     (when hydra-is-helpful
-                      (message ,hint))
+                      (,hint))
                     (setq hydra-last
                           (hydra-set-transient-map
                            (setq hydra-curr-map ',keymap)
                            t
-                           ,@(if (and (not (eq body-color 'amaranth)) body-post)
-                                 `((lambda () ,body-post)))))
+                           ,(if (and (not (eq body-color 'amaranth)) body-post)
+                                `(lambda () (hydra-disable t) ,body-post)
+                                (lambda () (hydra-disable t)))))
                     ,other-post))))))
 
 ;;* Macros
@@ -373,6 +391,7 @@ except a blue head can stop the Hydra state.
                                        (concat "lambda-" (car x)))))))
                  heads))
          (body-name (intern (format "%S/body" name)))
+         (hint-name (intern (format "%S/hint" name)))
          (body-key (unless (hydra--callablep body)
                      (cadr body)))
          (body-color (if (hydra--callablep body)
@@ -407,14 +426,15 @@ except a blue head can stop the Hydra state.
                  (message "An amaranth Hydra can only exit through a blue head")
                  (hydra-set-transient-map hydra-curr-map t)
                  (when hydra-is-helpful
-                   (sit-for 0.8)
-                   (message ,hint)))))
+                   (unless hydra-lv
+                    (sit-for 0.8))
+                   (,hint-name)))))
         (error "An amaranth Hydra must have at least one blue head in order to exit"))
       (when hydra-keyboard-quit
         (define-key keymap hydra-keyboard-quit
           `(lambda ()
              (interactive)
-             (hydra-disable)
+             (hydra-disable t)
              ,body-post))))
     `(progn
        ,@(cl-mapcar
@@ -422,7 +442,7 @@ except a blue head can stop the Hydra state.
             (hydra--make-defun
              name (hydra--make-callable (cadr head)) (hydra--color head body-color)
              (format "%s\n\nCall the head: `%S'." doc (cadr head))
-             hint keymap
+             hint-name keymap
              body-color body-pre body-post))
           heads names)
        ,@(unless (or (null body-key)
@@ -457,7 +477,9 @@ except a blue head can stop the Hydra state.
                             (t
                              (error "Invalid :bind property %S" head))))))
                 heads names))
-       ,(hydra--make-defun body-name nil nil doc hint keymap
+       (defun ,hint-name ()
+         (hydra--message ,hint))
+       ,(hydra--make-defun body-name nil nil doc hint-name keymap
                            body-color body-pre body-post
                            '(setq prefix-arg current-prefix-arg)))))
 
