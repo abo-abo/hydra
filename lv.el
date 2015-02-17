@@ -63,7 +63,7 @@
     (unless (string= (buffer-string) str)
       (delete-region (point-min) (point-max))
       (insert str)
-      (fit-window-to-buffer nil nil 2))
+      (fit-window-to-buffer nil nil 1))
     (goto-char (point-min))
     (select-window ori)))
 

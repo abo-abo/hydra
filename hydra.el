@@ -256,9 +256,14 @@ It's intended for the echo area, when a Hydra is active."
              (nreverse (mapcar #'cdr alist))
              ", "))))
 
-(defun hydra-disable (&optional kill-lv)
-  "Disable the current Hydra.
-When KILL-LV is non-nil, kill LV window and buffer."
+(defun hydra-cleanup ()
+  "Clean up after a Hydra."
+  (when (window-live-p lv-wnd)
+    (kill-buffer (window-buffer lv-wnd))
+    (delete-window lv-wnd)))
+
+(defun hydra-disable ()
+  "Disable the current Hydra."
   (cond
     ;; Emacs 25
     ((functionp hydra-last)
@@ -274,10 +279,7 @@ When KILL-LV is non-nil, kill LV window and buffer."
                  (consp (caar emulation-mode-map-alists))
                  (equal (cl-cdaar emulation-mode-map-alists) ',keymap))
        (setq emulation-mode-map-alists
-             (cdr emulation-mode-map-alists)))))
-  (when (and kill-lv (window-live-p lv-wnd))
-    (kill-buffer (window-buffer lv-wnd))
-    (delete-window lv-wnd)))
+             (cdr emulation-mode-map-alists))))))
 
 (defun hydra--message (format-str &rest args)
   "Forward to (`message' FORMAT-STR ARGS).
@@ -311,7 +313,8 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
      ,doc
      (interactive)
      ,@(when body-pre (list body-pre))
-     (hydra-disable ,(eq color 'blue))
+     (hydra-disable)
+     ,@(when (eq color 'blue) '((hydra-cleanup)))
      (catch 'hydra-disable
        ,@(delq nil
                (if (eq color 'blue)
@@ -333,8 +336,8 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
                            (setq hydra-curr-map ',keymap)
                            t
                            ,(if (and (not (eq body-color 'amaranth)) body-post)
-                                `(lambda () (hydra-disable t) ,body-post)
-                                (lambda () (hydra-disable t)))))
+                                `(lambda () (hydra-cleanup) ,body-post)
+                                `(lambda () (hydra-cleanup)))))
                     ,other-post))))))
 
 ;;* Macros
@@ -434,7 +437,8 @@ except a blue head can stop the Hydra state.
         (define-key keymap hydra-keyboard-quit
           `(lambda ()
              (interactive)
-             (hydra-disable t)
+             (hydra-disable)
+             (hydra-cleanup)
              ,body-post))))
     `(progn
        ,@(cl-mapcar
