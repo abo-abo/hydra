@@ -259,8 +259,9 @@ It's intended for the echo area, when a Hydra is active."
 (defun hydra-cleanup ()
   "Clean up after a Hydra."
   (when (window-live-p lv-wnd)
-    (kill-buffer (window-buffer lv-wnd))
-    (delete-window lv-wnd)))
+    (let ((buf (window-buffer lv-wnd)))
+      (delete-window lv-wnd)
+      (kill-buffer buf))))
 
 (defun hydra-disable ()
   "Disable the current Hydra."
