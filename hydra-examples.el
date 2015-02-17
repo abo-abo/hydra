@@ -196,53 +196,5 @@
       (shrink-window arg)
     (enlarge-window arg)))
 
-;;* Obsoletes
-(defvar hydra-example-text-scale
-  '(("g" text-scale-increase "zoom in")
-    ("l" text-scale-decrease "zoom out"))
-  "A two-headed hydra for text scale manipulation.")
-(make-obsolete-variable
- 'hydra-example-text-scale
- "Don't use `hydra-example-text-scale', just write your own
-`defhydra' using hydra-examples.el as a template"
- "0.9.0")
-
-(defvar hydra-example-move-window-splitter
-  '(("h" hydra-move-splitter-left)
-    ("j" hydra-move-splitter-down)
-    ("k" hydra-move-splitter-up)
-    ("l" hydra-move-splitter-right))
-  "A four-headed hydra for the window splitter manipulation.
-Works best if you have not more than 4 windows.")
-(make-obsolete-variable
- 'hydra-example-move-window-splitter
- "Don't use `hydra-example-move-window-splitter', just write your own
-`defhydra' using hydra-examples.el as a template"
- "0.9.0")
-
-(defvar hydra-example-goto-error
-  '(("h" first-error "first")
-    ("j" next-error "next")
-    ("k" previous-error "prev"))
-  "A three-headed hydra for jumping between \"errors\".
-Useful for e.g. `occur', `rgrep' and the like.")
-(make-obsolete-variable
- 'hydra-example-goto-error
- "Don't use `hydra-example-goto-error', just write your own
-`defhydra' using hydra-examples.el as a template"
- "0.9.0")
-
-(defvar hydra-example-windmove
-  '(("h" windmove-left)
-    ("j" windmove-down)
-    ("k" windmove-up)
-    ("l" windmove-right))
-  "A four-headed hydra for `windmove'.")
-(make-obsolete-variable
- 'hydra-example-windmove
- "Don't use `hydra-example-windmove', just write your own
-`defhydra' using hydra-examples.el as a template"
- "0.9.0")
-
 (provide 'hydra-examples)
 ;;; hydra-examples.el ends here

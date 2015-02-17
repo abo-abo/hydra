@@ -320,37 +320,6 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
                     ,other-post))))))
 
 ;;* Macros
-;;** hydra-create
-;;;###autoload
-(defmacro hydra-create (body heads &optional method)
-  "Create a hydra with a BODY prefix and HEADS with METHOD.
-This will result in `global-set-key' statements with the keys
-being the concatenation of BODY and each head in HEADS.  HEADS is
-an list of (KEY FUNCTION &optional HINT).
-
-After one of the HEADS is called via BODY+KEY, it and the other
-HEADS can be called with only KEY (no need for BODY).  This state
-is broken once any key binding that is not in HEADS is called.
-
-METHOD is a lambda takes two arguments: a KEY and a COMMAND.
-It defaults to `global-set-key'.
-When `(keymapp METHOD)`, it becomes:
-
-    (lambda (key command) (define-key METHOD key command))"
-  (declare (indent 1)
-           (obsolete defhydra "0.8.0"))
-  `(defhydra ,(intern
-               (concat
-                "hydra-" (replace-regexp-in-string " " "_" body)))
-       ,(cond ((hydra--callablep method)
-              method)
-             ((null method)
-              `(global-map ,body))
-             (t
-              (list method body)))
-     "hydra"
-     ,@(eval heads)))
-
 ;;** defhydra
 ;;;###autoload
 (defmacro defhydra (name body &optional docstring &rest heads)
