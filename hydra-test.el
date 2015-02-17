@@ -555,6 +555,24 @@ The body can be accessed via `hydra-vi/body'."
                         t (lambda nil (hydra-disable t))))
                  (setq prefix-arg current-prefix-arg))))))))
 
+(ert-deftest defhydradio ()
+  (should (equal
+           (macroexpand
+            '(defhydradio hydra-test ()
+              (num [0 1 2 3 4 5 6 7 8 9 10])
+              (str ["foo" "bar" "baz"])))
+           '(progn
+             (defvar hydra-test/num 0
+               "Num")
+             (put 'hydra-test/num 'range [0 1 2 3 4 5 6 7 8 9 10])
+             (defun hydra-test/num ()
+               (hydra--cycle-radio 'hydra-test/num))
+             (defvar hydra-test/str "foo"
+               "Str")
+             (put 'hydra-test/str 'range ["foo" "bar" "baz"])
+             (defun hydra-test/str ()
+               (hydra--cycle-radio 'hydra-test/str))))))
+
 (provide 'hydra-test)
 
 ;;; hydra-test.el ends here

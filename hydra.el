@@ -483,6 +483,64 @@ except a blue head can stop the Hydra state.
                            body-color body-pre body-post
                            '(setq prefix-arg current-prefix-arg)))))
 
+(defmacro defhydradio (name body &rest heads)
+  "Create toggles with prefix NAME.
+BODY specifies the options; there are none currently.
+HEADS have the format:
+
+    (TOGGLE-NAME &optional VALUE DOC)
+
+TOGGLE-NAME will be used along with NAME to generate a variable
+name and a function that cycles it with the same name.  VALUE
+should be an array. The first element of VALUE will be used to
+inialize the variable.
+VALUE defaults to [nil t].
+DOC defaults to TOGGLE-NAME split and capitalized."
+  (declare (indent defun))
+  (cons 'progn
+        (apply #'append
+               (mapcar (lambda (h)
+                         (hydra--radio name h))
+                       heads))))
+
+(defun hydra--radio (parent head)
+  "Generate a hydradio from HEAD."
+  (let* ((name (car head))
+         (full-name (intern (format "%S/%S" parent name)))
+         (val (or (cadr head) [nil t]))
+         (doc (or (cl-caddr head)
+                  (mapconcat #'capitalize
+                             (split-string (symbol-name name) "-")
+                             " "))))
+    `((defvar ,full-name ,(hydra--quote-maybe (aref val 0)) ,doc)
+      (put ',full-name 'range ,val)
+      (defun ,full-name ()
+        (hydra--cycle-radio ',full-name)))))
+
+(defun hydra--quote-maybe (x)
+  "Quote X if it's a symbol."
+  (if (symbolp x)
+      (list 'quote x)
+    x))
+
+(defun hydra--cycle-radio (sym)
+  "Set SYM to the next value in its range."
+  (let* ((val (symbol-value sym))
+         (range (get sym 'range))
+         (i 0)
+         (l (length range)))
+    (setq i (catch 'done
+              (while (< i l)
+                (if (equal (aref range i) val)
+                    (throw 'done (1+ i))
+                  (incf i)))
+              (error "Val not in range for %S" sym)))
+    (set sym
+         (aref range
+               (if (>= i l)
+                   0
+                 i)))))
+
 (provide 'hydra)
 
 ;;; Local Variables:
