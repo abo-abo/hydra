@@ -58,7 +58,8 @@
 (defun lv-message (format-string &rest args)
   "Set LV window contents to (`format' FORMAT-STRING ARGS)."
   (let ((ori (selected-window))
-        (str (apply #'format format-string args)))
+        (str (apply #'format format-string args))
+        deactivate-mark)
     (select-window (lv-window))
     (unless (string= (buffer-string) str)
       (delete-region (point-min) (point-max))
