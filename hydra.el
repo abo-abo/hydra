@@ -364,8 +364,18 @@ format:
 
 BODY-MAP is a keymap; `global-map' is used quite often.  Each
 function generated from HEADS will be bound in BODY-MAP to
-BODY-KEY + KEY, and will set the transient map so that all
-following heads can be called though KEY only.
+BODY-KEY + KEY (both are strings passed to `kbd'), and will set
+the transient map so that all following heads can be called
+though KEY only.
+
+CMD is a callable expression: either an interactive function
+name, or an interactive lambda, or a single sexp (it will be
+wrapped in an interactive lambda).
+
+HINT is a short string that identifies its head. It will be
+printed beside KEY in the echo erea if `hydra-is-helpful' is not
+nil. If you don't even want the KEY to be printed, set HINT
+explicitly to nil.
 
 The heads inherit their PLIST from the body and are allowed to
 override each key.  The keys recognized are :color and :bind.
@@ -378,7 +388,12 @@ except a blue head can stop the Hydra state.
 
 :bind can be:
 - nil: this head will not be bound in BODY-MAP.
-- a lambda taking KEY and CMD used to bind a head"
+- a lambda taking KEY and CMD used to bind a head
+
+It is possible to omit both BODY-MAP and BODY-KEY if you don't
+want to bind anything. In that case, typically you will bind the
+generated NAME/body command. This command is also the return
+result of `defhydra'."
   (declare (indent defun))
   (unless (stringp docstring)
     (setq heads (cons docstring heads))
@@ -431,7 +446,7 @@ except a blue head can stop the Hydra state.
                  (hydra-set-transient-map hydra-curr-map t)
                  (when hydra-is-helpful
                    (unless hydra-lv
-                    (sit-for 0.8))
+                     (sit-for 0.8))
                    (,hint-name)))))
         (error "An amaranth Hydra must have at least one blue head in order to exit"))
       (when hydra-keyboard-quit
