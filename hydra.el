@@ -323,11 +323,13 @@ The expressions can be auto-expanded according to NAME."
           (error "Unrecognized key: _%s_" key))))
     `(format ,str ,@(nreverse varlist))))
 
-(defun hydra--message (str name heads body-color)
+(defun hydra--message (name body docstring heads)
   "Generate code to display STR in the preferred echo area.
 Set `hydra-lv' to choose the echo area.
 NAME, HEADS and BODY-COLOR are parameters of `defhydra'."
-  (let ((format-expr (hydra--format (hydra--hint str heads body-color) name heads body-color)))
+  (let* ((body-color (hydra--body-color body))
+         (format-expr (hydra--format
+                       (hydra--hint docstring heads body-color) name heads body-color)))
     `(if hydra-lv
          (lv-message ,format-expr)
        (message ,format-expr))))
@@ -551,7 +553,7 @@ result of `defhydra'."
                              (error "Invalid :bind property %S" head))))))
                 heads names))
        (defun ,hint-name ()
-         ,(hydra--message docstring name heads body-color))
+         ,(hydra--message name body docstring heads))
        ,(hydra--make-defun body-name nil nil doc hint-name keymap
                            body-color body-pre body-post
                            '(setq prefix-arg current-prefix-arg)))))
