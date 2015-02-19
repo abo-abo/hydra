@@ -223,24 +223,24 @@ Return DEFAULT if PROP is not in H."
         (plist-get plist prop)
       default)))
 
-(defun hydra--head-color (h body-color)
-  "Return the color of a Hydra head H with BODY-COLOR."
+(defun hydra--head-color (h body)
+  "Return the color of a Hydra head H with BODY."
   (let ((color (hydra--head-property h :color))
-        (exit (hydra--head-property h :exit 'default))
+        (exit (or (plist-get (cddr body) :exit)
+                  (hydra--head-property h :exit 'default)))
         (nonheads (plist-get (cddr body) :nonheads)))
     (cond ((null (cadr h))
            'blue)
           ((eq exit t)
            'blue)
-          ((null exit)
-           (cond ((eq nonheads 'warn)
-                  'amaranth)
-                 ((eq nonheads 'run)
-                  'pink)
-                 (t
-                  'red)))
+          ((eq nonheads 'run)
+           'pink)
+          ((eq nonheads 'warn)
+           (if (eq exit t)
+               'teal
+             'amaranth))
           ((null color)
-           body-color)
+           (hydra--body-color body))
           (t
            color))))
 
@@ -257,9 +257,9 @@ BODY is the second argument to `defhydra'"
           (color color)
           (t 'red))))
 
-(defun hydra--face (h body-color)
-  "Return the face for a Hydra head H with BODY-COLOR."
-  (cl-case (hydra--head-color h body-color)
+(defun hydra--face (h body)
+  "Return the face for a Hydra head H with BODY."
+  (cl-case (hydra--head-color h body)
     (blue 'hydra-face-blue)
     (red 'hydra-face-red)
     (amaranth 'hydra-face-amaranth)
@@ -304,12 +304,11 @@ Otherwise, add PREFIX to the symbol name."
 (defun hydra--hint (name body docstring heads)
   "Generate a hint for the echo area.
 NAME, BODY, DOCSTRING and HEADS are parameters to `defhydra'."
-  (let ((body-color (hydra--body-color body))
-        alist)
+  (let (alist)
     (dolist (h heads)
       (let ((val (assoc (cadr h) alist))
             (pstr (propertize (car h) 'face
-                              (hydra--face h body-color))))
+                              (hydra--face h body))))
         (unless (and (> (length h) 2)
                      (null (cl-caddr h)))
           (if val
@@ -354,7 +353,7 @@ The expressions can be auto-expanded according to NAME."
              (head (assoc key heads)))
         (if head
             (setq str (replace-match
-                       (propertize key 'face (hydra--face head body-color))
+                       (propertize key 'face (hydra--face head body))
                        nil nil str))
           (error "Unrecognized key: _%s_" key))))
     `(format ,str ,@(nreverse varlist))))
@@ -442,15 +441,9 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
         (body-post (plist-get (cddr body) :post)))
     (when (memq body-color '(amaranth pink teal))
       (if (cl-some `(lambda (h)
-                      (eq (hydra--head-color h ',body-color) 'blue))
+                      (eq (hydra--head-color h body) 'blue))
                    heads)
           (progn
-            ;; (when (cl-some `(lambda (h)
-            ;;                   (eq (hydra--head-color h ',body-color) 'red))
-            ;;                heads)
-            ;;   (warn
-            ;;    "%S body color: upgrading all red heads to %S"
-            ;;    body-color body-color))
             (define-key keymap [t]
               `(lambda ()
                  (interactive)
@@ -568,7 +561,7 @@ result of `defhydra'."
           (lambda (head name)
             (hydra--make-defun
              name (hydra--make-callable
-                   (cadr head)) (hydra--head-color head body-color)
+                   (cadr head)) (hydra--head-color head body)
              (format "%s\n\nCall the head: `%S'." doc (cadr head))
              hint-name keymap
              body-color body-pre body-post))
