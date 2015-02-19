@@ -101,8 +101,7 @@ It's the only other way to quit it besides though a blue head.
 It's possible to set this to nil.")
 
 (defcustom hydra-lv t
-  "When non-nil, `lv-message' will be used to display hints
-instead of `message'."
+  "When non-nil, `lv-message' (not `message') will be used to display hints."
   :type 'boolean)
 
 (defface hydra-face-red
@@ -236,37 +235,6 @@ BODY is the second argument to `defhydra'"
     (pink 'hydra-face-pink)
     (t (error "Unknown color for %S" h))))
 
-(defun hydra--hint (docstring heads body-color)
-  "Generate a hint from DOCSTRING and HEADS and BODY-COLOR.
-It's intended for the echo area, when a Hydra is active."
-  (let (alist)
-    (dolist (h heads)
-      (let ((val (assoc (cadr h) alist))
-            (pstr (propertize (car h) 'face
-                              (hydra--face h body-color))))
-        (unless (and (> (length h) 2)
-                     (null (cl-caddr h)))
-          (if val
-              (setf (cadr val)
-                    (concat (cadr val) " " pstr))
-            (push
-             (cons (cadr h)
-                   (cons pstr
-                         (and (stringp (cl-caddr h)) (cl-caddr h))))
-             alist)))))
-
-    (format "%s: %s."
-            docstring
-            (mapconcat
-             (lambda (x)
-               (format
-                (if (cdr x)
-                    (concat "[%s]: " (cdr x))
-                  "%s")
-                (car x)))
-             (nreverse (mapcar #'cdr alist))
-             ", "))))
-
 (defun hydra-cleanup ()
   "Clean up after a Hydra."
   (when (window-live-p lv-wnd)
@@ -301,6 +269,38 @@ Otherwise, add PREFIX to the symbol name."
         sym
       (intern (concat prefix "/" str)))))
 
+(defun hydra--hint (name body docstring heads)
+  "Generate a hint for the echo area.
+NAME, BODY, DOCSTRING and HEADS are parameters to `defhydra'."
+  (let ((body-color (hydra--body-color body))
+        alist)
+    (dolist (h heads)
+      (let ((val (assoc (cadr h) alist))
+            (pstr (propertize (car h) 'face
+                              (hydra--face h body-color))))
+        (unless (and (> (length h) 2)
+                     (null (cl-caddr h)))
+          (if val
+              (setf (cadr val)
+                    (concat (cadr val) " " pstr))
+            (push
+             (cons (cadr h)
+                   (cons pstr
+                         (and (stringp (cl-caddr h)) (cl-caddr h))))
+             alist)))))
+
+    (format "%s: %s."
+            docstring
+            (mapconcat
+             (lambda (x)
+               (format
+                (if (cdr x)
+                    (concat "[%s]: " (cdr x))
+                  "%s")
+                (car x)))
+             (nreverse (mapcar #'cdr alist))
+             ", "))))
+
 (defun hydra--format (str name heads body-color)
   "Generate a `format' statement from STR.
 \"%`...\" expressions are extracted into \"%S\".
@@ -324,12 +324,12 @@ The expressions can be auto-expanded according to NAME."
     `(format ,str ,@(nreverse varlist))))
 
 (defun hydra--message (name body docstring heads)
-  "Generate code to display STR in the preferred echo area.
+  "Generate code to display the hint in the preferred echo area.
 Set `hydra-lv' to choose the echo area.
-NAME, HEADS and BODY-COLOR are parameters of `defhydra'."
+NAME, BODY, DOCSTRING, and HEADS are parameters of `defhydra'."
   (let* ((body-color (hydra--body-color body))
          (format-expr (hydra--format
-                       (hydra--hint docstring heads body-color) name heads body-color)))
+                       (hydra--hint name body docstring heads) name heads body-color)))
     `(if hydra-lv
          (lv-message ,format-expr)
        (message ,format-expr))))
