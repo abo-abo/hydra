@@ -602,11 +602,19 @@ inialize the variable.
 VALUE defaults to [nil t].
 DOC defaults to TOGGLE-NAME split and capitalized."
   (declare (indent defun))
-  (cons 'progn
-        (apply #'append
-               (mapcar (lambda (h)
-                         (hydra--radio name h))
-                       heads))))
+  `(progn
+     ,@(apply #'append
+              (mapcar (lambda (h)
+                        (hydra--radio name h))
+                      heads))
+     (defun ,(intern (format "%S/reset-radios" name)) ()
+       ,@(mapcar
+          (lambda (h)
+            (let ((full-name (intern (format "%S/%S" name (car h))))
+                  )
+              `(setq ,full-name ,(hydra--quote-maybe
+                                  (and (cadr h) (aref (cadr h) 0))))))
+          heads))))
 
 (defun hydra--radio (parent head)
   "Generate a hydradio with PARENT from HEAD."
@@ -624,9 +632,12 @@ DOC defaults to TOGGLE-NAME split and capitalized."
 
 (defun hydra--quote-maybe (x)
   "Quote X if it's a symbol."
-  (if (symbolp x)
-      (list 'quote x)
-    x))
+  (cond ((null x)
+         nil)
+        ((symbolp x)
+         (list 'quote x))
+        (t
+         x)))
 
 (defun hydra--cycle-radio (sym)
   "Set SYM to the next value in its range."

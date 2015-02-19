@@ -586,7 +586,10 @@ The body can be accessed via `hydra-vi/body'."
                "Str")
              (put 'hydra-test/str 'range ["foo" "bar" "baz"])
              (defun hydra-test/str ()
-               (hydra--cycle-radio 'hydra-test/str))))))
+               (hydra--cycle-radio 'hydra-test/str))
+             (defun hydra-test/reset-radios ()
+               (setq hydra-test/num 0)
+               (setq hydra-test/str "foo"))))))
 
 (provide 'hydra-test)
 
