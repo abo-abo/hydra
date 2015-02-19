@@ -187,9 +187,12 @@ Call the head: `previous-error'."
       (define-key global-map [134217831 107]
        (function hydra-error/previous-error))
       (defun hydra-error/hint nil
-        (hydra--message #("error: [h]: first, [j]: next, [k]: prev." 8 9 (face hydra-face-red)
-                          20 21 (face hydra-face-red)
-                          31 32 (face hydra-face-red))))
+        (if hydra-lv (lv-message (format #("error: [h]: first, [j]: next, [k]: prev." 8 9 (face hydra-face-red)
+                                           20 21 (face hydra-face-red)
+                                           31 32 (face hydra-face-red))))
+          (message (format #("error: [h]: first, [j]: next, [k]: prev." 8 9 (face hydra-face-red)
+                             20 21 (face hydra-face-red)
+                             31 32 (face hydra-face-red))))))
       (defun hydra-error/body nil "Create a hydra with a \"M-g\" body and the heads:
 
 \"h\":    `first-error',
@@ -305,10 +308,14 @@ Call the head: `nil'."
              (hydra-cleanup)
              (catch (quote hydra-disable)))
       (defun hydra-toggle/hint nil
-        (hydra--message #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel." 9 10 (face hydra-face-blue)
-                          24 25 (face hydra-face-blue)
-                          35 36 (face hydra-face-blue)
-                          48 49 (face hydra-face-blue))))
+        (if hydra-lv (lv-message (format #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel." 9 10 (face hydra-face-blue)
+                                           24 25 (face hydra-face-blue)
+                                           35 36 (face hydra-face-blue)
+                                           48 49 (face hydra-face-blue))))
+          (message (format #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel." 9 10 (face hydra-face-blue)
+                             24 25 (face hydra-face-blue)
+                             35 36 (face hydra-face-blue)
+                             48 49 (face hydra-face-blue))))))
       (defun hydra-toggle/body nil "Create a hydra with no body and the heads:
 
 \"t\":    `toggle-truncate-lines',
@@ -503,9 +510,12 @@ Call the head: `nil'."
                (catch (quote hydra-disable)
                  (set-cursor-color "#ffffff")))
         (defun hydra-vi/hint nil
-          (hydra--message #("vi: j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
-                            7 8 (face hydra-face-amaranth)
-                            11 12 (face hydra-face-blue))))
+          (if hydra-lv (lv-message (format #("vi: j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
+                                             7 8 (face hydra-face-amaranth)
+                                             11 12 (face hydra-face-blue))))
+            (message (format #("vi: j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
+                               7 8 (face hydra-face-amaranth)
+                               11 12 (face hydra-face-blue))))))
         (defun hydra-vi/body nil "Create a hydra with no body and the heads:
 
 \"j\":    `next-line',
