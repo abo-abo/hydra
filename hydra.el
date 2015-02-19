@@ -216,15 +216,20 @@ Return DEFAULT if PROP is not in H."
         (plist-get plist prop)
       default)))
 
-(defun hydra--color (h body-color)
+(defun hydra--head-color (h body-color)
   "Return the color of a Hydra head H with BODY-COLOR."
   (if (null (cadr h))
       'blue
     (or (hydra--head-property h :color) body-color)))
 
+(defun hydra--body-color (body)
+  "Return the color of BODY.
+BODY is the second argument to `defhydra'"
+  (or (plist-get (cddr body) :color) 'red))
+
 (defun hydra--face (h body-color)
   "Return the face for a Hydra head H with BODY-COLOR."
-  (cl-case (hydra--color h body-color)
+  (cl-case (hydra--head-color h body-color)
     (blue 'hydra-face-blue)
     (red 'hydra-face-red)
     (amaranth 'hydra-face-amaranth)
@@ -322,7 +327,7 @@ The expressions can be auto-expanded according to NAME."
   "Generate code to display STR in the preferred echo area.
 Set `hydra-lv' to choose the echo area.
 NAME, HEADS and BODY-COLOR are parameters of `defhydra'."
-  (let ((format-expr (hydra--format str name heads body-color)))
+  (let ((format-expr (hydra--format (hydra--hint str heads body-color) name heads body-color)))
     `(if hydra-lv
          (lv-message ,format-expr)
        (message ,format-expr))))
@@ -451,15 +456,11 @@ result of `defhydra'."
          (hint-name (intern (format "%S/hint" name)))
          (body-key (unless (hydra--callablep body)
                      (cadr body)))
-         (body-color (if (hydra--callablep body)
-                         'red
-                       (or (plist-get (cddr body) :color)
-                           'red)))
+         (body-color (hydra--body-color body))
          (body-pre (plist-get (cddr body) :pre))
          (body-post (plist-get (cddr body) :post))
          (method (or (plist-get body :bind)
                      (car body)))
-         (hint (hydra--hint docstring heads body-color))
          (doc (hydra--doc body-key body-name heads)))
     (when (and (or body-pre body-post)
                (version< emacs-version "24.4"))
@@ -470,11 +471,11 @@ result of `defhydra'."
       (setq body-post `(funcall #',body-post)))
     (when (memq body-color '(amaranth pink))
       (if (cl-some `(lambda (h)
-                      (eq (hydra--color h ',body-color) 'blue))
+                      (eq (hydra--head-color h ',body-color) 'blue))
                    heads)
           (progn
             (when (cl-some `(lambda (h)
-                              (eq (hydra--color h ',body-color) 'red))
+                              (eq (hydra--head-color h ',body-color) 'red))
                            heads)
               (warn
                "%S body color: upgrading all red heads to %S"
@@ -511,7 +512,7 @@ result of `defhydra'."
           (lambda (head name)
             (hydra--make-defun
              name (hydra--make-callable
-                   (cadr head)) (hydra--color head body-color)
+                   (cadr head)) (hydra--head-color head body-color)
              (format "%s\n\nCall the head: `%S'." doc (cadr head))
              hint-name keymap
              body-color body-pre body-post))
@@ -550,7 +551,7 @@ result of `defhydra'."
                              (error "Invalid :bind property %S" head))))))
                 heads names))
        (defun ,hint-name ()
-         ,(hydra--message hint name heads body-color))
+         ,(hydra--message docstring name heads body-color))
        ,(hydra--make-defun body-name nil nil doc hint-name keymap
                            body-color body-pre body-post
                            '(setq prefix-arg current-prefix-arg)))))
