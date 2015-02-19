@@ -122,6 +122,12 @@ Vanquishable only through a blue head.")
     '((t (:foreground "#FF6EB4" :bold t)))
   "Pink body has red heads and on intercepting non-heads calls them without quitting.
 Vanquishable only through a blue head.")
+
+(defface hydra-face-teal
+    '((t (:foreground "#367588" :bold t)))
+  "Teal body has blue heads an warns on intercepting non-heads.
+Vanquishable only through a blue head.")
+
 ;;* Fontification
 (defun hydra-add-font-lock ()
   "Fontify `defhydra' statements."
@@ -235,6 +241,7 @@ BODY is the second argument to `defhydra'"
     (red 'hydra-face-red)
     (amaranth 'hydra-face-amaranth)
     (pink 'hydra-face-pink)
+    (teal 'hydra-face-teal)
     (t (error "Unknown color for %S" h))))
 
 (defun hydra-cleanup ()
@@ -473,7 +480,7 @@ result of `defhydra'."
       (setq body-pre `(funcall #',body-pre)))
     (when (and body-post (symbolp body-post))
       (setq body-post `(funcall #',body-post)))
-    (when (memq body-color '(amaranth pink))
+    (when (memq body-color '(amaranth pink teal))
       (if (cl-some `(lambda (h)
                       (eq (hydra--head-color h ',body-color) 'blue))
                    heads)
@@ -488,8 +495,9 @@ result of `defhydra'."
               `(lambda ()
                  (interactive)
                  ,@(if
-                    (eq body-color 'amaranth)
-                    '((message "An amaranth Hydra can only exit through a blue head"))
+                    (memq body-color '(amaranth teal))
+                    `((message ,(format "An %S Hydra can only exit through a blue head"
+                                        body-color)))
                     '((let ((kb (key-binding (this-command-keys))))
                         (if kb
                             (if (commandp kb)
