@@ -160,6 +160,33 @@
 ;; This example will bind "C-x `" in `global-map', but it will not
 ;; bind "C-x j" and "C-x k".
 ;; You can still "C-x `jjk" though.
+;;** Example 7: toggle with Ruby-style docstring
+(when (bound-and-true-p hydra-examples-verbatim)
+  (defhydra hydra-toggle (:color pink)
+    "
+_a_ abbrev-mode:       %`abbrev-mode
+_d_ debug-on-error:    %`debug-on-error
+_f_ auto-fill-mode:    %`auto-fill-function
+_g_ golden-ratio-mode: %`golden-ratio-mode
+_t_ truncate-lines:    %`truncate-lines
+_w_ whitespace-mode:   %`whitespace-mode
+
+"
+    ("a" abbrev-mode nil)
+    ("d" toggle-debug-on-error nil)
+    ("f" auto-fill-mode nil)
+    ("g" golden-ratio-mode nil)
+    ("t" toggle-truncate-lines nil)
+    ("w" whitespace-mode nil)
+    ("q" nil "quit"))
+  (global-set-key (kbd "C-c C-v") 'hydra-toggle/body))
+
+;; Here, using e.g. "_a_" translates to "a" with proper face.
+;; More interestingly:
+;;
+;;     "foobar %`abbrev-mode" means roughly (format "foobar %S" abbrev-mode)
+;;
+;; This means that you actually see the state of the mode that you're changing.
 
 ;;* Windmove helpers
 (require 'windmove)
