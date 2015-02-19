@@ -521,7 +521,7 @@ result of `defhydra'."
                     ((eq body-color 'amaranth)
                      '((message "An amaranth Hydra can only exit through a blue head")))
                     ((eq body-color 'teal)
-                     '((message "An teal Hydra can only exit through a blue head")))
+                     '((message "A teal Hydra can only exit through a blue head")))
                     (t
                      '((hydra-pink-fallback))))
                  (hydra-set-transient-map hydra-curr-map t)
