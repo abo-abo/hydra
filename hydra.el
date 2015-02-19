@@ -401,6 +401,23 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
                                 `(lambda () (hydra-cleanup)))))
                     ,other-post))))))
 
+(defun hydra-pink-fallback ()
+  (let ((keys (this-command-keys))
+        kb)
+    (when (equal keys [backspace])
+      (setq keys ""))
+    (setq kb (key-binding keys))
+    (if kb
+        (if (commandp kb)
+            (condition-case err
+                (call-interactively kb)
+              (error
+               (message "%S" err)
+               (unless hydra-lv
+                 (sit-for 0.8))))
+          (message "Pink Hydra can't currently handle prefixes, continuing"))
+      (message "Pink Hydra could not resolve: %S" keys))))
+
 ;;* Macros
 ;;** defhydra
 ;;;###autoload
@@ -500,18 +517,13 @@ result of `defhydra'."
             (define-key keymap [t]
               `(lambda ()
                  (interactive)
-                 ,@ (cond
-                      ((eq body-color 'amaranth)
-                       '((message "An amaranth Hydra can only exit through a blue head")))
-                      ((eq body-color 'teal)
-                       '((message "An teal Hydra can only exit through a blue head")))
-                      (t
-                       '((let ((kb (key-binding (this-command-keys))))
-                           (if kb
-                               (if (commandp kb)
-                                   (call-interactively kb)
-                                 (error "Pink Hydra can't currently handle prefixes, aborting"))
-                             (message "A pink Hydra can only exit through a blue head"))))))
+                 ,@(cond
+                    ((eq body-color 'amaranth)
+                     '((message "An amaranth Hydra can only exit through a blue head")))
+                    ((eq body-color 'teal)
+                     '((message "An teal Hydra can only exit through a blue head")))
+                    (t
+                     '((hydra-pink-fallback))))
                  (hydra-set-transient-map hydra-curr-map t)
                  (when hydra-is-helpful
                    (unless hydra-lv
