@@ -225,9 +225,13 @@ Return DEFAULT if PROP is not in H."
 
 (defun hydra--head-color (h body-color)
   "Return the color of a Hydra head H with BODY-COLOR."
-  (if (null (cadr h))
-      'blue
-    (or (hydra--head-property h :color) body-color)))
+  (let ((col (hydra--head-property h :color)))
+    (cond ((null (cadr h))
+           'blue)
+          ((null col)
+           body-color)
+          (t
+           col))))
 
 (defun hydra--body-color (body)
   "Return the color of BODY.
@@ -369,10 +373,10 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
      (interactive)
      ,@(when body-pre (list body-pre))
      (hydra-disable)
-     ,@(when (eq color 'blue) '((hydra-cleanup)))
+     ,@(when (memq color '(blue teal)) '((hydra-cleanup)))
      (catch 'hydra-disable
        ,@(delq nil
-               (if (eq color 'blue)
+               (if (memq color '(blue teal))
                    `(,(when cmd `(call-interactively #',cmd))
                       ,body-post)
                  `(,(when cmd
