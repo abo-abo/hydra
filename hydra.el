@@ -500,16 +500,18 @@ result of `defhydra'."
             (define-key keymap [t]
               `(lambda ()
                  (interactive)
-                 ,@(if
-                    (memq body-color '(amaranth teal))
-                    `((message ,(format "An %S Hydra can only exit through a blue head"
-                                        body-color)))
-                    '((let ((kb (key-binding (this-command-keys))))
-                        (if kb
-                            (if (commandp kb)
-                                (call-interactively kb)
-                              (error "Pink Hydra can't currently handle prefixes, aboring"))
-                          (message "A pink Hydra can only exit through a blue head")))))
+                 ,@ (cond
+                      ((eq body-color 'amaranth)
+                       '((message "An amaranth Hydra can only exit through a blue head")))
+                      ((eq body-color 'teal)
+                       '((message "An teal Hydra can only exit through a blue head")))
+                      (t
+                       '((let ((kb (key-binding (this-command-keys))))
+                           (if kb
+                               (if (commandp kb)
+                                   (call-interactively kb)
+                                 (error "Pink Hydra can't currently handle prefixes, aborting"))
+                             (message "A pink Hydra can only exit through a blue head"))))))
                  (hydra-set-transient-map hydra-curr-map t)
                  (when hydra-is-helpful
                    (unless hydra-lv
