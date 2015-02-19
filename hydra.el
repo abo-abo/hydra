@@ -116,6 +116,10 @@ It's possible to set this to nil.")
 (defface hydra-face-amaranth
     '((t (:foreground "#E52B50" :bold t)))
   "Amaranth Hydra can exit only through a blue head.")
+
+(defface hydra-face-pink
+    '((t (:foreground "#FF6EB4" :bold t)))
+  "Amaranth Hydra can exit only through a blue head.")
 ;;* Fontification
 (defun hydra-add-font-lock ()
   "Fontify `defhydra' statements."
@@ -223,6 +227,7 @@ Return DEFAULT if PROP is not in H."
     (blue 'hydra-face-blue)
     (red 'hydra-face-red)
     (amaranth 'hydra-face-amaranth)
+    (pink 'hydra-face-pink)
     (t (error "Unknown color for %S" h))))
 
 (defun hydra--hint (docstring heads body-color)
@@ -430,7 +435,7 @@ result of `defhydra'."
       (setq body-pre `(funcall #',body-pre)))
     (when (and body-post (symbolp body-post))
       (setq body-post `(funcall #',body-post)))
-    (when (eq body-color 'amaranth)
+    (when (memq body-color '(amaranth pink))
       (if (cl-some `(lambda (h)
                       (eq (hydra--color h ',body-color) 'blue))
                    heads)
@@ -438,17 +443,22 @@ result of `defhydra'."
             (when (cl-some `(lambda (h)
                               (eq (hydra--color h ',body-color) 'red))
                            heads)
-              (warn "Amaranth body color: upgrading all red heads to amaranth"))
+              (warn "%S body color: upgrading all red heads to %S" body-color body-color))
             (define-key keymap [t]
               `(lambda ()
                  (interactive)
-                 (message "An amaranth Hydra can only exit through a blue head")
+                 ,@(if (eq body-color 'amaranth)
+                       '((message "An amaranth Hydra can only exit through a blue head"))
+                       '((let ((kb (key-binding (this-command-keys))))
+                           (if kb
+                               (call-interactively kb)
+                             (message "A pink Hydra can only exit through a blue head")))))
                  (hydra-set-transient-map hydra-curr-map t)
                  (when hydra-is-helpful
                    (unless hydra-lv
                      (sit-for 0.8))
                    (,hint-name)))))
-        (error "An amaranth Hydra must have at least one blue head in order to exit"))
+        (error "An %S Hydra must have at least one blue head in order to exit" body-color))
       (when hydra-keyboard-quit
         (define-key keymap hydra-keyboard-quit
           `(lambda ()
