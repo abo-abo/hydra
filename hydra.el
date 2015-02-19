@@ -225,18 +225,37 @@ Return DEFAULT if PROP is not in H."
 
 (defun hydra--head-color (h body-color)
   "Return the color of a Hydra head H with BODY-COLOR."
-  (let ((col (hydra--head-property h :color)))
+  (let ((color (hydra--head-property h :color))
+        (exit (hydra--head-property h :exit 'default))
+        (nonheads (plist-get (cddr body) :nonheads)))
     (cond ((null (cadr h))
            'blue)
-          ((null col)
+          ((eq exit t)
+           'blue)
+          ((null exit)
+           (cond ((eq nonheads 'warn)
+                  'amaranth)
+                 ((eq nonheads 'run)
+                  'pink)
+                 (t
+                  'red)))
+          ((null color)
            body-color)
           (t
-           col))))
+           color))))
 
 (defun hydra--body-color (body)
   "Return the color of BODY.
 BODY is the second argument to `defhydra'"
-  (or (plist-get (cddr body) :color) 'red))
+  (let ((color (plist-get (cddr body) :color))
+        (exit (plist-get (cddr body) :exit))
+        (nonheads (plist-get (cddr body) :nonheads)))
+    (cond ((eq nonheads 'warn)
+           (if exit 'teal 'amaranth))
+          ((eq nonheads 'run) 'pink)
+          (exit 'blue)
+          (color color)
+          (t 'red))))
 
 (defun hydra--face (h body-color)
   "Return the face for a Hydra head H with BODY-COLOR."
@@ -418,6 +437,46 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
           (message "Pink Hydra can't currently handle prefixes, continuing"))
       (message "Pink Hydra could not resolve: %S" keys))))
 
+(defun hydra--handle-nonhead (body heads keymap hint-name)
+  (let ((body-color (hydra--body-color body))
+        (body-post (plist-get (cddr body) :post)))
+    (when (memq body-color '(amaranth pink teal))
+      (if (cl-some `(lambda (h)
+                      (eq (hydra--head-color h ',body-color) 'blue))
+                   heads)
+          (progn
+            ;; (when (cl-some `(lambda (h)
+            ;;                   (eq (hydra--head-color h ',body-color) 'red))
+            ;;                heads)
+            ;;   (warn
+            ;;    "%S body color: upgrading all red heads to %S"
+            ;;    body-color body-color))
+            (define-key keymap [t]
+              `(lambda ()
+                 (interactive)
+                 ,(cond
+                   ((eq body-color 'amaranth)
+                    '(message "An amaranth Hydra can only exit through a blue head"))
+                   ((eq body-color 'teal)
+                    '(message "A teal Hydra can only exit through a blue head"))
+                   (t
+                    '(hydra-pink-fallback)))
+                 (hydra-set-transient-map hydra-curr-map t)
+                 (when hydra-is-helpful
+                   (unless hydra-lv
+                     (sit-for 0.8))
+                   (,hint-name)))))
+        (error
+         "An %S Hydra must have at least one blue head in order to exit"
+         body-color))
+      (when hydra-keyboard-quit
+        (define-key keymap hydra-keyboard-quit
+          `(lambda ()
+             (interactive)
+             (hydra-disable)
+             (hydra-cleanup)
+             ,body-post))))))
+
 ;;* Macros
 ;;** defhydra
 ;;;###autoload
@@ -503,42 +562,7 @@ result of `defhydra'."
       (setq body-pre `(funcall #',body-pre)))
     (when (and body-post (symbolp body-post))
       (setq body-post `(funcall #',body-post)))
-    (when (memq body-color '(amaranth pink teal))
-      (if (cl-some `(lambda (h)
-                      (eq (hydra--head-color h ',body-color) 'blue))
-                   heads)
-          (progn
-            (when (cl-some `(lambda (h)
-                              (eq (hydra--head-color h ',body-color) 'red))
-                           heads)
-              (warn
-               "%S body color: upgrading all red heads to %S"
-               body-color body-color))
-            (define-key keymap [t]
-              `(lambda ()
-                 (interactive)
-                 ,@(cond
-                    ((eq body-color 'amaranth)
-                     '((message "An amaranth Hydra can only exit through a blue head")))
-                    ((eq body-color 'teal)
-                     '((message "A teal Hydra can only exit through a blue head")))
-                    (t
-                     '((hydra-pink-fallback))))
-                 (hydra-set-transient-map hydra-curr-map t)
-                 (when hydra-is-helpful
-                   (unless hydra-lv
-                     (sit-for 0.8))
-                   (,hint-name)))))
-        (error
-         "An %S Hydra must have at least one blue head in order to exit"
-         body-color))
-      (when hydra-keyboard-quit
-        (define-key keymap hydra-keyboard-quit
-          `(lambda ()
-             (interactive)
-             (hydra-disable)
-             (hydra-cleanup)
-             ,body-post))))
+    (hydra--handle-nonhead body heads keymap hint-name)
     `(progn
        ,@(cl-mapcar
           (lambda (head name)

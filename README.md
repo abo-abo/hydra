@@ -277,3 +277,34 @@ Since version `0.10.0`, setting `hydra-lv` to `t` (the default setting) will mak
 window right above the Echo Area for hints. This has the advantage that you can immediately see
 any `message` output from the functions that you call, since Hydra no longer uses `message` to display
 the hint. You can still have the old behavior by setting `hydra-lv` to `nil`.
+
+## Color table
+
+
+Body     | Head      | Executing NON-HEADS   | Executing HEADS
+Color    | Inherited |                       |
+         | Color     |                       |
+---------|-----------|-----------------------|-----------------
+amaranth | red       | Disallow and Continue | Continue
+teal     | blue      | Disallow and Continue | Quit
+pink     | red       | Allow and Continue    | Continue
+red      | red       | Allow and Quit        | Continue
+blue     | blue      | Allow and Quit        | Quit
+
+## Color to toggle correspondence
+
+By popular demand, an alternative syntax has been implemented that translates to colors without
+using them in the syntax. `:exit` can be used both in body (heads will inherit) and in heads
+(possible to override body). `:exit` is nil by default, corresponding to `red` head; you don't need
+to set it explicitly to nil.  `:nonheads` can be used only in body and can be either nil (default),
+`warn` or `run`.
+
+| color    | toggle                 |
+|----------+------------------------|
+| red      |                        |
+| blue     | :exit t                |
+| amaranth | :nonheads warn         |
+| teal     | :nonheads warn :exit t |
+| pink     | :nonheads run          |
+
+

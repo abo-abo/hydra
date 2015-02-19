@@ -591,6 +591,88 @@ The body can be accessed via `hydra-vi/body'."
                (setq hydra-test/num 0)
                (setq hydra-test/str "foo"))))))
 
+(ert-deftest hydra-blue-compat ()
+  (should
+   (equal
+    (macroexpand
+     '(defhydra hydra-toggle (:color blue)
+       "toggle"
+       ("t" toggle-truncate-lines "truncate")
+       ("f" auto-fill-mode "fill")
+       ("a" abbrev-mode "abbrev")
+       ("q" nil "cancel")))
+    (macroexpand
+     '(defhydra hydra-toggle (:exit t)
+       "toggle"
+       ("t" toggle-truncate-lines "truncate")
+       ("f" auto-fill-mode "fill")
+       ("a" abbrev-mode "abbrev")
+       ("q" nil "cancel"))))))
+
+(ert-deftest hydra-amaranth-compat ()
+  (unless (version< emacs-version "24.4")
+    (should
+     (equal
+      (macroexpand
+       '(defhydra hydra-vi
+         (:pre
+          (set-cursor-color "#e52b50")
+          :post
+          (set-cursor-color "#ffffff")
+          :color amaranth)
+         "vi"
+         ("j" next-line)
+         ("k" previous-line)
+         ("q" nil "quit")))
+      (macroexpand
+       '(defhydra hydra-vi
+         (:pre
+          (set-cursor-color "#e52b50")
+          :post
+          (set-cursor-color "#ffffff")
+          :nonheads warn)
+         "vi"
+         ("j" next-line)
+         ("k" previous-line)
+         ("q" nil "quit")))))))
+
+(ert-deftest hydra-pink-compat ()
+  (should
+   (equal
+    (macroexpand
+     '(defhydra hydra-zoom (global-map "<f2>"
+                            :color pink)
+       "zoom"
+       ("g" text-scale-increase "in")
+       ("l" text-scale-decrease "out")
+       ("q" nil "quit")))
+    (macroexpand
+     '(defhydra hydra-zoom (global-map "<f2>"
+                            :nonheads run)
+       "zoom"
+       ("g" text-scale-increase "in")
+       ("l" text-scale-decrease "out")
+       ("q" nil "quit"))))))
+
+(ert-deftest hydra-teal-compat ()
+  (should
+   (equal
+    (macroexpand
+     '(defhydra hydra-zoom (global-map "<f2>"
+                            :color teal)
+       "zoom"
+       ("g" text-scale-increase "in")
+       ("l" text-scale-decrease "out")
+       ("q" nil "quit")))
+    (macroexpand
+     '(defhydra hydra-zoom (global-map "<f2>"
+                            :nonheads warn
+                            :exit t)
+       "zoom"
+       ("g" text-scale-increase "in")
+       ("l" text-scale-decrease "out")
+       ("q" nil "quit"))))))
+
 (provide 'hydra-test)
 
 ;;; hydra-test.el ends here
