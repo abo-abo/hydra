@@ -303,12 +303,14 @@ NAME, BODY, DOCSTRING and HEADS are parameters to `defhydra'."
              (nreverse (mapcar #'cdr alist))
              ", "))))
 
-(defun hydra--format (str name heads body-color)
+(defun hydra--format (name body docstring heads)
   "Generate a `format' statement from STR.
 \"%`...\" expressions are extracted into \"%S\".
 NAME, HEADS and BODY-COLOR are parameters of `defhydra'.
 The expressions can be auto-expanded according to NAME."
-  (let ((prefix (symbol-name name))
+  (let ((str (hydra--hint name body docstring heads))
+        (body-color (hydra--body-color body))
+        (prefix (symbol-name name))
         (start 0)
         varlist)
     (while (setq start (string-match "%`\\([a-z-A-Z/0-9]+\\)" str start))
@@ -329,9 +331,7 @@ The expressions can be auto-expanded according to NAME."
   "Generate code to display the hint in the preferred echo area.
 Set `hydra-lv' to choose the echo area.
 NAME, BODY, DOCSTRING, and HEADS are parameters of `defhydra'."
-  (let* ((body-color (hydra--body-color body))
-         (format-expr (hydra--format
-                       (hydra--hint name body docstring heads) name heads body-color)))
+  (let ((format-expr (hydra--format name body docstring heads)))
     `(if hydra-lv
          (lv-message ,format-expr)
        (message ,format-expr))))
