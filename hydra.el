@@ -302,7 +302,9 @@ NAME, BODY, DOCSTRING and HEADS are parameters to `defhydra'."
                          (and (stringp (cl-caddr h)) (cl-caddr h))))
              alist)))))
 
-    (format "%s: %s."
+    (format (if (eq ?\n (aref docstring 0))
+                "%s%s"
+              "%s: %s.")
             docstring
             (mapconcat
              (lambda (x)
