@@ -105,21 +105,23 @@ It's possible to set this to nil.")
   :type 'boolean)
 
 (defface hydra-face-red
-    '((t (:foreground "#7F0055" :bold t)))
+    '((t (:foreground "#FF0000" :bold t)))
   "Red Hydra heads will persist indefinitely."
   :group 'hydra)
 
 (defface hydra-face-blue
-    '((t (:foreground "#758BC6" :bold t)))
+    '((t (:foreground "#0000FF" :bold t)))
   "Blue Hydra heads will vanquish the Hydra.")
 
 (defface hydra-face-amaranth
     '((t (:foreground "#E52B50" :bold t)))
-  "Amaranth Hydra can exit only through a blue head.")
+  "Amaranth body has red heads and warns on intercepting non-heads.
+Vanquishable only through a blue head.")
 
 (defface hydra-face-pink
     '((t (:foreground "#FF6EB4" :bold t)))
-  "Amaranth Hydra can exit only through a blue head.")
+  "Pink body has red heads and on intercepting non-heads calls them without quitting.
+Vanquishable only through a blue head.")
 ;;* Fontification
 (defun hydra-add-font-lock ()
   "Fontify `defhydra' statements."
