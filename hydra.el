@@ -135,6 +135,9 @@ Vanquishable only through a blue head.")
    'emacs-lisp-mode
    '(("(\\(defhydra\\)\\_> +\\(.*?\\)\\_>"
       (1 font-lock-keyword-face)
+      (2 font-lock-type-face))
+     ("(\\(defhydradio\\)\\_> +\\(.*?\\)\\_>"
+      (1 font-lock-keyword-face)
       (2 font-lock-type-face)))))
 
 ;;* Universal Argument
