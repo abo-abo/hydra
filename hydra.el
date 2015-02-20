@@ -445,7 +445,7 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
                           (hydra-set-transient-map
                            (setq hydra-curr-map ',keymap)
                            t
-                           ,(if (and (not (eq body-color 'amaranth)) body-post)
+                           ,(if (and (not (memq body-color '(amaranth pink teal))) body-post)
                                 `(lambda () (hydra-cleanup) ,body-post)
                                 `(lambda () (hydra-cleanup)))))
                     ,other-post))))))
