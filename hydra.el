@@ -470,6 +470,8 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
 (defun hydra--handle-nonhead (body heads keymap hint-name)
   (let ((body-color (hydra--body-color body))
         (body-post (plist-get (cddr body) :post)))
+    (when (and body-post (symbolp body-post))
+      (setq body-post `(funcall #',body-post)))
     (when (memq body-color '(amaranth pink teal))
       (if (cl-some `(lambda (h)
                       (eq (hydra--head-color h body) 'blue))
