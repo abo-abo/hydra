@@ -49,9 +49,9 @@ Call the head: `first-error'."
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function first-error)))
-                 (error (message "%S" err)
-                        (unless hydra-lv (sit-for 0.8))
-                        nil))
+                 ((quit error) (message "%S" err)
+                  (unless hydra-lv (sit-for 0.8))
+                  nil))
                (when hydra-is-helpful (hydra-error/hint))
                (setq hydra-last
                      (hydra-set-transient-map
@@ -96,9 +96,9 @@ Call the head: `next-error'."
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function next-error)))
-                 (error (message "%S" err)
-                        (unless hydra-lv (sit-for 0.8))
-                        nil))
+                 ((quit error) (message "%S" err)
+                  (unless hydra-lv (sit-for 0.8))
+                  nil))
                (when hydra-is-helpful (hydra-error/hint))
                (setq hydra-last
                      (hydra-set-transient-map
@@ -143,9 +143,9 @@ Call the head: `previous-error'."
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function previous-error)))
-                 (error (message "%S" err)
-                        (unless hydra-lv (sit-for 0.8))
-                        nil))
+                 ((quit error) (message "%S" err)
+                  (unless hydra-lv (sit-for 0.8))
+                  nil))
                (when hydra-is-helpful (hydra-error/hint))
                (setq hydra-last
                      (hydra-set-transient-map
@@ -392,9 +392,9 @@ Call the head: `next-line'."
                (hydra-disable)
                (catch (quote hydra-disable)
                  (condition-case err (prog1 t (call-interactively (function next-line)))
-                   (error (message "%S" err)
-                          (unless hydra-lv (sit-for 0.8))
-                          nil))
+                   ((quit error) (message "%S" err)
+                    (unless hydra-lv (sit-for 0.8))
+                    nil))
                  (when hydra-is-helpful (hydra-vi/hint))
                  (setq hydra-last
                        (hydra-set-transient-map
@@ -450,9 +450,9 @@ Call the head: `previous-line'."
                (hydra-disable)
                (catch (quote hydra-disable)
                  (condition-case err (prog1 t (call-interactively (function previous-line)))
-                   (error (message "%S" err)
-                          (unless hydra-lv (sit-for 0.8))
-                          nil))
+                   ((quit error) (message "%S" err)
+                    (unless hydra-lv (sit-for 0.8))
+                    nil))
                  (when hydra-is-helpful (hydra-vi/hint))
                  (setq hydra-last
                        (hydra-set-transient-map

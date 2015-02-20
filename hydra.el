@@ -345,7 +345,7 @@ The expressions can be auto-expanded according to NAME."
         varlist)
     (while (setq start
                  (string-match
-                  "\\(?:%\\( ?-?[0-9]*\\)`\\([a-z-A-Z/0-9]+\\)\\)\\|\\(?:_\\([a-z-A-Z]+\\)_\\)"
+                  "\\(?:%\\( ?-?[0-9]*\\)`\\([a-z-A-Z/0-9]+\\)\\)\\|\\(?:_\\([a-z-~A-Z]+\\)_\\)"
                   docstring start))
       (if (eq ?_ (aref (match-string 0 docstring) 0))
           (let* ((key (match-string 3 docstring))
@@ -353,7 +353,7 @@ The expressions can be auto-expanded according to NAME."
             (if head
                 (progn
                   (push (propertize key 'face (hydra--face head body)) varlist)
-                  (setq docstring (replace-match "%s" nil nil docstring)))
+                  (setq docstring (replace-match "% 3s" nil nil docstring)))
               (error "Unrecognized key: _%s_" key)))
         (push (hydra--unalias-var (match-string 2 docstring) prefix) varlist)
         (setq docstring (replace-match (concat "%" (match-string 1 docstring) "S") nil nil docstring 0))))
@@ -407,7 +407,7 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
                           `(condition-case err
                                (prog1 t
                                  (call-interactively #',cmd))
-                             (error
+                             ((quit error)
                               (message "%S" err)
                               (unless hydra-lv
                                 (sit-for 0.8))
@@ -433,7 +433,7 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
         (if (commandp kb)
             (condition-case err
                 (call-interactively kb)
-              (error
+              ((quit error)
                (message "%S" err)
                (unless hydra-lv
                  (sit-for 0.8))))
