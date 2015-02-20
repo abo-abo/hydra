@@ -322,44 +322,45 @@ NAME, BODY, DOCSTRING and HEADS are parameters to `defhydra'."
                    (cons pstr
                          (and (stringp (cl-caddr h)) (cl-caddr h))))
              alist)))))
-
-    (format (if (eq ?\n (aref docstring 0))
-                "%s%s"
-              "%s: %s.")
-            docstring
-            (mapconcat
-             (lambda (x)
-               (format
-                (if (cdr x)
-                    (concat "[%s]: " (cdr x))
-                  "%s")
-                (car x)))
-             (nreverse (mapcar #'cdr alist))
-             ", "))))
+    (mapconcat
+     (lambda (x)
+       (format
+        (if (cdr x)
+            (concat "[%s]: " (cdr x))
+          "%s")
+        (car x)))
+     (nreverse (mapcar #'cdr alist))
+     ", ")))
 
 (defun hydra--format (name body docstring heads)
   "Generate a `format' statement from STR.
 \"%`...\" expressions are extracted into \"%S\".
 NAME, HEADS and BODY-COLOR are parameters of `defhydra'.
 The expressions can be auto-expanded according to NAME."
-  (let ((str (hydra--hint name body docstring heads))
+  (setq docstring (replace-regexp-in-string "\\^" "" docstring))
+  (let ((rest (hydra--hint name body docstring heads))
         (body-color (hydra--body-color body))
         (prefix (symbol-name name))
         (start 0)
         varlist)
-    (while (setq start (string-match "%`\\([a-z-A-Z/0-9]+\\)" str start))
-      (push (hydra--unalias-var (match-string 1 str) prefix) varlist)
-      (setq str (replace-match "%S" nil nil str 0)))
-    (setq start 0)
-    (while (setq start (string-match "_\\([a-z-A-Z]+\\)_" str start))
-      (let* ((key (match-string 1 str))
-             (head (assoc key heads)))
-        (if head
-            (setq str (replace-match
-                       (propertize key 'face (hydra--face head body))
-                       nil nil str))
-          (error "Unrecognized key: _%s_" key))))
-    `(format ,str ,@(nreverse varlist))))
+    (while (setq start
+                 (string-match
+                  "\\(?:%\\( ?-?[0-9]*\\)`\\([a-z-A-Z/0-9]+\\)\\)\\|\\(?:_\\([a-z-A-Z]+\\)_\\)"
+                  docstring start))
+      (if (eq ?_ (aref (match-string 0 docstring) 0))
+          (let* ((key (match-string 3 docstring))
+                 (head (assoc key heads)))
+            (if head
+                (progn
+                  (push (propertize key 'face (hydra--face head body)) varlist)
+                  (setq docstring (replace-match "%s" nil nil docstring)))
+              (error "Unrecognized key: _%s_" key)))
+        (push (hydra--unalias-var (match-string 2 docstring) prefix) varlist)
+        (setq docstring (replace-match (concat "%" (match-string 1 docstring) "S") nil nil docstring 0))))
+    (if (eq ?\n (aref docstring 0))
+        `(concat (format ,docstring ,@(nreverse varlist))
+                 ,rest)
+      `(format ,(concat docstring ": " rest ".")))))
 
 (defun hydra--message (name body docstring heads)
   "Generate code to display the hint in the preferred echo area.
