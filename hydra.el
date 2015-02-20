@@ -490,9 +490,9 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
                    (unless hydra-lv
                      (sit-for 0.8))
                    (,hint-name)))))
-        (error
-         "An %S Hydra must have at least one blue head in order to exit"
-         body-color))
+          (error
+           "An %S Hydra must have at least one blue head in order to exit"
+           body-color))
       (when hydra-keyboard-quit
         (define-key keymap hydra-keyboard-quit
           `(lambda ()
@@ -579,9 +579,6 @@ result of `defhydra'."
          (method (or (plist-get body :bind)
                      (car body)))
          (doc (hydra--doc body-key body-name heads)))
-    (when (and (or body-pre body-post)
-               (version< emacs-version "24.4"))
-      (error "At least Emacs 24.4 is needed for :pre and :post"))
     (when (and body-pre (symbolp body-pre))
       (setq body-pre `(funcall #',body-pre)))
     (when (and body-post (symbolp body-post))
