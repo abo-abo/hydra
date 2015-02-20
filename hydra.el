@@ -310,8 +310,7 @@ NAME, BODY, DOCSTRING and HEADS are parameters to `defhydra'."
   (let (alist)
     (dolist (h heads)
       (let ((val (assoc (cadr h) alist))
-            (pstr (propertize (car h) 'face
-                              (hydra--face h body))))
+            (pstr (hydra-fontify-head h body)))
         (unless (and (> (length h) 2)
                      (null (cl-caddr h)))
           (if val
@@ -331,6 +330,19 @@ NAME, BODY, DOCSTRING and HEADS are parameters to `defhydra'."
         (car x)))
      (nreverse (mapcar #'cdr alist))
      ", ")))
+
+(defvar hydra-fontify-head-function nil
+  "Possible replacement for `hydra-fontify-head-default'.")
+
+(defun hydra-fontify-head-default (head body)
+  "Produce a pretty string from HEAD and BODY.
+HEAD's binding is returned as a string with a colored face."
+  (propertize (car head) 'face (hydra--face head body)))
+
+(defun hydra-fontify-head (head body)
+  "Produce a pretty string from HEAD and BODY."
+  (funcall (or hydra-fontify-head-function 'hydra-fontify-head-default)
+           head body))
 
 (defun hydra--format (name body docstring heads)
   "Generate a `format' statement from STR.
@@ -352,7 +364,7 @@ The expressions can be auto-expanded according to NAME."
                  (head (assoc key heads)))
             (if head
                 (progn
-                  (push (propertize key 'face (hydra--face head body)) varlist)
+                  (push (hydra-fontify-head head body) varlist)
                   (setq docstring (replace-match "% 3s" nil nil docstring)))
               (error "Unrecognized key: _%s_" key)))
         (push (hydra--unalias-var (match-string 2 docstring) prefix) varlist)
