@@ -80,9 +80,22 @@
 (require 'lv)
 
 (defalias 'hydra-set-transient-map
-  (if (fboundp 'set-transient-map)
-      'set-transient-map
-    'set-temporary-overlay-map))
+    (if (fboundp 'set-transient-map)
+        'set-transient-map
+      (lambda (map keep-pred &optional on-exit)
+        (set-temporary-overlay-map map (hydra--pred on-exit)))))
+
+(defun hydra--pred (on-exit)
+  "Generate a predicate on whether to continue the Hydra state.
+Call ON-EXIT for clean-up.
+This is a compatibility code for Emacs older than 24.4."
+  `(lambda ()
+     (if (lookup-key hydra-curr-map (this-command-keys-vector))
+         t
+       (hydra-cleanup)
+       ,(when on-exit
+              `(funcall ,(hydra--make-callable on-exit)))
+       nil)))
 
 ;;* Customize
 (defgroup hydra nil
@@ -284,17 +297,19 @@ BODY is the second argument to `defhydra'"
     ((functionp hydra-last)
      (funcall hydra-last))
 
-    ;; Emacs 24.4.1
-    ((boundp 'overriding-terminal-local-map)
-     (setq overriding-terminal-local-map nil))
+    ;; Emacs 24.3 or older
+    ((< emacs-minor-version 4)
+     (setq emulation-mode-map-alists
+           (cl-remove-if
+            (lambda (x)
+              (and (consp x)
+                   (consp (car x))
+                   (equal (cdar x) hydra-curr-map)))
+            emulation-mode-map-alists)))
 
-    ;; older
+    ;; Emacs 24.4.1
     (t
-     (while (and (consp (car emulation-mode-map-alists))
-                 (consp (caar emulation-mode-map-alists))
-                 (equal (cl-cdaar emulation-mode-map-alists) ',keymap))
-       (setq emulation-mode-map-alists
-             (cdr emulation-mode-map-alists))))))
+     (setq overriding-terminal-local-map nil))))
 
 (defun hydra--unalias-var (str prefix)
   "Return the symbol named STR if it's bound as a variable.
