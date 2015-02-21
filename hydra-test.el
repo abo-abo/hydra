@@ -697,7 +697,20 @@ _f_ auto-fill-mode:    %`auto-fill-function
 % 3s auto-fill-mode:    %S
 " "{a}" abbrev-mode "{d}" debug-on-error "{f}" auto-fill-function) "[[q]]: quit"))))
 
-
+(ert-deftest hydra-format-with-sexp ()
+  (should (equal
+           (let ((hydra-fontify-head-function
+                  'hydra-fontify-head-greyscale))
+             (hydra--format
+              'hydra-toggle nil
+              "\n_n_ narrow-or-widen-dwim %(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
+              '(("n" narrow-to-region nil) ("q" nil "cancel"))))
+           '(concat (format "\n% 3s narrow-or-widen-dwim %Sasdf\n"
+                     "{n}"
+                     (progn
+                       (message "checking")
+                       (buffer-narrowed-p)))
+             "[[q]]: cancel"))))
 
 (provide 'hydra-test)
 

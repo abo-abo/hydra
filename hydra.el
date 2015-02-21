@@ -378,21 +378,42 @@ The expressions can be auto-expanded according to NAME."
         (body-color (hydra--body-color body))
         (prefix (symbol-name name))
         (start 0)
-        varlist)
+        varlist
+        offset)
     (while (setq start
                  (string-match
-                  "\\(?:%\\( ?-?[0-9]*\\)`\\([a-z-A-Z/0-9]+\\)\\)\\|\\(?:_\\([a-z-~A-Z]+\\)_\\)"
+                  "\\(?:%\\( ?-?[0-9]*\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\([a-z-~A-Z]+\\)_\\)"
                   docstring start))
-      (if (eq ?_ (aref (match-string 0 docstring) 0))
-          (let* ((key (match-string 3 docstring))
-                 (head (assoc key heads)))
-            (if head
-                (progn
-                  (push (hydra-fontify-head head body) varlist)
-                  (setq docstring (replace-match "% 3s" nil nil docstring)))
-              (error "Unrecognized key: _%s_" key)))
-        (push (hydra--unalias-var (match-string 2 docstring) prefix) varlist)
-        (setq docstring (replace-match (concat "%" (match-string 1 docstring) "S") nil nil docstring 0))))
+      (cond ((eq ?_ (aref (match-string 0 docstring) 0))
+             (let* ((key (match-string 3 docstring))
+                    (head (assoc key heads)))
+               (if head
+                   (progn
+                     (push (hydra-fontify-head head body) varlist)
+                     (setq docstring (replace-match "% 3s" nil nil docstring)))
+                 (error "Unrecognized key: _%s_" key))))
+
+            ((eq ?` (aref (match-string 2 docstring) 0))
+             (push (hydra--unalias-var
+                    (substring (match-string 2 docstring) 1) prefix) varlist)
+             (setq docstring
+                   (replace-match
+                    (concat "%" (match-string 1 docstring) "S")
+                    nil nil docstring 0)))
+
+            (t
+             (setq offset
+                   (with-temp-buffer
+                     (insert (substring docstring (1+ start)))
+                     (goto-char (point-min))
+                     (push (read (current-buffer)) varlist)
+                     (point)))
+             (setq docstring
+                   (concat
+                    (substring docstring 0 start)
+                    "%" (match-string 1 docstring) "S"
+                    (substring docstring
+                               (+ (match-end 2) offset -2)))))))
     (if (eq ?\n (aref docstring 0))
         `(concat (format ,docstring ,@(nreverse varlist))
                  ,rest)
