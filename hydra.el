@@ -362,7 +362,7 @@ HEAD's binding is returned as a string with a colored face."
 (defun hydra--format (name body docstring heads)
   "Generate a `format' statement from STR.
 \"%`...\" expressions are extracted into \"%S\".
-NAME, HEADS and BODY-COLOR are parameters of `defhydra'.
+NAME, BODY, DOCSTRING and HEADS are parameters of `defhydra'.
 The expressions can be auto-expanded according to NAME."
   (setq docstring (replace-regexp-in-string "\\^" "" docstring))
   (let ((rest (hydra--hint name body docstring heads))
@@ -451,6 +451,7 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
                     ,other-post))))))
 
 (defun hydra-pink-fallback ()
+  "On intercepting a non-head, try to run it."
   (let ((keys (this-command-keys))
         kb)
     (when (equal keys [backspace])
@@ -467,7 +468,9 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
           (message "Pink Hydra can't currently handle prefixes, continuing"))
       (message "Pink Hydra could not resolve: %S" keys))))
 
-(defun hydra--handle-nonhead (body heads keymap hint-name)
+(defun hydra--handle-nonhead (keymap name body heads)
+  "Setup KEYMAP for intercepting non-head bindings.
+NAME, BODY and HEADS are parameters to `defhydra'."
   (let ((body-color (hydra--body-color body))
         (body-post (plist-get (cddr body) :post)))
     (when (and body-post (symbolp body-post))
@@ -491,10 +494,10 @@ BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
                  (when hydra-is-helpful
                    (unless hydra-lv
                      (sit-for 0.8))
-                   (,hint-name)))))
-          (error
-           "An %S Hydra must have at least one blue head in order to exit"
-           body-color))
+                   (,(intern (format "%S/hint" name)))))))
+        (error
+         "An %S Hydra must have at least one blue head in order to exit"
+         body-color))
       (when hydra-keyboard-quit
         (define-key keymap hydra-keyboard-quit
           `(lambda ()
@@ -585,7 +588,7 @@ result of `defhydra'."
       (setq body-pre `(funcall #',body-pre)))
     (when (and body-post (symbolp body-post))
       (setq body-post `(funcall #',body-post)))
-    (hydra--handle-nonhead body heads keymap hint-name)
+    (hydra--handle-nonhead keymap name body heads)
     `(progn
        ,@(cl-mapcar
           (lambda (head name)
