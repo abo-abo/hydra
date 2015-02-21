@@ -610,12 +610,15 @@ result of `defhydra'."
                      (cadr body)))
          (body-color (hydra--body-color body))
          (body-pre (plist-get (cddr body) :pre))
+         (body-body-pre (plist-get (cddr body) :body-pre))
          (body-post (plist-get (cddr body) :post))
          (method (or (plist-get body :bind)
                      (car body)))
          (doc (hydra--doc body-key body-name heads)))
     (when (and body-pre (symbolp body-pre))
       (setq body-pre `(funcall #',body-pre)))
+    (when (and body-body-pre (symbolp body-body-pre))
+      (setq body-body-pre `(funcall #',body-body-pre)))
     (when (and body-post (symbolp body-post))
       (setq body-post `(funcall #',body-post)))
     (hydra--handle-nonhead keymap name body heads)
@@ -665,7 +668,7 @@ result of `defhydra'."
        (defun ,hint-name ()
          ,(hydra--message name body docstring heads))
        ,(hydra--make-defun body-name nil nil doc hint-name keymap
-                           body-color body-pre body-post
+                           body-color (or body-body-pre body-pre) body-post
                            '(setq prefix-arg current-prefix-arg)))))
 
 (defmacro defhydradio (name body &rest heads)
