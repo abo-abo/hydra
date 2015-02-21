@@ -354,6 +354,15 @@ NAME, BODY, DOCSTRING and HEADS are parameters to `defhydra'."
 HEAD's binding is returned as a string with a colored face."
   (propertize (car head) 'face (hydra--face head body)))
 
+(defun hydra-fontify-head-greyscale (head body)
+  "Produce a pretty string from HEAD and BODY.
+HEAD's binding is returned as a string wrapped with [] or {}."
+  (let ((color (hydra--head-color head body)))
+    (format
+     (if (eq color 'blue)
+         "[%s]"
+       "{%s}") (car head))))
+
 (defun hydra-fontify-head (head body)
   "Produce a pretty string from HEAD and BODY."
   (funcall (or hydra-fontify-head-function 'hydra-fontify-head-default)

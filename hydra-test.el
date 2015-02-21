@@ -673,6 +673,32 @@ The body can be accessed via `hydra-vi/body'."
        ("l" text-scale-decrease "out")
        ("q" nil "quit"))))))
 
+(ert-deftest hydra-format ()
+  (should (equal
+           (let ((hydra-fontify-head-function
+                  'hydra-fontify-head-greyscale))
+             (hydra--format
+              'hydra-toggle
+              nil
+              "
+_a_ abbrev-mode:       %`abbrev-mode
+_d_ debug-on-error:    %`debug-on-error
+_f_ auto-fill-mode:    %`auto-fill-function
+" '(("a" abbrev-mode nil)
+    ("d" toggle-debug-on-error nil)
+    ("f" auto-fill-mode nil)
+    ("g" golden-ratio-mode nil)
+    ("t" toggle-truncate-lines nil)
+    ("w" whitespace-mode nil)
+    ("q" nil "quit"))))
+           '(concat (format "
+% 3s abbrev-mode:       %S
+% 3s debug-on-error:    %S
+% 3s auto-fill-mode:    %S
+" "{a}" abbrev-mode "{d}" debug-on-error "{f}" auto-fill-function) "[[q]]: quit"))))
+
+
+
 (provide 'hydra-test)
 
 ;;; hydra-test.el ends here
