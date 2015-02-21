@@ -415,7 +415,7 @@ The expressions can be auto-expanded according to NAME."
                     (substring docstring
                                (+ (match-end 2) offset -2)))))))
     (if (eq ?\n (aref docstring 0))
-        `(concat (format ,docstring ,@(nreverse varlist))
+        `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
                  ,rest)
       `(format ,(concat docstring ": " rest ".")))))
 

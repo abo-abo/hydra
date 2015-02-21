@@ -218,6 +218,22 @@ _~_: modified                                                                   
   ("q" quit-window "quit" :color blue))
 ;; Recommended binding:
 ;; (define-key Buffer-menu-mode-map "." 'hydra-buffer-menu/body)
+;;** Example 9: s-expressions in the docstring
+;; You can inline s-expresssions into the docstring like this:
+(when (bound-and-true-p hydra-examples-verbatim)
+  (eval-after-load 'dired
+    (defhydra hydra-marked-items (dired-mode-map "")
+      "
+Number of marked items: %(length (dired-get-marked-files))
+"
+      ("m" dired-mark "mark"))))
+
+;; This results in the following dynamic docstring:
+;;
+;;     (format "Number of marked items: %S\n"
+;;             (length (dired-get-marked-files)))
+;;
+;; You can use `format'-style width specs, e.g. % 10(length nil).
 
 ;;* Windmove helpers
 (require 'windmove)

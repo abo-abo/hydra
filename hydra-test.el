@@ -691,8 +691,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
     ("t" toggle-truncate-lines nil)
     ("w" whitespace-mode nil)
     ("q" nil "quit"))))
-           '(concat (format "
-% 3s abbrev-mode:       %S
+           '(concat (format "% 3s abbrev-mode:       %S
 % 3s debug-on-error:    %S
 % 3s auto-fill-mode:    %S
 " "{a}" abbrev-mode "{d}" debug-on-error "{f}" auto-fill-function) "[[q]]: quit"))))
@@ -705,7 +704,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
               'hydra-toggle nil
               "\n_n_ narrow-or-widen-dwim %(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
               '(("n" narrow-to-region nil) ("q" nil "cancel"))))
-           '(concat (format "\n% 3s narrow-or-widen-dwim %Sasdf\n"
+           '(concat (format "% 3s narrow-or-widen-dwim %Sasdf\n"
                      "{n}"
                      (progn
                        (message "checking")
