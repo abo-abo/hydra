@@ -121,6 +121,10 @@ It's possible to set this to nil.")
   "When non-nil, hydra will issue some non-essential style warnings."
   :type 'boolean)
 
+(defcustom hydra-key-format-spec "% 3s"
+  "Default `format'-style specifier for _a_  syntax in docstrings.
+When nil, you can specify your own at each location like this: _ 5a_.")
+
 (defface hydra-face-red
     '((t (:foreground "#FF0000" :bold t)))
   "Red Hydra heads will persist indefinitely."
@@ -448,15 +452,20 @@ The expressions can be auto-expanded according to NAME."
         offset)
     (while (setq start
                  (string-match
-                  "\\(?:%\\( ?-?[0-9]*\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\([a-z-~A-Z]+\\)_\\)"
+                  "\\(?:%\\( ?-?[0-9]*\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\( ?-?[0-9]*\\)\\([a-z-~A-Z0-9/]+\\)_\\)"
                   docstring start))
       (cond ((eq ?_ (aref (match-string 0 docstring) 0))
-             (let* ((key (match-string 3 docstring))
+             (let* ((key (match-string 4 docstring))
                     (head (assoc key heads)))
                (if head
                    (progn
                      (push (hydra-fontify-head head body) varlist)
-                     (setq docstring (replace-match "% 3s" nil nil docstring)))
+                     (setq docstring
+                           (replace-match
+                            (or
+                             hydra-key-format-spec
+                             (concat "%" (match-string 3 docstring) "s"))
+                            nil nil docstring)))
                  (error "Unrecognized key: _%s_" key))))
 
             ((eq ?` (aref (match-string 2 docstring) 0))
