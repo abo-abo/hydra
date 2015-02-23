@@ -580,6 +580,23 @@ NAME, BODY and HEADS are parameters to `defhydra'."
          "An %S Hydra must have at least one blue head in order to exit"
          body-color)))))
 
+(defun hydra--head-name (h body-name)
+  "Return the symbol for head H of body BODY-NAME."
+  (intern (format "%S/%s" body-name
+                  (if (symbolp (cadr h))
+                      (cadr h)
+                    (concat "lambda-" (car h))))))
+
+(defun hydra--delete-duplicates (heads)
+  "Delete heads calling the same thing from HEADS."
+  (let (lst res)
+    (mapc (lambda (h)
+            (unless (member (cadr h) lst)
+              (push h res))
+            (push (cadr h) lst))
+          heads)
+    (nreverse res)))
+
 ;;* Macros
 ;;** defhydra
 ;;;###autoload
@@ -640,14 +657,6 @@ result of `defhydra'."
   (when (keywordp (car body))
     (setq body (cons nil (cons nil body))))
   (let* ((keymap (copy-keymap hydra-base-map))
-         (names (mapcar
-                 (lambda (x)
-                   (define-key keymap (kbd (car x))
-                     (intern (format "%S/%s" name
-                                     (if (symbolp (cadr x))
-                                         (cadr x)
-                                       (concat "lambda-" (car x)))))))
-                 heads))
          (body-name (intern (format "%S/body" name)))
          (hint-name (intern (format "%S/hint" name)))
          (body-key (unless (hydra--callablep body)
@@ -659,6 +668,11 @@ result of `defhydra'."
          (method (or (plist-get body :bind)
                      (car body)))
          (doc (hydra--doc body-key body-name heads)))
+    (mapc
+     (lambda (x)
+       (define-key keymap (kbd (car x))
+         (hydra--head-name x name)))
+     heads)
     (when (and body-pre (symbolp body-pre))
       (setq body-pre `(funcall #',body-pre)))
     (when (and body-body-pre (symbolp body-body-pre))
@@ -667,16 +681,16 @@ result of `defhydra'."
       (setq body-post `(funcall #',body-post)))
     (hydra--handle-nonhead keymap name body heads)
     `(progn
-       ,@(cl-mapcar
-          (lambda (head name)
+       ,@(mapcar
+          (lambda (head)
             (hydra--make-defun
-             name (hydra--make-callable
-                   (cadr head)) (hydra--head-color head body)
+             (hydra--head-name head name)
+             (hydra--make-callable
+              (cadr head)) (hydra--head-color head body)
              (format "%s\n\nCall the head: `%S'." doc (cadr head))
              hint-name keymap
              body-color body-pre body-post))
-          (cl-delete-duplicates heads)
-          (cl-delete-duplicates names))
+          (hydra--delete-duplicates heads))
        ,@(unless (or (null body-key)
                      (null method)
                      (hydra--callablep method))
@@ -684,32 +698,33 @@ result of `defhydra'."
                      (define-key ,method (kbd ,body-key) nil))))
        ,@(delq nil
                (cl-mapcar
-                (lambda (head name)
-                  (when (or body-key method)
-                    (let ((bind (hydra--head-property head :bind 'default))
-                          (final-key
-                           (if body-key
-                               (vconcat (kbd body-key) (kbd (car head)))
-                             (kbd (car head)))))
-                      (cond ((null bind) nil)
+                (lambda (head)
+                  (let ((name (hydra--head-name head name)))
+                    (when (or body-key method)
+                      (let ((bind (hydra--head-property head :bind 'default))
+                            (final-key
+                             (if body-key
+                                 (vconcat (kbd body-key) (kbd (car head)))
+                               (kbd (car head)))))
+                        (cond ((null bind) nil)
 
-                            ((eq bind 'default)
-                             (list
-                              (if (hydra--callablep method)
-                                  'funcall
-                                'define-key)
-                              method
-                              final-key
-                              (list 'function name)))
+                              ((eq bind 'default)
+                               (list
+                                (if (hydra--callablep method)
+                                    'funcall
+                                  'define-key)
+                                method
+                                final-key
+                                (list 'function name)))
 
-                            ((hydra--callablep bind)
-                             `(funcall (function ,bind)
-                                       ,final-key
-                                       (function ,name)))
+                              ((hydra--callablep bind)
+                               `(funcall (function ,bind)
+                                         ,final-key
+                                         (function ,name)))
 
-                            (t
-                             (error "Invalid :bind property %S" head))))))
-                heads names))
+                              (t
+                               (error "Invalid :bind property %S" head)))))))
+                heads))
        (defun ,hint-name ()
          ,(hydra--message name body docstring heads))
        ,(hydra--make-defun body-name nil nil doc hint-name keymap
