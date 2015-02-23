@@ -493,41 +493,58 @@ HEADS is a list of heads."
     heads ",\n")
    (format "The body can be accessed via `%S'." body-name)))
 
-(defun hydra--make-defun (name cmd color
-                          doc hint keymap
-                          body-color body-pre body-post &optional other-post)
-  "Make a defun wrapper, using NAME, CMD, COLOR, DOC, HINT, and KEYMAP.
-BODY-COLOR, BODY-PRE, BODY-POST, and OTHER-POST are used as well."
-  `(defun ,name ()
-     ,doc
-     (interactive)
-     ,@(when body-pre (list body-pre))
-     (hydra-disable)
-     ,@(when (memq color '(blue teal)) '((hydra-cleanup)))
-     (catch 'hydra-disable
-       ,@(delq nil
-               (if (memq color '(blue teal))
-                   `(,(when cmd `(call-interactively #',cmd))
-                      ,body-post)
-                 `(,(when cmd
-                          `(condition-case err
-                               (prog1 t
-                                 (call-interactively #',cmd))
-                             ((quit error)
-                              (message "%S" err)
-                              (unless hydra-lv
-                                (sit-for 0.8))
-                              nil)))
-                    (when hydra-is-helpful
-                      (,hint))
-                    (setq hydra-last
-                          (hydra-set-transient-map
-                           (setq hydra-curr-map ',keymap)
-                           t
-                           ,(if (and (not (memq body-color '(amaranth pink teal))) body-post)
-                                `(lambda () (hydra-cleanup) ,body-post)
-                                `(lambda () (hydra-cleanup)))))
-                    ,other-post))))))
+(defun hydra--make-defun (name body doc head
+                          keymap body-pre body-post &optional other-post)
+  "Make a defun wrapper, using NAME, BODY, DOC, HEAD, and KEYMAP.
+NAME and BODY are the arguments to `defhydra'.
+DOC was generated with `hydra--doc'.
+HEAD is one of the HEADS passed to `defhydra'.
+BODY-PRE and BODY-POST are pre-processed in `defhydra'.
+OTHER-POST is an optional extension to the :post key of BODY."
+  (let ((name (hydra--head-name head name))
+        (cmd (when (car head)
+               (hydra--make-callable
+                (cadr head))))
+        (color (when (car head)
+                 (hydra--head-color head body)))
+        (doc (if (car head)
+                 (format "%s\n\nCall the head: `%S'." doc (cadr head))
+               doc))
+        (hint (intern (format "%S/hint" name)))
+        (body-color (hydra--body-color body)))
+    `(defun ,name ()
+       ,doc
+       (interactive)
+       ,@(when body-pre (list body-pre))
+       (hydra-disable)
+       ,@(when (memq color '(blue teal)) '((hydra-cleanup)))
+       (catch 'hydra-disable
+         ,@(delq nil
+                 (if (memq color '(blue teal))
+                     `(,(when cmd `(call-interactively #',cmd))
+                        ,body-post)
+                   `(,(when cmd
+                            `(condition-case err
+                                 (prog1 t
+                                   (call-interactively #',cmd))
+                               ((quit error)
+                                (message "%S" err)
+                                (unless hydra-lv
+                                  (sit-for 0.8))
+                                nil)))
+                      (when hydra-is-helpful
+                        (,hint))
+                      (setq hydra-last
+                            (hydra-set-transient-map
+                             (setq hydra-curr-map ',keymap)
+                             t
+                             ,(if (and
+                                   (not (memq body-color
+                                              '(amaranth pink teal)))
+                                   body-post)
+                                  `(lambda () (hydra-cleanup) ,body-post)
+                                  `(lambda () (hydra-cleanup)))))
+                      ,other-post)))))))
 
 (defun hydra-pink-fallback ()
   "On intercepting a non-head, try to run it."
@@ -658,7 +675,6 @@ result of `defhydra'."
     (setq body (cons nil (cons nil body))))
   (let* ((keymap (copy-keymap hydra-base-map))
          (body-name (intern (format "%S/body" name)))
-         (hint-name (intern (format "%S/hint" name)))
          (body-key (unless (hydra--callablep body)
                      (cadr body)))
          (body-color (hydra--body-color body))
@@ -683,13 +699,8 @@ result of `defhydra'."
     `(progn
        ,@(mapcar
           (lambda (head)
-            (hydra--make-defun
-             (hydra--head-name head name)
-             (hydra--make-callable
-              (cadr head)) (hydra--head-color head body)
-             (format "%s\n\nCall the head: `%S'." doc (cadr head))
-             hint-name keymap
-             body-color body-pre body-post))
+            (hydra--make-defun name body doc head keymap
+                               body-pre body-post))
           (hydra--delete-duplicates heads))
        ,@(unless (or (null body-key)
                      (null method)
@@ -725,11 +736,13 @@ result of `defhydra'."
                               (t
                                (error "Invalid :bind property %S" head)))))))
                 heads))
-       (defun ,hint-name ()
+       (defun ,(intern (format "%S/hint" name)) ()
          ,(hydra--message name body docstring heads))
-       ,(hydra--make-defun body-name nil nil doc hint-name keymap
-                           body-color (or body-body-pre body-pre) body-post
-                           '(setq prefix-arg current-prefix-arg)))))
+       ,(hydra--make-defun
+         name body doc '(nil body)
+         keymap
+         (or body-body-pre body-pre) body-post
+         '(setq prefix-arg current-prefix-arg)))))
 
 (defmacro defhydradio (name body &rest heads)
   "Create radios with prefix NAME.
