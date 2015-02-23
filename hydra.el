@@ -117,6 +117,10 @@ It's possible to set this to nil.")
   "When non-nil, `lv-message' (not `message') will be used to display hints."
   :type 'boolean)
 
+(defcustom hydra-verbose nil
+  "When non-nil, hydra will issue some non-essential style warnings."
+  :type 'boolean)
+
 (defface hydra-face-red
     '((t (:foreground "#FF0000" :bold t)))
   "Red Hydra heads will persist indefinitely."
@@ -284,9 +288,10 @@ Return DEFAULT if PROP is not in H."
     (let ((nonheads (plist-get (cddr body) :nonheads))
           (body-exit (plist-get (cddr body) :exit)))
       (cond ((null (cadr h))
-             (if head-color
-                 (error "Extra properties for head with nil body: %S" h)
-               'blue))
+             (when head-color
+               (hydra--complain
+                "Doubly specified blue head - nil cmd is already blue: %S" h))
+             'blue)
             ((null head-color)
              (hydra--body-color body))
             ((null nonheads)
@@ -476,6 +481,11 @@ NAME, BODY, DOCSTRING, and HEADS are parameters of `defhydra'."
     `(if hydra-lv
          (lv-message ,format-expr)
        (message ,format-expr))))
+
+(defun hydra--complain (format-string &rest args)
+  "Forward to (`message' FORMAT-STRING ARGS) unless `hydra-verbose' is nil."
+  (when hydra-verbose
+    (apply #'warn format-string args)))
 
 (defun hydra--doc (body-key body-name heads)
   "Generate a part of Hydra docstring.
