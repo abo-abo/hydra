@@ -605,31 +605,30 @@ The body can be accessed via `hydra-vi/body'."
        ("q" nil "cancel"))))))
 
 (ert-deftest hydra-amaranth-compat ()
-  (unless (version< emacs-version "24.4")
-    (should
-     (equal
-      (macroexpand
-       '(defhydra hydra-vi
-         (:pre
-          (set-cursor-color "#e52b50")
-          :post
-          (set-cursor-color "#ffffff")
-          :color amaranth)
-         "vi"
-         ("j" next-line)
-         ("k" previous-line)
-         ("q" nil "quit")))
-      (macroexpand
-       '(defhydra hydra-vi
-         (:pre
-          (set-cursor-color "#e52b50")
-          :post
-          (set-cursor-color "#ffffff")
-          :nonheads warn)
-         "vi"
-         ("j" next-line)
-         ("k" previous-line)
-         ("q" nil "quit")))))))
+  (should
+   (equal
+    (macroexpand
+     '(defhydra hydra-vi
+       (:pre
+        (set-cursor-color "#e52b50")
+        :post
+        (set-cursor-color "#ffffff")
+        :color amaranth)
+       "vi"
+       ("j" next-line)
+       ("k" previous-line)
+       ("q" nil "quit")))
+    (macroexpand
+     '(defhydra hydra-vi
+       (:pre
+        (set-cursor-color "#e52b50")
+        :post
+        (set-cursor-color "#ffffff")
+        :foreign-keys warn)
+       "vi"
+       ("j" next-line)
+       ("k" previous-line)
+       ("q" nil "quit"))))))
 
 (ert-deftest hydra-pink-compat ()
   (should
@@ -643,7 +642,7 @@ The body can be accessed via `hydra-vi/body'."
        ("q" nil "quit")))
     (macroexpand
      '(defhydra hydra-zoom (global-map "<f2>"
-                            :nonheads run)
+                            :foreign-keys run)
        "zoom"
        ("g" text-scale-increase "in")
        ("l" text-scale-decrease "out")
@@ -661,7 +660,7 @@ The body can be accessed via `hydra-vi/body'."
        ("q" nil "quit")))
     (macroexpand
      '(defhydra hydra-zoom (global-map "<f2>"
-                            :nonheads warn
+                            :foreign-keys warn
                             :exit t)
        "zoom"
        ("g" text-scale-increase "in")
@@ -706,7 +705,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
                        (buffer-narrowed-p)))
              "[[q]]: cancel"))))
 
-(ert-deftest hydra-compat-colors ()
+(ert-deftest hydra-compat-colors-1 ()
   (should (equal (hydra--head-color
                   '("e" (message "Exiting now") "blue")
                   '(nil nil :color blue))
@@ -722,7 +721,73 @@ _f_ auto-fill-mode:    %`auto-fill-function
   (should (equal (hydra--head-color
                   '("c" (message "Continuing") "red" :exit nil)
                   '(nil nil :exit t))
-                 'red)))
+                 'red))
+  (equal (hydra--head-color
+          '("a" abbrev-mode nil)
+          '(nil nil :color teal))
+         'teal)
+  (equal (hydra--head-color
+          '("a" abbrev-mode :exit nil)
+          '(nil nil :color teal))
+         'amaranth)
+  )
+
+(ert-deftest hydra-compat-colors-2 ()
+  (equal
+   (macroexpand
+    '(defhydra hydra-test (:color amaranth)
+      ("a" fun-a)
+      ("b" fun-b :color blue)
+      ("c" fun-c :color blue)
+      ("d" fun-d :color blue)
+      ("e" fun-e :color blue)
+      ("f" fun-f :color blue)))
+   (macroexpand
+    '(defhydra hydra-test (:color teal)
+      ("a" fun-a :color red)
+      ("b" fun-b)
+      ("c" fun-c)
+      ("d" fun-d)
+      ("e" fun-e)
+      ("f" fun-f)))))
+
+(ert-deftest hydra-compat-colors-3 ()
+  (equal
+   (macroexpand
+    '(defhydra hydra-test ()
+      ("a" fun-a)
+      ("b" fun-b :color blue)
+      ("c" fun-c :color blue)
+      ("d" fun-d :color blue)
+      ("e" fun-e :color blue)
+      ("f" fun-f :color blue)))
+   (macroexpand
+    '(defhydra hydra-test (:color blue)
+      ("a" fun-a :color red)
+      ("b" fun-b)
+      ("c" fun-c)
+      ("d" fun-d)
+      ("e" fun-e)
+      ("f" fun-f)))))
+
+(ert-deftest hydra-compat-colors-4 ()
+  (equal
+   (macroexpand
+    '(defhydra hydra-test ()
+      ("a" fun-a)
+      ("b" fun-b :exit t)
+      ("c" fun-c :exit t)
+      ("d" fun-d :exit t)
+      ("e" fun-e :exit t)
+      ("f" fun-f :exit t)))
+   (macroexpand
+    '(defhydra hydra-test (:exit t)
+      ("a" fun-a :exit nil)
+      ("b" fun-b)
+      ("c" fun-c)
+      ("d" fun-d)
+      ("e" fun-e)
+      ("f" fun-f)))))
 
 (provide 'hydra-test)
 

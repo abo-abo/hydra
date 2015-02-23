@@ -297,13 +297,13 @@ the hint. You can still have the old behavior by setting `hydra-lv` to `nil`.
 By popular demand, an alternative syntax has been implemented that translates to colors without
 using them in the syntax. `:exit` can be used both in body (heads will inherit) and in heads
 (possible to override body). `:exit` is nil by default, corresponding to `red` head; you don't need
-to set it explicitly to nil.  `:nonheads` can be used only in body and can be either nil (default),
+to set it explicitly to nil.  `:foreign-keys` can be used only in body and can be either nil (default),
 `warn` or `run`.
 
-    | color    | toggle                 |
-    |----------+------------------------|
-    | red      |                        |
-    | blue     | :exit t                |
-    | amaranth | :nonheads warn         |
-    | teal     | :nonheads warn :exit t |
-    | pink     | :nonheads run          |
+    | color    | toggle                     |
+    |----------+----------------------------|
+    | red      |                            |
+    | blue     | :exit t                    |
+    | amaranth | :foreign-keys warn         |
+    | teal     | :foreign-keys warn :exit t |
+    | pink     | :foreign-keys run          |

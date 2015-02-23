@@ -5,7 +5,7 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.10.0
+;; Version: 0.11.0
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -267,6 +267,7 @@ Return DEFAULT if PROP is not in H."
   "Return the color of a Hydra head H with BODY."
   (let* ((exit (hydra--head-property h :exit 'default))
          (color (hydra--head-property h :color))
+         (foreign-keys (hydra--body-foreign-keys body))
          (head-color
           (cond ((eq exit 'default)
                  (cl-case color
@@ -278,15 +279,17 @@ Return DEFAULT if PROP is not in H."
                 ((null exit)
                  (if color
                      (error "Don't mix :color and :exit - they are aliases: %S" h)
-                   'red))
+                   (cl-case foreign-keys
+                     (run 'pink)
+                     (warn 'amaranth)
+                     (t 'red))))
                 ((eq exit t)
                  (if color
                      (error "Don't mix :color and :exit - they are aliases: %S" h)
                    'blue))
                 (t
                  (error "Unknown :exit %S" exit)))))
-    (let ((nonheads (plist-get (cddr body) :nonheads))
-          (body-exit (plist-get (cddr body) :exit)))
+    (let ((body-exit (plist-get (cddr body) :exit)))
       (cond ((null (cadr h))
              (when head-color
                (hydra--complain
@@ -294,28 +297,37 @@ Return DEFAULT if PROP is not in H."
              'blue)
             ((null head-color)
              (hydra--body-color body))
-            ((null nonheads)
+            ((null foreign-keys)
              head-color)
-            ((eq nonheads 'run)
+            ((eq foreign-keys 'run)
              (if (eq head-color 'red)
                  'pink
                'blue))
-            ((eq nonheads 'warn)
-             (if (eq head-color 'red)
+            ((eq foreign-keys 'warn)
+             (if (memq head-color '(red amaranth))
                  'amaranth
                'teal))
             (t
              (error "Unexpected %S %S" h body))))))
+
+(defun hydra--body-foreign-keys (body)
+  "Return what BODY does with a non-head binding."
+  (or
+   (plist-get (cddr body) :foreign-keys)
+   (let ((color (plist-get (cddr body) :color)))
+     (cl-case color
+       ((amaranth teal) 'warn)
+       (pink 'run)))))
 
 (defun hydra--body-color (body)
   "Return the color of BODY.
 BODY is the second argument to `defhydra'"
   (let ((color (plist-get (cddr body) :color))
         (exit (plist-get (cddr body) :exit))
-        (nonheads (plist-get (cddr body) :nonheads)))
-    (cond ((eq nonheads 'warn)
+        (foreign-keys (plist-get (cddr body) :foreign-keys)))
+    (cond ((eq foreign-keys 'warn)
            (if exit 'teal 'amaranth))
-          ((eq nonheads 'run) 'pink)
+          ((eq foreign-keys 'run) 'pink)
           (exit 'blue)
           (color color)
           (t 'red))))
@@ -585,17 +597,15 @@ NAME, BODY and HEADS are parameters to `defhydra'."
       (define-key keymap hydra-keyboard-quit #'hydra-keyboard-quit))
     (when (memq body-color '(amaranth pink teal))
       (if (cl-some `(lambda (h)
-                      (eq (hydra--head-color h body) 'blue))
+                      (memq (hydra--head-color h body) '(blue teal)))
                    heads)
           (progn
             (define-key keymap [t]
               `(lambda ()
                  (interactive)
                  ,(cond
-                   ((eq body-color 'amaranth)
+                   ((memq body-color '(amaranth teal))
                     '(message "An amaranth Hydra can only exit through a blue head"))
-                   ((eq body-color 'teal)
-                    '(message "A teal Hydra can only exit through a blue head"))
                    (t
                     '(hydra-pink-fallback)))
                  (hydra-set-transient-map hydra-curr-map t)
@@ -603,9 +613,10 @@ NAME, BODY and HEADS are parameters to `defhydra'."
                    (unless hydra-lv
                      (sit-for 0.8))
                    (,(intern (format "%S/hint" name)))))))
-        (error
-         "An %S Hydra must have at least one blue head in order to exit"
-         body-color)))))
+        (unless (eq body-color 'teal)
+          (error
+           "An %S Hydra must have at least one blue head in order to exit"
+           body-color))))))
 
 (defun hydra--head-name (h body-name)
   "Return the symbol for head H of body BODY-NAME."
