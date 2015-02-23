@@ -711,6 +711,24 @@ _f_ auto-fill-mode:    %`auto-fill-function
                        (buffer-narrowed-p)))
              "[[q]]: cancel"))))
 
+(ert-deftest hydra-compat-colors ()
+  (should (equal (hydra--head-color
+                  '("e" (message "Exiting now") "blue")
+                  '(nil nil :color blue))
+                 'blue))
+  (should (equal (hydra--head-color
+                  '("c" (message "Continuing") "red" :color red)
+                  '(nil nil :color blue))
+                 'red))
+  (should (equal (hydra--head-color
+                  '("e" (message "Exiting now") "blue")
+                  '(nil nil :exit t))
+                 'blue))
+  (should (equal (hydra--head-color
+                  '("c" (message "Continuing") "red" :exit nil)
+                  '(nil nil :exit t))
+                 'red)))
+
 (provide 'hydra-test)
 
 ;;; hydra-test.el ends here

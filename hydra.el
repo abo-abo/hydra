@@ -239,26 +239,68 @@ Return DEFAULT if PROP is not in H."
         (plist-get plist prop)
       default)))
 
+(defun hydra--aggregate-color (head-color body-color)
+  "Return the resulting head color for HEAD-COLOR and BODY-COLOR."
+  (cond ((eq head-color 'red)
+         (cl-case body-color
+           (red 'red)
+           (blue 'red)
+           (amaranth 'amaranth)
+           (pink 'pink)
+           (cyan 'amaranth)))
+        ((eq head-color 'blue)
+         (cl-case body-color
+           (red 'blue)
+           (blue 'blue)
+           (amaranth 'teal)
+           (pink 'blue)
+           (cyan 'teal)))
+        (t
+         (error "Can't aggregate head %S to body %S"
+                head-color body-color))))
+
 (defun hydra--head-color (h body)
   "Return the color of a Hydra head H with BODY."
-  (let ((color (hydra--head-property h :color))
-        (exit (or (plist-get (cddr body) :exit)
-                  (hydra--head-property h :exit 'default)))
-        (nonheads (plist-get (cddr body) :nonheads)))
-    (cond ((null (cadr h))
-           'blue)
-          ((eq exit t)
-           'blue)
-          ((eq nonheads 'run)
-           'pink)
-          ((eq nonheads 'warn)
-           (if (eq exit t)
-               'teal
-             'amaranth))
-          ((null color)
-           (hydra--body-color body))
-          (t
-           color))))
+  (let* ((exit (hydra--head-property h :exit 'default))
+         (color (hydra--head-property h :color))
+         (head-color
+          (cond ((eq exit 'default)
+                 (cl-case color
+                   (blue 'blue)
+                   (red 'red)
+                   (t
+                    (unless (null color)
+                      (error "Use only :blue or :red for heads: %S" h)))))
+                ((null exit)
+                 (if color
+                     (error "Don't mix :color and :exit - they are aliases: %S" h)
+                   'red))
+                ((eq exit t)
+                 (if color
+                     (error "Don't mix :color and :exit - they are aliases: %S" h)
+                   'blue))
+                (t
+                 (error "Unknown :exit %S" exit)))))
+    (let ((nonheads (plist-get (cddr body) :nonheads))
+          (body-exit (plist-get (cddr body) :exit)))
+      (cond ((null (cadr h))
+             (if head-color
+                 (error "Extra properties for head with nil body: %S" h)
+               'blue))
+            ((null head-color)
+             (hydra--body-color body))
+            ((null nonheads)
+             head-color)
+            ((eq nonheads 'run)
+             (if (eq head-color 'red)
+                 'pink
+               'blue))
+            ((eq nonheads 'warn)
+             (if (eq head-color 'red)
+                 'amaranth
+               'teal))
+            (t
+             (error "Unexpected %S %S" h body))))))
 
 (defun hydra--body-color (body)
   "Return the color of BODY.
