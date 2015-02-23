@@ -332,6 +332,13 @@ BODY is the second argument to `defhydra'"
       (delete-window lv-wnd)
       (kill-buffer buf))))
 
+(defun hydra-keyboard-quit ()
+  "Quitting function similar to `keyboard-quit'."
+  (interactive)
+  (hydra-disable)
+  (hydra-cleanup)
+  nil)
+
 (defun hydra-disable ()
   "Disable the current Hydra."
   (cond
@@ -547,6 +554,8 @@ NAME, BODY and HEADS are parameters to `defhydra'."
         (body-post (plist-get (cddr body) :post)))
     (when (and body-post (symbolp body-post))
       (setq body-post `(funcall #',body-post)))
+    (when hydra-keyboard-quit
+      (define-key keymap hydra-keyboard-quit #'hydra-keyboard-quit))
     (when (memq body-color '(amaranth pink teal))
       (if (cl-some `(lambda (h)
                       (eq (hydra--head-color h body) 'blue))
@@ -569,14 +578,7 @@ NAME, BODY and HEADS are parameters to `defhydra'."
                    (,(intern (format "%S/hint" name)))))))
         (error
          "An %S Hydra must have at least one blue head in order to exit"
-         body-color))
-      (when hydra-keyboard-quit
-        (define-key keymap hydra-keyboard-quit
-          `(lambda ()
-             (interactive)
-             (hydra-disable)
-             (hydra-cleanup)
-             ,body-post))))))
+         body-color)))))
 
 ;;* Macros
 ;;** defhydra
@@ -673,7 +675,8 @@ result of `defhydra'."
              (format "%s\n\nCall the head: `%S'." doc (cadr head))
              hint-name keymap
              body-color body-pre body-post))
-          heads names)
+          (cl-delete-duplicates heads)
+          (cl-delete-duplicates names))
        ,@(unless (or (null body-key)
                      (null method)
                      (hydra--callablep method))

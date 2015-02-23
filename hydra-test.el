@@ -56,7 +56,8 @@ Call the head: `first-error'."
                (setq hydra-last
                      (hydra-set-transient-map
                       (setq hydra-curr-map
-                            (quote (keymap (107 . hydra-error/previous-error)
+                            (quote (keymap (7 . hydra-keyboard-quit)
+                                           (107 . hydra-error/previous-error)
                                            (106 . hydra-error/next-error)
                                            (104 . hydra-error/first-error)
                                            (kp-subtract . hydra--negative-argument)
@@ -103,7 +104,8 @@ Call the head: `next-error'."
                (setq hydra-last
                      (hydra-set-transient-map
                       (setq hydra-curr-map
-                            (quote (keymap (107 . hydra-error/previous-error)
+                            (quote (keymap (7 . hydra-keyboard-quit)
+                                           (107 . hydra-error/previous-error)
                                            (106 . hydra-error/next-error)
                                            (104 . hydra-error/first-error)
                                            (kp-subtract . hydra--negative-argument)
@@ -150,7 +152,8 @@ Call the head: `previous-error'."
                (setq hydra-last
                      (hydra-set-transient-map
                       (setq hydra-curr-map
-                            (quote (keymap (107 . hydra-error/previous-error)
+                            (quote (keymap (7 . hydra-keyboard-quit)
+                                           (107 . hydra-error/previous-error)
                                            (106 . hydra-error/next-error)
                                            (104 . hydra-error/first-error)
                                            (kp-subtract . hydra--negative-argument)
@@ -208,7 +211,8 @@ The body can be accessed via `hydra-error/body'."
                      (hydra-set-transient-map
                       (setq hydra-curr-map
                             (quote
-                             (keymap (107 . hydra-error/previous-error)
+                             (keymap (7 . hydra-keyboard-quit)
+                                     (107 . hydra-error/previous-error)
                                      (106 . hydra-error/next-error)
                                      (104 . hydra-error/first-error)
                                      (kp-subtract . hydra--negative-argument)
@@ -332,7 +336,8 @@ The body can be accessed via `hydra-toggle/body'."
                      (hydra-set-transient-map
                       (setq hydra-curr-map
                             (quote
-                             (keymap (113 . hydra-toggle/nil)
+                             (keymap (7 . hydra-keyboard-quit)
+                                     (113 . hydra-toggle/nil)
                                      (97 . hydra-toggle/abbrev-mode)
                                      (102 . hydra-toggle/auto-fill-mode)
                                      (116 . hydra-toggle/toggle-truncate-lines)
@@ -363,22 +368,21 @@ The body can be accessed via `hydra-toggle/body'."
                (setq prefix-arg current-prefix-arg)))))))
 
 (ert-deftest hydra-amaranth-vi ()
-  (unless (version< emacs-version "24.4")
-    (should
-     (equal
-      (macroexpand
-       '(defhydra hydra-vi
-         (:pre
-          (set-cursor-color "#e52b50")
-          :post
-          (set-cursor-color "#ffffff")
-          :color amaranth)
-         "vi"
-         ("j" next-line)
-         ("k" previous-line)
-         ("q" nil "quit")))
-      '(progn
-        (defun hydra-vi/next-line nil "Create a hydra with no body and the heads:
+  (should
+   (equal
+    (macroexpand
+     '(defhydra hydra-vi
+       (:pre
+        (set-cursor-color "#e52b50")
+        :post
+        (set-cursor-color "#ffffff")
+        :color amaranth)
+       "vi"
+       ("j" next-line)
+       ("k" previous-line)
+       ("q" nil "quit")))
+    '(progn
+      (defun hydra-vi/next-line nil "Create a hydra with no body and the heads:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
@@ -387,56 +391,53 @@ The body can be accessed via `hydra-toggle/body'."
 The body can be accessed via `hydra-vi/body'.
 
 Call the head: `next-line'."
-               (interactive)
-               (set-cursor-color "#e52b50")
-               (hydra-disable)
-               (catch (quote hydra-disable)
-                 (condition-case err (prog1 t (call-interactively (function next-line)))
-                   ((quit error) (message "%S" err)
-                    (unless hydra-lv (sit-for 0.8))
-                    nil))
-                 (when hydra-is-helpful (hydra-vi/hint))
-                 (setq hydra-last
-                       (hydra-set-transient-map
-                        (setq hydra-curr-map
-                              (quote
-                               (keymap (7 lambda nil (interactive)
-                                          (hydra-disable)
-                                          (hydra-cleanup)
-                                          (set-cursor-color "#ffffff"))
-                                       (t lambda nil (interactive)
-                                          (message "An amaranth Hydra can only exit through a blue head")
-                                          (hydra-set-transient-map hydra-curr-map t)
-                                          (when hydra-is-helpful (unless hydra-lv (sit-for 0.8))
-                                                (hydra-vi/hint)))
-                                       (113 . hydra-vi/nil)
-                                       (107 . hydra-vi/previous-line)
-                                       (106 . hydra-vi/next-line)
-                                       (kp-subtract . hydra--negative-argument)
-                                       (kp-9 . hydra--digit-argument)
-                                       (kp-8 . hydra--digit-argument)
-                                       (kp-7 . hydra--digit-argument)
-                                       (kp-6 . hydra--digit-argument)
-                                       (kp-5 . hydra--digit-argument)
-                                       (kp-4 . hydra--digit-argument)
-                                       (kp-3 . hydra--digit-argument)
-                                       (kp-2 . hydra--digit-argument)
-                                       (kp-1 . hydra--digit-argument)
-                                       (kp-0 . hydra--digit-argument)
-                                       (57 . hydra--digit-argument)
-                                       (56 . hydra--digit-argument)
-                                       (55 . hydra--digit-argument)
-                                       (54 . hydra--digit-argument)
-                                       (53 . hydra--digit-argument)
-                                       (52 . hydra--digit-argument)
-                                       (51 . hydra--digit-argument)
-                                       (50 . hydra--digit-argument)
-                                       (49 . hydra--digit-argument)
-                                       (48 . hydra--digit-argument)
-                                       (45 . hydra--negative-argument)
-                                       (21 . hydra--universal-argument))))
-                        t (lambda nil (hydra-cleanup))))))
-        (defun hydra-vi/previous-line nil "Create a hydra with no body and the heads:
+             (interactive)
+             (set-cursor-color "#e52b50")
+             (hydra-disable)
+             (catch (quote hydra-disable)
+               (condition-case err (prog1 t (call-interactively (function next-line)))
+                 ((quit error) (message "%S" err)
+                  (unless hydra-lv (sit-for 0.8))
+                  nil))
+               (when hydra-is-helpful (hydra-vi/hint))
+               (setq hydra-last
+                     (hydra-set-transient-map
+                      (setq hydra-curr-map
+                            (quote
+                             (keymap (t lambda nil (interactive)
+                                        (message "An amaranth Hydra can only exit through a blue head")
+                                        (hydra-set-transient-map hydra-curr-map t)
+                                        (when hydra-is-helpful (unless hydra-lv (sit-for 0.8))
+                                              (hydra-vi/hint)))
+                                     (7 . hydra-keyboard-quit)
+                                     (113 . hydra-vi/nil)
+                                     (107 . hydra-vi/previous-line)
+                                     (106 . hydra-vi/next-line)
+                                     (kp-subtract . hydra--negative-argument)
+                                     (kp-9 . hydra--digit-argument)
+                                     (kp-8 . hydra--digit-argument)
+                                     (kp-7 . hydra--digit-argument)
+                                     (kp-6 . hydra--digit-argument)
+                                     (kp-5 . hydra--digit-argument)
+                                     (kp-4 . hydra--digit-argument)
+                                     (kp-3 . hydra--digit-argument)
+                                     (kp-2 . hydra--digit-argument)
+                                     (kp-1 . hydra--digit-argument)
+                                     (kp-0 . hydra--digit-argument)
+                                     (57 . hydra--digit-argument)
+                                     (56 . hydra--digit-argument)
+                                     (55 . hydra--digit-argument)
+                                     (54 . hydra--digit-argument)
+                                     (53 . hydra--digit-argument)
+                                     (52 . hydra--digit-argument)
+                                     (51 . hydra--digit-argument)
+                                     (50 . hydra--digit-argument)
+                                     (49 . hydra--digit-argument)
+                                     (48 . hydra--digit-argument)
+                                     (45 . hydra--negative-argument)
+                                     (21 . hydra--universal-argument))))
+                      t (lambda nil (hydra-cleanup))))))
+      (defun hydra-vi/previous-line nil "Create a hydra with no body and the heads:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
@@ -445,56 +446,53 @@ Call the head: `next-line'."
 The body can be accessed via `hydra-vi/body'.
 
 Call the head: `previous-line'."
-               (interactive)
-               (set-cursor-color "#e52b50")
-               (hydra-disable)
-               (catch (quote hydra-disable)
-                 (condition-case err (prog1 t (call-interactively (function previous-line)))
-                   ((quit error) (message "%S" err)
-                    (unless hydra-lv (sit-for 0.8))
-                    nil))
-                 (when hydra-is-helpful (hydra-vi/hint))
-                 (setq hydra-last
-                       (hydra-set-transient-map
-                        (setq hydra-curr-map
-                              (quote
-                               (keymap (7 lambda nil (interactive)
-                                          (hydra-disable)
-                                          (hydra-cleanup)
-                                          (set-cursor-color "#ffffff"))
-                                       (t lambda nil (interactive)
-                                          (message "An amaranth Hydra can only exit through a blue head")
-                                          (hydra-set-transient-map hydra-curr-map t)
-                                          (when hydra-is-helpful (unless hydra-lv (sit-for 0.8))
-                                                (hydra-vi/hint)))
-                                       (113 . hydra-vi/nil)
-                                       (107 . hydra-vi/previous-line)
-                                       (106 . hydra-vi/next-line)
-                                       (kp-subtract . hydra--negative-argument)
-                                       (kp-9 . hydra--digit-argument)
-                                       (kp-8 . hydra--digit-argument)
-                                       (kp-7 . hydra--digit-argument)
-                                       (kp-6 . hydra--digit-argument)
-                                       (kp-5 . hydra--digit-argument)
-                                       (kp-4 . hydra--digit-argument)
-                                       (kp-3 . hydra--digit-argument)
-                                       (kp-2 . hydra--digit-argument)
-                                       (kp-1 . hydra--digit-argument)
-                                       (kp-0 . hydra--digit-argument)
-                                       (57 . hydra--digit-argument)
-                                       (56 . hydra--digit-argument)
-                                       (55 . hydra--digit-argument)
-                                       (54 . hydra--digit-argument)
-                                       (53 . hydra--digit-argument)
-                                       (52 . hydra--digit-argument)
-                                       (51 . hydra--digit-argument)
-                                       (50 . hydra--digit-argument)
-                                       (49 . hydra--digit-argument)
-                                       (48 . hydra--digit-argument)
-                                       (45 . hydra--negative-argument)
-                                       (21 . hydra--universal-argument))))
-                        t (lambda nil (hydra-cleanup))))))
-        (defun hydra-vi/nil nil "Create a hydra with no body and the heads:
+             (interactive)
+             (set-cursor-color "#e52b50")
+             (hydra-disable)
+             (catch (quote hydra-disable)
+               (condition-case err (prog1 t (call-interactively (function previous-line)))
+                 ((quit error) (message "%S" err)
+                  (unless hydra-lv (sit-for 0.8))
+                  nil))
+               (when hydra-is-helpful (hydra-vi/hint))
+               (setq hydra-last
+                     (hydra-set-transient-map
+                      (setq hydra-curr-map
+                            (quote
+                             (keymap (t lambda nil (interactive)
+                                        (message "An amaranth Hydra can only exit through a blue head")
+                                        (hydra-set-transient-map hydra-curr-map t)
+                                        (when hydra-is-helpful (unless hydra-lv (sit-for 0.8))
+                                              (hydra-vi/hint)))
+                                     (7 . hydra-keyboard-quit)
+                                     (113 . hydra-vi/nil)
+                                     (107 . hydra-vi/previous-line)
+                                     (106 . hydra-vi/next-line)
+                                     (kp-subtract . hydra--negative-argument)
+                                     (kp-9 . hydra--digit-argument)
+                                     (kp-8 . hydra--digit-argument)
+                                     (kp-7 . hydra--digit-argument)
+                                     (kp-6 . hydra--digit-argument)
+                                     (kp-5 . hydra--digit-argument)
+                                     (kp-4 . hydra--digit-argument)
+                                     (kp-3 . hydra--digit-argument)
+                                     (kp-2 . hydra--digit-argument)
+                                     (kp-1 . hydra--digit-argument)
+                                     (kp-0 . hydra--digit-argument)
+                                     (57 . hydra--digit-argument)
+                                     (56 . hydra--digit-argument)
+                                     (55 . hydra--digit-argument)
+                                     (54 . hydra--digit-argument)
+                                     (53 . hydra--digit-argument)
+                                     (52 . hydra--digit-argument)
+                                     (51 . hydra--digit-argument)
+                                     (50 . hydra--digit-argument)
+                                     (49 . hydra--digit-argument)
+                                     (48 . hydra--digit-argument)
+                                     (45 . hydra--negative-argument)
+                                     (21 . hydra--universal-argument))))
+                      t (lambda nil (hydra-cleanup))))))
+      (defun hydra-vi/nil nil "Create a hydra with no body and the heads:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
@@ -503,72 +501,69 @@ Call the head: `previous-line'."
 The body can be accessed via `hydra-vi/body'.
 
 Call the head: `nil'."
-               (interactive)
-               (set-cursor-color "#e52b50")
-               (hydra-disable)
-               (hydra-cleanup)
-               (catch (quote hydra-disable)
-                 (set-cursor-color "#ffffff")))
-        (defun hydra-vi/hint nil
-          (if hydra-lv (lv-message (format #("vi: j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
-                                             7 8 (face hydra-face-amaranth)
-                                             11 12 (face hydra-face-blue))))
-            (message (format #("vi: j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
-                               7 8 (face hydra-face-amaranth)
-                               11 12 (face hydra-face-blue))))))
-        (defun hydra-vi/body nil "Create a hydra with no body and the heads:
+             (interactive)
+             (set-cursor-color "#e52b50")
+             (hydra-disable)
+             (hydra-cleanup)
+             (catch (quote hydra-disable)
+               (set-cursor-color "#ffffff")))
+      (defun hydra-vi/hint nil
+        (if hydra-lv (lv-message (format #("vi: j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
+                                           7 8 (face hydra-face-amaranth)
+                                           11 12 (face hydra-face-blue))))
+          (message (format #("vi: j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
+                             7 8 (face hydra-face-amaranth)
+                             11 12 (face hydra-face-blue))))))
+      (defun hydra-vi/body nil "Create a hydra with no body and the heads:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
 \"q\":    `nil'
 
 The body can be accessed via `hydra-vi/body'."
-               (interactive)
-               (set-cursor-color "#e52b50")
-               (hydra-disable)
-               (catch (quote hydra-disable)
-                 (when hydra-is-helpful (hydra-vi/hint))
-                 (setq hydra-last
-                       (hydra-set-transient-map
-                        (setq hydra-curr-map
-                              (quote
-                               (keymap (7 lambda nil (interactive)
-                                          (hydra-disable)
-                                          (hydra-cleanup)
-                                          (set-cursor-color "#ffffff"))
-                                       (t lambda nil (interactive)
-                                          (message "An amaranth Hydra can only exit through a blue head")
-                                          (hydra-set-transient-map hydra-curr-map t)
-                                          (when hydra-is-helpful (unless hydra-lv (sit-for 0.8))
-                                                (hydra-vi/hint)))
-                                       (113 . hydra-vi/nil)
-                                       (107 . hydra-vi/previous-line)
-                                       (106 . hydra-vi/next-line)
-                                       (kp-subtract . hydra--negative-argument)
-                                       (kp-9 . hydra--digit-argument)
-                                       (kp-8 . hydra--digit-argument)
-                                       (kp-7 . hydra--digit-argument)
-                                       (kp-6 . hydra--digit-argument)
-                                       (kp-5 . hydra--digit-argument)
-                                       (kp-4 . hydra--digit-argument)
-                                       (kp-3 . hydra--digit-argument)
-                                       (kp-2 . hydra--digit-argument)
-                                       (kp-1 . hydra--digit-argument)
-                                       (kp-0 . hydra--digit-argument)
-                                       (57 . hydra--digit-argument)
-                                       (56 . hydra--digit-argument)
-                                       (55 . hydra--digit-argument)
-                                       (54 . hydra--digit-argument)
-                                       (53 . hydra--digit-argument)
-                                       (52 . hydra--digit-argument)
-                                       (51 . hydra--digit-argument)
-                                       (50 . hydra--digit-argument)
-                                       (49 . hydra--digit-argument)
-                                       (48 . hydra--digit-argument)
-                                       (45 . hydra--negative-argument)
-                                       (21 . hydra--universal-argument))))
-                        t (lambda nil (hydra-cleanup))))
-                 (setq prefix-arg current-prefix-arg))))))))
+             (interactive)
+             (set-cursor-color "#e52b50")
+             (hydra-disable)
+             (catch (quote hydra-disable)
+               (when hydra-is-helpful (hydra-vi/hint))
+               (setq hydra-last
+                     (hydra-set-transient-map
+                      (setq hydra-curr-map
+                            (quote
+                             (keymap (t lambda nil (interactive)
+                                        (message "An amaranth Hydra can only exit through a blue head")
+                                        (hydra-set-transient-map hydra-curr-map t)
+                                        (when hydra-is-helpful (unless hydra-lv (sit-for 0.8))
+                                              (hydra-vi/hint)))
+                                     (7 . hydra-keyboard-quit)
+                                     (113 . hydra-vi/nil)
+                                     (107 . hydra-vi/previous-line)
+                                     (106 . hydra-vi/next-line)
+                                     (kp-subtract . hydra--negative-argument)
+                                     (kp-9 . hydra--digit-argument)
+                                     (kp-8 . hydra--digit-argument)
+                                     (kp-7 . hydra--digit-argument)
+                                     (kp-6 . hydra--digit-argument)
+                                     (kp-5 . hydra--digit-argument)
+                                     (kp-4 . hydra--digit-argument)
+                                     (kp-3 . hydra--digit-argument)
+                                     (kp-2 . hydra--digit-argument)
+                                     (kp-1 . hydra--digit-argument)
+                                     (kp-0 . hydra--digit-argument)
+                                     (57 . hydra--digit-argument)
+                                     (56 . hydra--digit-argument)
+                                     (55 . hydra--digit-argument)
+                                     (54 . hydra--digit-argument)
+                                     (53 . hydra--digit-argument)
+                                     (52 . hydra--digit-argument)
+                                     (51 . hydra--digit-argument)
+                                     (50 . hydra--digit-argument)
+                                     (49 . hydra--digit-argument)
+                                     (48 . hydra--digit-argument)
+                                     (45 . hydra--negative-argument)
+                                     (21 . hydra--universal-argument))))
+                      t (lambda nil (hydra-cleanup))))
+               (setq prefix-arg current-prefix-arg)))))))
 
 (ert-deftest defhydradio ()
   (should (equal
