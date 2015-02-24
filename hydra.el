@@ -378,6 +378,12 @@ BODY is the second argument to `defhydra'"
     (t
      (setq overriding-terminal-local-map nil))))
 
+(defun hydra-exit ()
+  "Exit the current Hydra and clean up."
+  (interactive)
+  (hydra-disable)
+  (hydra-cleanup))
+
 (defun hydra--unalias-var (str prefix)
   "Return the symbol named STR if it's bound as a variable.
 Otherwise, add PREFIX to the symbol name."
@@ -634,15 +640,17 @@ NAME, BODY and HEADS are parameters to `defhydra'."
 In duplicate HEADS, :cmd-name is modified to whatever they duplicate."
   (let (res ali entry)
     (dolist (h heads)
-      (if (setq entry (assoc (cons (cadr h)
-                                   (hydra--head-color h '(nil nil)))
-                             ali))
-          (setf (cl-cdddr h) (plist-put (cl-cdddr h) :cmd-name (cdr entry)))
-        (push (cons (cons (cadr h)
-                          (hydra--head-color h '(nil nil)))
-                    (plist-get (cl-cdddr h) :cmd-name))
-              ali)
-        (push h res)))
+      (if (null (cadr h))
+          (setf (cl-cdddr h) (plist-put (cl-cdddr h) :cmd-name 'hydra-exit))
+        (if (setq entry (assoc (cons (cadr h)
+                                     (hydra--head-color h '(nil nil)))
+                               ali))
+            (setf (cl-cdddr h) (plist-put (cl-cdddr h) :cmd-name (cdr entry)))
+          (push (cons (cons (cadr h)
+                            (hydra--head-color h '(nil nil)))
+                      (plist-get (cl-cdddr h) :cmd-name))
+                ali)
+          (push h res))))
     (nreverse res)))
 
 ;;* Macros
@@ -755,31 +763,32 @@ result of `defhydra'."
        ,@(delq nil
                (cl-mapcar
                 (lambda (head)
-                  (let ((name (hydra--head-name head name)))
-                    (when (or body-key method)
-                      (let ((bind (hydra--head-property head :bind 'default))
-                            (final-key
-                             (if body-key
-                                 (vconcat (kbd body-key) (kbd (car head)))
-                               (kbd (car head)))))
-                        (cond ((null bind) nil)
+                  (let ((name (hydra--head-property head :cmd-name)))
+                    (unless (eq name 'hydra-exit)
+                      (when (or body-key method)
+                        (let ((bind (hydra--head-property head :bind 'default))
+                              (final-key
+                               (if body-key
+                                   (vconcat (kbd body-key) (kbd (car head)))
+                                 (kbd (car head)))))
+                          (cond ((null bind) nil)
 
-                              ((eq bind 'default)
-                               (list
-                                (if (hydra--callablep method)
-                                    'funcall
-                                  'define-key)
-                                method
-                                final-key
-                                (list 'function name)))
+                                ((eq bind 'default)
+                                 (list
+                                  (if (hydra--callablep method)
+                                      'funcall
+                                    'define-key)
+                                  method
+                                  final-key
+                                  (list 'function name)))
 
-                              ((hydra--callablep bind)
-                               `(funcall (function ,bind)
-                                         ,final-key
-                                         (function ,name)))
+                                ((hydra--callablep bind)
+                                 `(funcall (function ,bind)
+                                           ,final-key
+                                           (function ,name)))
 
-                              (t
-                               (error "Invalid :bind property %S" head)))))))
+                                (t
+                                 (error "Invalid :bind property %S" head))))))))
                 heads))
        (defun ,(intern (format "%S/hint" name)) ()
          ,(hydra--message name body docstring heads))
