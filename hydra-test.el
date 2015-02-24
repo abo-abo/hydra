@@ -297,6 +297,20 @@ Call the head: `abbrev-mode'."
              (hydra-cleanup)
              (catch (quote hydra-disable)
                (call-interactively (function abbrev-mode))))
+      (defun hydra-toggle/nil nil "Create a hydra with no body and the heads:
+
+\"t\":    `toggle-truncate-lines',
+\"f\":    `auto-fill-mode',
+\"a\":    `abbrev-mode',
+\"q\":    `nil'
+
+The body can be accessed via `hydra-toggle/body'.
+
+Call the head: `nil'."
+             (interactive)
+             (hydra-disable)
+             (hydra-cleanup)
+             (catch (quote hydra-disable)))
       (defun hydra-toggle/hint nil
         (if hydra-lv (lv-message (format #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel." 9 10 (face hydra-face-blue)
                                            24 25 (face hydra-face-blue)
@@ -323,7 +337,7 @@ The body can be accessed via `hydra-toggle/body'."
                       (setq hydra-curr-map
                             (quote
                              (keymap (7 . hydra-keyboard-quit)
-                                     (113 . hydra-exit)
+                                     (113 . hydra-toggle/nil)
                                      (97 . hydra-toggle/abbrev-mode)
                                      (102 . hydra-toggle/auto-fill-mode)
                                      (116 . hydra-toggle/toggle-truncate-lines)
@@ -396,7 +410,7 @@ Call the head: `next-line'."
                                         (when hydra-is-helpful (unless hydra-lv (sit-for 0.8))
                                               (hydra-vi/hint)))
                                      (7 . hydra-keyboard-quit)
-                                     (113 . hydra-exit)
+                                     (113 . hydra-vi/nil)
                                      (107 . hydra-vi/previous-line)
                                      (106 . hydra-vi/next-line)
                                      (kp-subtract . hydra--negative-argument)
@@ -451,7 +465,7 @@ Call the head: `previous-line'."
                                         (when hydra-is-helpful (unless hydra-lv (sit-for 0.8))
                                               (hydra-vi/hint)))
                                      (7 . hydra-keyboard-quit)
-                                     (113 . hydra-exit)
+                                     (113 . hydra-vi/nil)
                                      (107 . hydra-vi/previous-line)
                                      (106 . hydra-vi/next-line)
                                      (kp-subtract . hydra--negative-argument)
@@ -478,6 +492,21 @@ Call the head: `previous-line'."
                                      (45 . hydra--negative-argument)
                                      (21 . hydra--universal-argument))))
                       t (lambda nil (hydra-cleanup))))))
+      (defun hydra-vi/nil nil "Create a hydra with no body and the heads:
+
+\"j\":    `next-line',
+\"k\":    `previous-line',
+\"q\":    `nil'
+
+The body can be accessed via `hydra-vi/body'.
+
+Call the head: `nil'."
+             (interactive)
+             (set-cursor-color "#e52b50")
+             (hydra-disable)
+             (hydra-cleanup)
+             (catch (quote hydra-disable)
+               (set-cursor-color "#ffffff")))
       (defun hydra-vi/hint nil
         (if hydra-lv (lv-message (format #("vi: j, k, [q]: quit." 4 5 (face hydra-face-amaranth)
                                            7 8 (face hydra-face-amaranth)
@@ -507,7 +536,7 @@ The body can be accessed via `hydra-vi/body'."
                                         (when hydra-is-helpful (unless hydra-lv (sit-for 0.8))
                                               (hydra-vi/hint)))
                                      (7 . hydra-keyboard-quit)
-                                     (113 . hydra-exit)
+                                     (113 . hydra-vi/nil)
                                      (107 . hydra-vi/previous-line)
                                      (106 . hydra-vi/next-line)
                                      (kp-subtract . hydra--negative-argument)
