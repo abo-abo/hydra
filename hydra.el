@@ -239,10 +239,7 @@ should be a single statement.  Wrap it in an interactive lambda."
 (defun hydra--head-property (h prop &optional default)
   "Return for Hydra head H the value of property PROP.
 Return DEFAULT if PROP is not in H."
-  (let ((plist (if (or (stringp (cl-caddr h))
-                       (null (cl-caddr h)))
-                   (cl-cdddr h)
-                 (cddr h))))
+  (let ((plist (cl-cdddr h)))
     (if (memq prop h)
         (plist-get plist prop)
       default)))
@@ -396,20 +393,18 @@ NAME, BODY, DOCSTRING and HEADS are parameters to `defhydra'."
     (dolist (h heads)
       (let ((val (assoc (cadr h) alist))
             (pstr (hydra-fontify-head h body)))
-        (unless (and (> (length h) 2)
-                     (null (cl-caddr h)))
+        (unless (null (cl-caddr h))
           (if val
               (setf (cadr val)
                     (concat (cadr val) " " pstr))
             (push
              (cons (cadr h)
-                   (cons pstr
-                         (and (stringp (cl-caddr h)) (cl-caddr h))))
+                   (cons pstr (cl-caddr h)))
              alist)))))
     (mapconcat
      (lambda (x)
        (format
-        (if (cdr x)
+        (if (> (length (cdr x)) 0)
             (concat "[%s]: " (cdr x))
           "%s")
         (car x)))
@@ -703,6 +698,15 @@ result of `defhydra'."
     (setq docstring "hydra"))
   (when (keywordp (car body))
     (setq body (cons nil (cons nil body))))
+  (dolist (h heads)
+    (cond ((< (length h) 2)
+           (error "Each head should have at least two items: %S" h))
+          ((= (length h) 2)
+           (setcdr (cdr h) '("")))
+          ((or (null (cl-caddr h))
+               (stringp (cl-caddr h))))
+          (t
+           (setcdr (cdr h) (cons "" (cddr h))))))
   (let* ((keymap (copy-keymap hydra-base-map))
          (body-name (intern (format "%S/body" name)))
          (body-key (unless (hydra--callablep body)
