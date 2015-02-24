@@ -52,7 +52,8 @@
           (setq truncate-lines nil)
           (setq mode-line-format nil)
           (setq cursor-type nil)
-          (set-window-dedicated-p lv-wnd t))
+          (set-window-dedicated-p lv-wnd t)
+          (set-window-parameter lv-wnd 'no-other-window t))
         (select-window ori)))))
 
 (defun lv-message (format-string &rest args)
