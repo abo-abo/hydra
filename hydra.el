@@ -121,7 +121,7 @@ It's possible to set this to nil.")
   "When non-nil, hydra will issue some non-essential style warnings."
   :type 'boolean)
 
-(defcustom hydra-key-format-spec "% 3s"
+(defcustom hydra-key-format-spec "%s"
   "Default `format'-style specifier for _a_  syntax in docstrings.
 When nil, you can specify your own at each location like this: _ 5a_.")
 
