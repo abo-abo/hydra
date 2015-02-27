@@ -647,7 +647,8 @@ NAME, BODY and HEADS are parameters to `defhydra'."
 (defun hydra--delete-duplicates (heads)
   "Return HEADS without entries that have the same CMD part.
 In duplicate HEADS, :cmd-name is modified to whatever they duplicate."
-  (let (res ali entry)
+  (let ((ali '(((hydra-repeat . red) . hydra-repeat)))
+        res entry)
     (dolist (h heads)
       (if (setq entry (assoc (cons (cadr h)
                                    (hydra--head-color h '(nil nil)))
@@ -702,7 +703,10 @@ NAMES is a list of variables."
 JOINER is a function similar to `concat'."
   (setq joiner (or joiner #'concat))
   (mapconcat
-   #'identity
+   (lambda (s)
+     (if (string-match " +$" s)
+         (replace-match "" nil nil s)
+       s))
    (apply #'cl-mapcar joiner
           (mapcar
            (lambda (s) (split-string s "\n"))

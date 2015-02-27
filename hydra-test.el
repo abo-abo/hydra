@@ -34,13 +34,15 @@
        "error"
        ("h" first-error "first")
        ("j" next-error "next")
-       ("k" previous-error "prev")))
+       ("k" previous-error "prev")
+       ("SPC" hydra-repeat "rep" :bind nil)))
     '(progn
       (defun hydra-error/first-error nil "Create a hydra with a \"M-g\" body and the heads:
 
 \"h\":    `first-error',
 \"j\":    `next-error',
-\"k\":    `previous-error'
+\"k\":    `previous-error',
+\"SPC\":    `hydra-repeat'
 
 The body can be accessed via `hydra-error/body'.
 
@@ -49,7 +51,8 @@ Call the head: `first-error'."
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function first-error)))
-                 ((quit error) (message "%S" err)
+                 ((quit error)
+                  (message "%S" err)
                   (unless hydra-lv (sit-for 0.8))
                   nil))
                (when hydra-is-helpful (hydra-error/hint))
@@ -57,6 +60,7 @@ Call the head: `first-error'."
                      (hydra-set-transient-map
                       (setq hydra-curr-map
                             (quote (keymap (7 . hydra-keyboard-quit)
+                                           (32 . hydra-repeat)
                                            (107 . hydra-error/previous-error)
                                            (106 . hydra-error/next-error)
                                            (104 . hydra-error/first-error)
@@ -88,7 +92,8 @@ Call the head: `first-error'."
 
 \"h\":    `first-error',
 \"j\":    `next-error',
-\"k\":    `previous-error'
+\"k\":    `previous-error',
+\"SPC\":    `hydra-repeat'
 
 The body can be accessed via `hydra-error/body'.
 
@@ -97,7 +102,8 @@ Call the head: `next-error'."
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function next-error)))
-                 ((quit error) (message "%S" err)
+                 ((quit error)
+                  (message "%S" err)
                   (unless hydra-lv (sit-for 0.8))
                   nil))
                (when hydra-is-helpful (hydra-error/hint))
@@ -105,6 +111,7 @@ Call the head: `next-error'."
                      (hydra-set-transient-map
                       (setq hydra-curr-map
                             (quote (keymap (7 . hydra-keyboard-quit)
+                                           (32 . hydra-repeat)
                                            (107 . hydra-error/previous-error)
                                            (106 . hydra-error/next-error)
                                            (104 . hydra-error/first-error)
@@ -136,7 +143,8 @@ Call the head: `next-error'."
 
 \"h\":    `first-error',
 \"j\":    `next-error',
-\"k\":    `previous-error'
+\"k\":    `previous-error',
+\"SPC\":    `hydra-repeat'
 
 The body can be accessed via `hydra-error/body'.
 
@@ -145,7 +153,8 @@ Call the head: `previous-error'."
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function previous-error)))
-                 ((quit error) (message "%S" err)
+                 ((quit error)
+                  (message "%S" err)
                   (unless hydra-lv (sit-for 0.8))
                   nil))
                (when hydra-is-helpful (hydra-error/hint))
@@ -153,6 +162,7 @@ Call the head: `previous-error'."
                      (hydra-set-transient-map
                       (setq hydra-curr-map
                             (quote (keymap (7 . hydra-keyboard-quit)
+                                           (32 . hydra-repeat)
                                            (107 . hydra-error/previous-error)
                                            (106 . hydra-error/next-error)
                                            (104 . hydra-error/first-error)
@@ -184,23 +194,26 @@ Call the head: `previous-error'."
         (define-key global-map (kbd "M-g")
           nil))
       (define-key global-map [134217831 104]
-       (function hydra-error/first-error))
+        (function hydra-error/first-error))
       (define-key global-map [134217831 106]
-       (function hydra-error/next-error))
+        (function hydra-error/next-error))
       (define-key global-map [134217831 107]
-       (function hydra-error/previous-error))
+        (function hydra-error/previous-error))
       (defun hydra-error/hint nil
-        (if hydra-lv (lv-message (format #("error: [h]: first, [j]: next, [k]: prev." 8 9 (face hydra-face-red)
+        (if hydra-lv (lv-message (format #("error: [h]: first, [j]: next, [k]: prev, [SPC]: rep." 8 9 (face hydra-face-red)
                                            20 21 (face hydra-face-red)
-                                           31 32 (face hydra-face-red))))
-          (message (format #("error: [h]: first, [j]: next, [k]: prev." 8 9 (face hydra-face-red)
+                                           31 32 (face hydra-face-red)
+                                           42 45 (face hydra-face-red))))
+          (message (format #("error: [h]: first, [j]: next, [k]: prev, [SPC]: rep." 8 9 (face hydra-face-red)
                              20 21 (face hydra-face-red)
-                             31 32 (face hydra-face-red))))))
+                             31 32 (face hydra-face-red)
+                             42 45 (face hydra-face-red))))))
       (defun hydra-error/body nil "Create a hydra with a \"M-g\" body and the heads:
 
 \"h\":    `first-error',
 \"j\":    `next-error',
-\"k\":    `previous-error'
+\"k\":    `previous-error',
+\"SPC\":    `hydra-repeat'
 
 The body can be accessed via `hydra-error/body'."
              (interactive)
@@ -212,6 +225,7 @@ The body can be accessed via `hydra-error/body'."
                       (setq hydra-curr-map
                             (quote
                              (keymap (7 . hydra-keyboard-quit)
+                                     (32 . hydra-repeat)
                                      (107 . hydra-error/previous-error)
                                      (106 . hydra-error/next-error)
                                      (104 . hydra-error/first-error)
@@ -1067,14 +1081,14 @@ When non-nil, hydra will issue some non essential style warnings.           %`hy
 _p_ Captain Jean Luc Picard:   % -8`hydra-tng/picard^^    _t_ Deanna Troi:               % -8`hydra-tng/troi^^^^^^
 _r_ Commander William Riker:   % -8`hydra-tng/riker^^^    _c_ Doctor Beverly Crusher:    % -8`hydra-tng/dr-crusher
 _d_ Lieutenant Commander Data: % -8`hydra-tng/data^^^^    _h_ Set phasers to             % -8`hydra-tng/phaser^^^^
-_w_ Worf:                      % -8`hydra-tng/worf^^^^    
-_f_ Geordi La Forge:           % -8`hydra-tng/la-forge    " 1)))
+_w_ Worf:                      % -8`hydra-tng/worf^^^^
+_f_ Geordi La Forge:           % -8`hydra-tng/la-forge" 1)))
     (should (equal (hydra--table hydra-tng/names 4 3)
                    (substring "
-_p_ Captain Jean Luc Picard:   % -8`hydra-tng/picard    _f_ Geordi La Forge:           % -8`hydra-tng/la-forge^^    
-_r_ Commander William Riker:   % -8`hydra-tng/riker^    _t_ Deanna Troi:               % -8`hydra-tng/troi^^^^^^    
-_d_ Lieutenant Commander Data: % -8`hydra-tng/data^^    _c_ Doctor Beverly Crusher:    % -8`hydra-tng/dr-crusher    
-_w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to             % -8`hydra-tng/phaser^^^^    " 1)))))
+_p_ Captain Jean Luc Picard:   % -8`hydra-tng/picard    _f_ Geordi La Forge:           % -8`hydra-tng/la-forge^^
+_r_ Commander William Riker:   % -8`hydra-tng/riker^    _t_ Deanna Troi:               % -8`hydra-tng/troi^^^^^^
+_d_ Lieutenant Commander Data: % -8`hydra-tng/data^^    _c_ Doctor Beverly Crusher:    % -8`hydra-tng/dr-crusher
+_w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to             % -8`hydra-tng/phaser^^^^" 1)))))
 
 (provide 'hydra-test)
 
