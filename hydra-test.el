@@ -569,8 +569,8 @@ The body can be accessed via `hydra-vi/body'."
   (should (equal
            (macroexpand
             '(defhydradio hydra-test ()
-              (num [0 1 2 3 4 5 6 7 8 9 10])
-              (str ["foo" "bar" "baz"])))
+              (num "Num" [0 1 2 3 4 5 6 7 8 9 10])
+              (str "Str" ["foo" "bar" "baz"])))
            '(progn
              (defvar hydra-test/num 0
                "Num")
@@ -582,9 +582,7 @@ The body can be accessed via `hydra-vi/body'."
              (put 'hydra-test/str 'range ["foo" "bar" "baz"])
              (defun hydra-test/str ()
                (hydra--cycle-radio 'hydra-test/str))
-             (defun hydra-test/reset-radios ()
-               (setq hydra-test/num 0)
-               (setq hydra-test/str "foo"))))))
+             (defvar hydra-test/names '(hydra-test/num hydra-test/str))))))
 
 (ert-deftest hydra-blue-compat ()
   (should
@@ -1030,6 +1028,53 @@ The body can be accessed via `hydra-zoom/body'."
                                            (21 . hydra--universal-argument))))
                       t (lambda nil (hydra-cleanup))))
                (setq prefix-arg current-prefix-arg)))))))
+
+(ert-deftest hydra--pad ()
+  (should (equal (hydra--pad '(a b c) 3)
+                 '(a b c)))
+  (should (equal (hydra--pad '(a) 3)
+                 '(a nil nil))))
+
+(ert-deftest hydra--matrix ()
+  (should (equal (hydra--matrix '(a b c) 2 2)
+                 '((a b) (c nil))))
+  (should (equal (hydra--matrix '(a b c d e f g h i) 4 3)
+                 '((a b c d) (e f g h) (i nil nil nil)))))
+
+(ert-deftest hydra--cell ()
+  (should (equal (hydra--cell "% -75s %%`%s" '(hydra-lv hydra-verbose))
+                 "When non-nil, `lv-message' (not `message') will be used to display hints.   %`hydra-lv^^^^^
+When non-nil, hydra will issue some non essential style warnings.           %`hydra-verbose")))
+
+(ert-deftest hydra--vconcat ()
+  (should (equal (hydra--vconcat '("abc\ndef" "012\n34" "def\nabc"))
+                 "abc012def\ndef34abc")))
+
+(defhydradio hydra-tng ()
+  (picard "_p_ Captain Jean Luc Picard:")
+  (riker "_r_ Commander William Riker:")
+  (data "_d_ Lieutenant Commander Data:")
+  (worf "_w_ Worf:")
+  (la-forge "_f_ Geordi La Forge:")
+  (troi "_t_ Deanna Troi:")
+  (dr-crusher "_c_ Doctor Beverly Crusher:")
+  (phaser "_h_ Set phasers to " [stun kill]))
+
+(ert-deftest hydra--table ()
+  (let ((hydra-cell-format "% -30s %% -8`%s"))
+    (should (equal (hydra--table hydra-tng/names 5 2)
+                   (substring "
+_p_ Captain Jean Luc Picard:   % -8`hydra-tng/picard^^    _t_ Deanna Troi:               % -8`hydra-tng/troi^^^^^^
+_r_ Commander William Riker:   % -8`hydra-tng/riker^^^    _c_ Doctor Beverly Crusher:    % -8`hydra-tng/dr-crusher
+_d_ Lieutenant Commander Data: % -8`hydra-tng/data^^^^    _h_ Set phasers to             % -8`hydra-tng/phaser^^^^
+_w_ Worf:                      % -8`hydra-tng/worf^^^^    
+_f_ Geordi La Forge:           % -8`hydra-tng/la-forge    " 1)))
+    (should (equal (hydra--table hydra-tng/names 4 3)
+                   (substring "
+_p_ Captain Jean Luc Picard:   % -8`hydra-tng/picard    _f_ Geordi La Forge:           % -8`hydra-tng/la-forge^^    
+_r_ Commander William Riker:   % -8`hydra-tng/riker^    _t_ Deanna Troi:               % -8`hydra-tng/troi^^^^^^    
+_d_ Lieutenant Commander Data: % -8`hydra-tng/data^^    _c_ Doctor Beverly Crusher:    % -8`hydra-tng/dr-crusher    
+_w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to             % -8`hydra-tng/phaser^^^^    " 1)))))
 
 (provide 'hydra-test)
 

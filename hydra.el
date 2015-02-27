@@ -118,7 +118,7 @@ It's possible to set this to nil.")
   :type 'boolean)
 
 (defcustom hydra-verbose nil
-  "When non-nil, hydra will issue some non-essential style warnings."
+  "When non-nil, hydra will issue some non essential style warnings."
   :type 'boolean)
 
 (defcustom hydra-key-format-spec "%s"
@@ -660,6 +660,86 @@ In duplicate HEADS, :cmd-name is modified to whatever they duplicate."
         (push h res)))
     (nreverse res)))
 
+(defun hydra--pad (lst n)
+  "Pad LST with nil until length N."
+  (let ((len (length lst)))
+    (if (= len n)
+        lst
+      (append lst (make-list (- n len) nil)))))
+
+(defun hydra--matrix (lst rows cols)
+  "Create a matrix from elements of LST.
+The matrix size is ROWS times COLS."
+  (let ((ls (copy-sequence lst))
+        res)
+    (dotimes (c cols)
+      (push (hydra--pad (hydra-multipop ls rows) rows) res))
+    (nreverse res)))
+
+(defun hydra--cell (fstr names)
+  "Format a rectangular cell based on FSTR and NAMES.
+FSTR is a format-style string with two string inputs: one for the
+doc and one for the symbol name.
+NAMES is a list of variables."
+  (let ((len (cl-reduce
+              (lambda (acc it) (max (length (symbol-name it)) acc))
+              names
+              :initial-value 0)))
+    (mapconcat
+     (lambda (sym)
+       (if sym
+           (format fstr
+                   (documentation-property sym 'variable-documentation)
+                   (let ((name (symbol-name sym)))
+                     (concat name (make-string (- len (length name)) ?^)))
+                   sym)
+         ""))
+     names
+     "\n")))
+
+(defun hydra--vconcat (strs &optional joiner)
+  "Glue STRS vertically.  They must be the same height.
+JOINER is a function similar to `concat'."
+  (setq joiner (or joiner #'concat))
+  (mapconcat
+   #'identity
+   (apply #'cl-mapcar joiner
+          (mapcar
+           (lambda (s) (split-string s "\n"))
+           strs))
+   "\n"))
+
+(defcustom hydra-cell-format "% -20s %% -8`%s"
+  "The default format for docstring cells."
+  :type 'string)
+
+(defun hydra--table (names rows cols &optional cell-formats)
+  "Format a `format'-style table from variables in NAMES.
+The size of the table is ROWS times COLS.
+CELL-FORMATS are `format' strings for each column.
+If CELL-FORMATS is a string, it's used for all columns.
+If CELL-FORMATS is nil, `hydra-cell-format' is used for all columns."
+  (setq cell-formats
+        (cond ((null cell-formats)
+               (make-list cols hydra-cell-format))
+              ((stringp cell-formats)
+               (make-list cols cell-formats))
+              (t
+               cell-formats)))
+  (hydra--vconcat
+   (cl-mapcar
+    #'hydra--cell
+    cell-formats
+    (hydra--matrix names rows cols))
+   (lambda (&rest x)
+     (mapconcat #'identity x "    "))))
+
+(defun hydra-reset-radios (names)
+  "Set varibles NAMES to their defaults.
+NAMES should be defined by `defhydradio' or similar."
+  (dolist (n names)
+    (set n (aref (get n 'range) 0))))
+
 ;;* Macros
 ;;** defhydra
 ;;;###autoload
@@ -714,9 +794,13 @@ want to bind anything.  In that case, typically you will bind the
 generated NAME/body command.  This command is also the return
 result of `defhydra'."
   (declare (indent defun))
-  (unless (stringp docstring)
-    (setq heads (cons docstring heads))
-    (setq docstring "hydra"))
+  (cond ((stringp docstring))
+        ((and (consp docstring)
+              (memq (car docstring) '(hydra--table concat format)))
+         (setq docstring (concat "\n" (eval docstring))))
+        (t
+         (setq heads (cons docstring heads))
+         (setq docstring "hydra")))
   (when (keywordp (car body))
     (setq body (cons nil (cons nil body))))
   (dolist (h heads)
@@ -824,24 +908,26 @@ DOC defaults to TOGGLE-NAME split and capitalized."
               (mapcar (lambda (h)
                         (hydra--radio name h))
                       heads))
-     (defun ,(intern (format "%S/reset-radios" name)) ()
-       ,@(mapcar
-          (lambda (h)
-            (let ((full-name (intern (format "%S/%S" name (car h))))
-                  )
-              `(setq ,full-name ,(hydra--quote-maybe
-                                  (and (cadr h) (aref (cadr h) 0))))))
-          heads))))
+     (defvar ,(intern (format "%S/names" name))
+       ',(mapcar (lambda (h) (intern (format "%S/%S" name (car h))))
+                 heads))))
+
+(defmacro hydra-multipop (lst n)
+  "Return LST's first N elements while removing them."
+  `(if (<= (length ,lst) ,n)
+       (prog1 ,lst
+         (setq ,lst nil))
+     (prog1 ,lst
+       (setcdr
+        (nthcdr (1- ,n) (prog1 ,lst (setq ,lst (nthcdr ,n ,lst))))
+        nil))))
 
 (defun hydra--radio (parent head)
   "Generate a hydradio with PARENT from HEAD."
   (let* ((name (car head))
          (full-name (intern (format "%S/%S" parent name)))
-         (val (or (cadr head) [nil t]))
-         (doc (or (cl-caddr head)
-                  (mapconcat #'capitalize
-                             (split-string (symbol-name name) "-")
-                             " "))))
+         (doc (cadr head))
+         (val (or (cl-caddr head) [nil t])))
     `((defvar ,full-name ,(hydra--quote-maybe (aref val 0)) ,doc)
       (put ',full-name 'range ,val)
       (defun ,full-name ()
