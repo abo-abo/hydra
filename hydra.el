@@ -215,6 +215,21 @@ Vanquishable only through a blue head.")
   (interactive "P")
   (let ((universal-argument-map hydra-curr-map))
     (negative-argument arg)))
+;;* Repeat
+(defvar hydra-repeat--prefix-arg nil
+  "Prefix arg to use with `hydra-repeat'.")
+
+(defvar hydra-repeat--command nil
+  "Command to use with `hydra-repeat'.")
+
+(defun hydra-repeat ()
+  "Repeat last command with last prefix arg."
+  (interactive)
+  (unless (string-match "hydra-repeat$" (symbol-name last-command))
+    (setq hydra-repeat--command last-command)
+    (setq hydra-repeat--prefix-arg (or last-prefix-arg 1)))
+  (setq current-prefix-arg hydra-repeat--prefix-arg)
+  (funcall hydra-repeat--command))
 
 ;;* Misc internals
 (defvar hydra-last nil
