@@ -370,6 +370,7 @@ BODY is the second argument to `defhydra'"
   (interactive)
   (hydra-disable)
   (hydra-cleanup)
+  (cancel-timer hydra-timer)
   nil)
 
 (defun hydra-disable ()
@@ -552,7 +553,8 @@ OTHER-POST is an optional extension to the :post key of BODY."
                  (format "%s\n\nCall the head: `%S'." doc (cadr head))
                doc))
         (hint (intern (format "%S/hint" name)))
-        (body-color (hydra--body-color body)))
+        (body-color (hydra--body-color body))
+        (body-timeout (plist-get body :timeout)))
     `(defun ,name ()
        ,doc
        (interactive)
@@ -585,7 +587,9 @@ OTHER-POST is an optional extension to the :post key of BODY."
                                    body-post)
                                   `(lambda () (hydra-cleanup) ,body-post)
                                   `(lambda () (hydra-cleanup)))))
-                      ,other-post)))))))
+                      ,(or other-post
+                           (when body-timeout
+                             `(hydra-timeout ,body-timeout))))))))))
 
 (defun hydra-pink-fallback ()
   "On intercepting a non-head, try to run it."
@@ -743,6 +747,22 @@ If CELL-FORMATS is nil, `hydra-cell-format' is used for all columns."
 NAMES should be defined by `defhydradio' or similar."
   (dolist (n names)
     (set n (aref (get n 'range) 0))))
+
+(defvar hydra-timer (timer-create)
+  "Timer for `hydra-timeout'.")
+
+(defun hydra-timeout (secs &optional function)
+  "In SECS seconds call FUNCTION.
+FUNCTION defaults to `hydra-disable'.
+Cancel the previous `hydra-timeout'."
+  (cancel-timer hydra-timer)
+  (setq hydra-timer (timer-create))
+  (timer-set-time hydra-timer
+                  (timer-relative-time nil secs))
+  (timer-set-function
+   hydra-timer
+   (or function #'hydra-keyboard-quit))
+  (timer-activate hydra-timer))
 
 ;;* Macros
 ;;** defhydra
