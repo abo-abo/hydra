@@ -83,7 +83,8 @@
     (if (fboundp 'set-transient-map)
         'set-transient-map
       (lambda (map keep-pred &optional on-exit)
-        (set-temporary-overlay-map map (hydra--pred on-exit)))))
+        (with-no-warnings
+          (set-temporary-overlay-map map (hydra--pred on-exit))))))
 
 (defun hydra--pred (on-exit)
   "Generate a predicate on whether to continue the Hydra state.
@@ -463,7 +464,7 @@ The expressions can be auto-expanded according to NAME."
         offset)
     (while (setq start
                  (string-match
-                  "\\(?:%\\( ?-?[0-9]*\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\( ?-?[0-9]*\\)\\([a-z-~A-Z0-9/|?<>={}]+\\)_\\)"
+                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\( ?-?[0-9]*\\)\\([a-z-~A-Z0-9/|?<>={}]+\\)_\\)"
                   docstring start))
       (cond ((eq ?_ (aref (match-string 0 docstring) 0))
              (let* ((key (match-string 4 docstring))
@@ -488,18 +489,23 @@ The expressions can be auto-expanded according to NAME."
                     nil nil docstring 0)))
 
             (t
-             (setq offset
-                   (with-temp-buffer
-                     (insert (substring docstring (1+ start)))
-                     (goto-char (point-min))
-                     (push (read (current-buffer)) varlist)
-                     (point)))
-             (setq docstring
-                   (concat
-                    (substring docstring 0 start)
-                    "%" (match-string 1 docstring) "S"
-                    (substring docstring
-                               (+ (match-end 2) offset -2)))))))
+             (let* ((spec (match-string 1 docstring))
+                    (lspec (length spec)))
+               (setq offset
+                     (with-temp-buffer
+                       (insert (substring docstring (+ 1 start (length spec))))
+                       (goto-char (point-min))
+                       (push (read (current-buffer)) varlist)
+                       (point)))
+               (when (or (zerop lspec)
+                         (/= (aref spec (1- (length spec))) ?s))
+                 (setq spec (concat spec "S")))
+               (setq docstring
+                     (concat
+                      (substring docstring 0 start)
+                      "%" spec
+                      (substring docstring
+                                 (+ (match-end 2) offset -2))))))))
     (if (eq ?\n (aref docstring 0))
         `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
                  ,rest)
