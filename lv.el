@@ -41,6 +41,7 @@
   (if (window-live-p lv-wnd)
       lv-wnd
     (let ((ori (selected-window))
+          (golden-ratio-mode nil)
           buf)
       (prog1 (setq lv-wnd
                    (select-window
