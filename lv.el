@@ -41,7 +41,6 @@
   (if (window-live-p lv-wnd)
       lv-wnd
     (let ((ori (selected-window))
-          (golden-ratio-mode nil)
           buf)
       (prog1 (setq lv-wnd
                    (select-window
@@ -61,7 +60,8 @@
   "Set LV window contents to (`format' FORMAT-STRING ARGS)."
   (let ((ori (selected-window))
         (str (apply #'format format-string args))
-        deactivate-mark)
+        deactivate-mark
+        golden-ratio-mode)
     (select-window (lv-window))
     (unless (string= (buffer-string) str)
       (delete-region (point-min) (point-max))
