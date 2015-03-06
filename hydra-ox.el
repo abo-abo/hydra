@@ -27,11 +27,11 @@
 (require 'org)
 
 (defhydradio hydra-ox ()
-  (body-only)
-  (export-scope [buffer subtree])
-  (async-export)
-  (visible-only)
-  (force-publishing))
+  (body-only "Export only the body.")
+  (export-scope "Export scope." [buffer subtree])
+  (async-export "When non-nil, export async.")
+  (visible-only "When non-nil, export visible only")
+  (force-publishing "Toggle force publishing"))
 
 (defhydra hydra-ox-html (:color blue)
   "ox-html"
