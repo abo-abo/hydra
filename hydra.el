@@ -252,13 +252,21 @@ should be a single statement.  Wrap it in an interactive lambda."
        (interactive)
        ,x)))
 
+(defun hydra-plist-get-default (plist prop default)
+  "Extract a value from a property list.
+PLIST is a property list, which is a list of the form
+\(PROP1 VALUE1 PROP2 VALUE2...).
+
+Return the value corresponding to PROP, or DEFAULT if PROP is not
+one of the properties on the list."
+  (if (memq prop plist)
+      (plist-get plist prop)
+    default))
+
 (defun hydra--head-property (h prop &optional default)
   "Return for Hydra head H the value of property PROP.
 Return DEFAULT if PROP is not in H."
-  (let ((plist (cl-cdddr h)))
-    (if (memq prop h)
-        (plist-get plist prop)
-      default)))
+  (hydra-plist-get-default (cl-cdddr h) prop default))
 
 (defun hydra--aggregate-color (head-color body-color)
   "Return the resulting head color for HEAD-COLOR and BODY-COLOR."
@@ -839,12 +847,17 @@ result of `defhydra'."
       (cond ((< len 2)
              (error "Each head should have at least two items: %S" h))
             ((= len 2)
-             (setcdr (cdr h) `("" :cmd-name ,cmd-name)))
+             (setcdr (cdr h)
+                     (list
+                      (hydra-plist-get-default (cddr body) :hint "")
+                      :cmd-name cmd-name)))
             (t
              (let ((hint (cl-caddr h)))
                (unless (or (null hint)
                            (stringp hint))
-                 (setcdr (cdr h) (cons "" (cddr h))))
+                 (setcdr (cdr h) (cons
+                                  (hydra-plist-get-default (cddr body) :hint "")
+                                  (cddr h))))
                (setcdr (cddr h) `(:cmd-name ,cmd-name ,@(cl-cdddr h))))))))
   (let* ((keymap (copy-keymap hydra-base-map))
          (body-name (intern (format "%S/body" name)))
