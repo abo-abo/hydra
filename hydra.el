@@ -772,7 +772,7 @@ Cancel the previous `hydra-timeout'."
   (cancel-timer hydra-timer)
   (setq hydra-timer (timer-create))
   (timer-set-time hydra-timer
-                  (timer-relative-time nil secs))
+                  (timer-relative-time (current-time) secs))
   (timer-set-function
    hydra-timer
    (or function #'hydra-keyboard-quit))
