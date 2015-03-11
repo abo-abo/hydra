@@ -120,8 +120,8 @@ To write your own hydras, you can:
 
 # Community wiki
 
-A good amount of useful hydras are aggregated in projects
-[community wiki](https://github.com/abo-abo/hydra/wiki/Hydras%20by%20Topic). Feel free to add your
+You can find some user created hydras and more documentation in the project's
+[community wiki](https://github.com/abo-abo/hydra/wiki/). Feel free to add your
 own or edit the existing ones.
 
 # The Rules Hydra-tics
