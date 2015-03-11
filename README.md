@@ -1,23 +1,21 @@
 [![Build Status](https://travis-ci.org/abo-abo/hydra.svg?branch=master)](https://travis-ci.org/abo-abo/hydra)
 
-This is a package for GNU Emacs that can be used to tie related
-commands into a family of short bindings with a common prefix - a
-Hydra.
+This is a package for GNU Emacs that can be used to tie related commands into a family of short
+bindings with a common prefix - a Hydra.
 
-![hydra](http://oremacs.com/download/Hydra.png)
+![hydra](http://oremacs.com/download/Hydra.jpg)
 
-Once you summon the Hydra through the prefixed binding (the body + any
-one head), all heads can be called in succession with only a short
-extension.
+Once you summon the Hydra through the prefixed binding (the body + any one head), all heads can be
+called in succession with only a short extension.
 
-The Hydra is vanquished once Hercules, any binding that isn't the
-Hydra's head, arrives.  Note that Hercules, besides vanquishing the
-Hydra, will still serve his orignal purpose, calling his proper
-command.  This makes the Hydra very seamless, it's like a minor mode
-that disables itself auto-magically.
+The Hydra is vanquished once Hercules, any binding that isn't the Hydra's head, arrives.  Note that
+Hercules, besides vanquishing the Hydra, will still serve his orignal purpose, calling his proper
+command.  This makes the Hydra very seamless, it's like a minor mode that disables itself
+auto-magically.
 
-## Sample global Hydras
-### Zoom
+## Sample Hydras
+
+### The one with the least amount of code
 
 ```cl
 (defhydra hydra-zoom (global-map "<f2>")
@@ -26,32 +24,72 @@ that disables itself auto-magically.
   ("l" text-scale-decrease "out"))
 ```
 
-### Goto-error
+With this simple code, you can:
+
+- Start zooming in with <kbd>&lt;f2&gt; g</kbd>.
+- Continue to zoom in with <kbd>g</kbd>.
+- Or zoom out with <kbd>l</kbd>.
+- Zoom in five times at once with <kbd>5g</kbd>.
+- Stop zooming with *any* key that isn't <kbd>g</kbd> or <kbd>l</kbd>.
+
+### The impressive-looking one
+
+Here's the result of pressing <kbd>.</kbd> in the good-old Buffer menu:
+
+![hydra-buffer-menu](http://oremacs.com/download/hydra-buffer-menu.png)
+
+The code is large but very simple:
 
 ```cl
-(defhydra hydra-error (global-map "M-g")
-  "goto-error"
-  ("h" first-error "first")
-  ("j" next-error "next")
-  ("k" previous-error "prev")
-  ("v" recenter-top-bottom "recenter")
-  ("q" nil "quit"))
+(defhydra hydra-buffer-menu (:color pink
+                             :hint nil)
+  "
+^Mark^             ^Unmark^           ^Actions^          ^Search
+^^^^^^^^-----------------------------------------------------------------                        (__)
+_m_: mark          _u_: unmark        _x_: execute       _R_: re-isearch                         (oo)
+_s_: save          _U_: unmark up     _b_: bury          _I_: isearch                      /------\\/
+_d_: delete        ^ ^                _g_: refresh       _O_: multi-occur                 / |    ||
+_D_: delete up     ^ ^                _T_: files only: % -28`Buffer-menu-files-only^^    *  /\\---/\\
+_~_: modified      ^ ^                ^ ^                ^^                                 ~~   ~~
+"
+  ("m" Buffer-menu-mark)
+  ("u" Buffer-menu-unmark)
+  ("U" Buffer-menu-backup-unmark)
+  ("d" Buffer-menu-delete)
+  ("D" Buffer-menu-delete-backwards)
+  ("s" Buffer-menu-save)
+  ("~" Buffer-menu-not-modified)
+  ("x" Buffer-menu-execute)
+  ("b" Buffer-menu-bury)
+  ("g" revert-buffer)
+  ("T" Buffer-menu-toggle-files-only)
+  ("O" Buffer-menu-multi-occur :color blue)
+  ("I" Buffer-menu-isearch-buffers :color blue)
+  ("R" Buffer-menu-isearch-buffers-regexp :color blue)
+  ("c" nil "cancel")
+  ("v" Buffer-menu-select "select" :color blue)
+  ("o" Buffer-menu-other-window "other-window" :color blue)
+  ("q" quit-window "quit" :color blue))
+
+(define-key Buffer-menu-mode-map "." 'hydra-buffer-menu/body)
 ```
 
-### Splitter
+Looking at the code you can see `hydra-buffer-menu` as sort of a namespace construct that wraps each
+function that it's given in code that shows that hint and makes it easy to call the related
+functions. One additional function is created and returned as the result of `defhydra` -
+`hydra-buffer-menu/body`.  This function does nothing except setting up the hint and the keymap, and
+is usually the entry point to complex hydras.
 
-```cl
-(require 'hydra-examples)
-(defhydra hydra-splitter (global-map "C-M-s")
-  "splitter"
-  ("h" hydra-move-splitter-left)
-  ("j" hydra-move-splitter-down)
-  ("k" hydra-move-splitter-up)
-  ("l" hydra-move-splitter-right))
-```
+To write your own hydras, you can:
+
+- Either modify an existing hydra to do what you want to do.
+- Read the docstrings and comments in the source to learn the rules.
 
 ### Community wiki
-A few useful hydras are aggregated in projects [community wiki](https://github.com/abo-abo/hydra/wiki/Hydras%20by%20Topic). Feel free to add your own or edit existing ones.
+
+A good amount of useful hydras are aggregated in projects
+[community wiki](https://github.com/abo-abo/hydra/wiki/Hydras%20by%20Topic). Feel free to add your
+own or edit the existing ones.
 
 ## Using the functions generated by `defhydra`
 
