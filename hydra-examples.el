@@ -209,7 +209,7 @@ _~_: modified      ^ ^                ^ ^                ^^                     
   ("b" Buffer-menu-bury)
   ("g" revert-buffer)
   ("T" Buffer-menu-toggle-files-only)
-  ("O" Buffer-menu-multi-occur:color blue)
+  ("O" Buffer-menu-multi-occur :color blue)
   ("I" Buffer-menu-isearch-buffers :color blue)
   ("R" Buffer-menu-isearch-buffers-regexp :color blue)
   ("c" nil "cancel")
