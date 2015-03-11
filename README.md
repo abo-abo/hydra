@@ -13,9 +13,36 @@ Hercules, besides vanquishing the Hydra, will still serve his original purpose, 
 command.  This makes the Hydra very seamless, it's like a minor mode that disables itself
 auto-magically.
 
-## Sample Hydras
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc/generate-toc again -->
+**Table of Contents**
 
-### The one with the least amount of code
+- [Sample Hydras](#sample-hydras)
+    - [The one with the least amount of code](#the-one-with-the-least-amount-of-code)
+    - [The impressive-looking one](#the-impressive-looking-one)
+- [Community wiki](#community-wiki)
+- [The Rules Hydra-tics](#the-rules-hydra-tics)
+    - [`hydra-awesome`](#hydra-awesome)
+    - [`awesome-map` and `awesome-binding`](#awesome-map-and-awesome-binding)
+    - [`awesome-plist`](#awesome-plist)
+        - [`:pre` and `:post`](#pre-and-post)
+        - [`:exit`](#exit)
+        - [`:foreign-keys`](#foreign-keys)
+        - [`:color`](#color)
+        - [`:timeout`](#timeout)
+        - [`:hint`](#hint)
+        - [`:bind`](#bind)
+    - [`awesome-docstring`](#awesome-docstring)
+    - [`awesome-head-1`](#awesome-head-1)
+        - [`head-binding`](#head-binding)
+        - [`head-command`](#head-command)
+        - [`head-hint`](#head-hint)
+        - [`head-plist`](#head-plist)
+
+<!-- markdown-toc end -->
+
+# Sample Hydras
+
+## The one with the least amount of code
 
 ```cl
 (defhydra hydra-zoom (global-map "<f2>")
@@ -38,7 +65,7 @@ For any Hydra:
 - `negative-argument` can be called with <kbd>-</kbd>.
 - `universal-argument` can be called with <kbd>C-u</kbd>.
 
-### The impressive-looking one
+## The impressive-looking one
 
 Here's the result of pressing <kbd>.</kbd> in the good-old Buffer menu:
 
@@ -91,13 +118,13 @@ To write your own hydras, you can:
 - Either modify an existing hydra to do what you want to do.
 - Read the docstrings and comments in the source to learn the rules.
 
-### Community wiki
+# Community wiki
 
 A good amount of useful hydras are aggregated in projects
 [community wiki](https://github.com/abo-abo/hydra/wiki/Hydras%20by%20Topic). Feel free to add your
 own or edit the existing ones.
 
-## The Rules Hydra-tics
+# The Rules Hydra-tics
 
 Each hydra (take `awesome` as a prefix to make it more specific) looks like this:
 
@@ -110,7 +137,7 @@ Each hydra (take `awesome` as a prefix to make it more specific) looks like this
   ...)
 ```
 
-### `hydra-awesome`
+## `hydra-awesome`
 
 Each hydra needs a name, and this one is named `hydra-awesome`. You can name your hydras as you wish,
 but I prefer to start each one with `hydra-`, because it acts as an additional namespace layer, for example:
@@ -166,7 +193,7 @@ The body can be accessed via `hydra-zoom/body'."
     (setq prefix-arg current-prefix-arg)))
 ```
 
-### `awesome-map` and `awesome-binding`
+## `awesome-map` and `awesome-binding`
 
 This can be any keymap, for instance, `global-map` or `isearch-mode-map`.
 
@@ -217,7 +244,7 @@ Or even simpler:
 But then you would have to bind `hydra-zoom/text-scale-increase` and
 `hydra-zoom/text-scale-decrease` yourself.
 
-### `awesome-plist`
+## `awesome-plist`
 
 You can read up on what a plist is in
 [the Elisp manual](https://www.gnu.org/software/emacs/manual/html_node/elisp/Property-Lists.html).
@@ -225,7 +252,7 @@ You can read up on what a plist is in
 You can use `awesome-plist` to modify the behavior of each head in some way.
 Below is a list of each key.
 
-#### `:pre` and `:post`
+### `:pre` and `:post`
 
 You can specify code that will be called before each head, and after the body. For example:
 
@@ -246,7 +273,7 @@ You can specify code that will be called before each head, and after the body. F
 Thanks to `:pre`, each time any head is called, the cursor color is changed.
 And when the hydra quits, the cursor color will be made black again with `:post`.
 
-#### `:exit`
+### `:exit`
 
 The `:exit` key is inherited by every head (they can override it) and influences what will happen
 after executing head's command:
@@ -254,7 +281,7 @@ after executing head's command:
 - `:exit nil` (the default) means that the hydra state will continue - you'll still see the hint and be able to use short bindings.
 - `:exit t` means that the hydra state will stop.
 
-#### `:foreign-keys`
+### `:foreign-keys`
 
 The `:foreign-keys` key belongs to the body and decides what to do when a key is pressed that doesn't
 belong to any head:
@@ -265,7 +292,7 @@ do whatever it was supposed to do if there was no hydra state.
 running the foreign key.
 - `:foreign-keys run` will not stop the hydra state, and try to run the foreign key.
 
-#### `:color`
+### `:color`
 
 The `:color` key is a shortcut. It aggregates `:exit` and `:foreign-keys` key in the following way:
 
@@ -280,17 +307,17 @@ The `:color` key is a shortcut. It aggregates `:exit` and `:foreign-keys` key in
 It's also a trick to make you instantly aware of the current hydra keys that you're about to press:
 the keys will be highlighted with the appropriate color.
 
-#### `:timeout`
+### `:timeout`
 
 The `:timeout` key starts a timer for the corresponding amount of seconds that disables the hydra.
 Calling any head will refresh the timer.
 
-#### `:hint`
+### `:hint`
 
 The `:hint` key will be inherited by each head. Each head is allowed to override it, of course.
 One value that makes sense is `:hint nil`. See below for an explanation of head hint.
 
-#### `:bind`
+### `:bind`
 
 The `:bind` key provides a lambda to be used to bind each head.  This is quite advanced and rarely
 used, you're not likely to need it.  But if you would like to bind your heads with e.g. `bind-key`
@@ -299,7 +326,7 @@ instead of `define-key` you can use this option.
 The `:bind` key can be overridden by each head. This is useful if you want to have a few heads that
 are not bound outside the hydra.
 
-### `awesome-docstring`
+## `awesome-docstring`
 
 This can be a simple string used to build the final hydra hint.  However, if you start it with a
 newline, the key-highlighting and Ruby-style string interpolation becomes enabled, as you can see in
@@ -321,7 +348,7 @@ change the amount of marked files, for example, it will be appropriately updated
 If the result of the Elisp expression is a string and you don't want to quote it, use this form:
 `%s(shell-command-to-string "du -hs")`.
 
-### `awesome-head-1`
+## `awesome-head-1`
 
 Each head looks like this:
 
@@ -336,11 +363,11 @@ For the head `("g" text-scale-increase "in")`:
 - `head-hint` is `"in"`.
 - `head-plist` is `nil`.
 
-#### `head-binding`
+### `head-binding`
 
 The `head-binding` is a string that can be passed to `kbd`.
 
-#### `head-command`
+### `head-command`
 
 The `head-command` can be:
 
@@ -369,7 +396,7 @@ Here's an example of the last option:
 (global-set-key (kbd "C-c r") 'hydra-launcher/body)
 ```
 
-#### `head-hint`
+### `head-hint`
 
 In case of a large body docstring, you usually don't want the head hint to show up, since
 you've already documented it the the body docstring.
@@ -386,7 +413,7 @@ Press _g_ to zoom in.
   ("l" text-scale-decrease "out"))
 ```
 
-#### `head-plist`
+### `head-plist`
 
 Here's a list of body keys that can be overridden in each head:
 
