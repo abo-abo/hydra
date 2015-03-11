@@ -299,6 +299,28 @@ instead of `define-key` you can use this option.
 The `:bind` key can be overridden by each head. This is useful if you want to have a few heads that
 are not bound outside the hydra.
 
+### `awesome-docstring`
+
+This can be a simple string used to build the final hydra hint.  However, if you start it with a
+newline, the key-highlighting and Ruby-style string interpolation becomes enabled, as you can see in
+`hydra-buffer-menu` above.
+
+To highlight a key, just wrap it in underscores. Note that the key must belong to one of the heads.
+The key will be highlighted with the color that is appropriate to the behavior of the key, i.e.  if
+the key will make the hydra exit, the color will be blue.
+
+To insert an empty character, use `^`. The only use of this is to have your code aligned as
+nicely as the result.
+
+To insert a dynamic Elisp variable, use `%`&#96; followed by the variable. Each time the variable
+changes due to a head, the docstring will be updated. `format`-style width specifiers can be used.
+
+To insert a dynamic Elisp expression, use e.g. `%(length (dired-get-marked-files))`.  If a head will
+change the amount of marked files, for example, it will be appropriately updated.
+
+If the result of the Elisp expression is a string and you don't want to quote it, use this form:
+`%s(shell-command-to-string "du -hs")`.
+
 ### `awesome-head-1`
 
 Each head looks like this:
