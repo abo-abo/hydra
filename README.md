@@ -20,7 +20,7 @@ auto-magically.
     - [The one with the least amount of code](#the-one-with-the-least-amount-of-code)
     - [The impressive-looking one](#the-impressive-looking-one)
 - [Community wiki](#community-wiki)
-- [The Rules Hydra-tics](#the-rules-hydra-tics)
+- [The Rules of Hydra-tics](#the-rules-of-hydra-tics)
     - [`hydra-awesome`](#hydra-awesome)
     - [`awesome-map` and `awesome-binding`](#awesome-map-and-awesome-binding)
     - [`awesome-plist`](#awesome-plist)
@@ -116,7 +116,9 @@ is usually the entry point to complex hydras.
 To write your own hydras, you can:
 
 - Either modify an existing hydra to do what you want to do.
-- Read the docstrings and comments in the source to learn the rules.
+- Or read [the rules](#the-rules-of-hydra-tics),
+  [the examples](https://github.com/abo-abo/hydra/blob/master/hydra-examples.el),
+  the docstrings and comments in the source.
 
 # Community wiki
 
@@ -124,7 +126,7 @@ You can find some user created hydras and more documentation in the project's
 [community wiki](https://github.com/abo-abo/hydra/wiki/). Feel free to add your
 own or edit the existing ones.
 
-# The Rules Hydra-tics
+# The Rules of Hydra-tics
 
 Each hydra (take `awesome` as a prefix to make it more specific) looks like this:
 
