@@ -9,7 +9,7 @@ Once you summon the Hydra through the prefixed binding (the body + any one head)
 called in succession with only a short extension.
 
 The Hydra is vanquished once Hercules, any binding that isn't the Hydra's head, arrives.  Note that
-Hercules, besides vanquishing the Hydra, will still serve his orignal purpose, calling his proper
+Hercules, besides vanquishing the Hydra, will still serve his original purpose, calling his proper
 command.  This makes the Hydra very seamless, it's like a minor mode that disables itself
 auto-magically.
 
@@ -34,7 +34,7 @@ With this simple code, you can:
 
 For any Hydra:
 
-- `digit-argment` can be called with <kbd>0</kbd>-<kbd>9</kbd>.
+- `digit-argument` can be called with <kbd>0</kbd>-<kbd>9</kbd>.
 - `negative-argument` can be called with <kbd>-</kbd>.
 - `universal-argument` can be called with <kbd>C-u</kbd>.
 
@@ -246,6 +246,59 @@ You can specify code that will be called before each head, and after the body. F
 Thanks to `:pre`, each time any head is called, the cursor color is changed.
 And when the hydra quits, the cursor color will be made black again with `:post`.
 
+#### `:exit`
+
+The `:exit` key is inherited by every head (they can override it) and influences what will happen
+after executing head's command:
+
+- `:exit nil` (the default) means that the hydra state will continue - you'll still see the hint and be able to use short bindings.
+- `:exit t` means that the hydra state will stop.
+
+#### `:foreign-keys`
+
+The `:foreign-keys` key belongs to the body and decides what to do when a key is pressed that doesn't
+belong to any head:
+
+- `:foreign-keys nil` (the default) means that the hydra state will stop and the foreign key will
+do whatever it was supposed to do if there was no hydra state.
+- `:foreign-keys warn` will not stop the hydra state, but instead will issue a warning without
+running the foreign key.
+- `:foreign-keys run` will not stop the hydra state, and try to run the foreign key.
+
+#### `:color`
+
+The `:color` key is a shortcut. It aggregates `:exit` and `:foreign-keys` key in the following way:
+
+    | color    | toggle                     |
+    |----------+----------------------------|
+    | red      |                            |
+    | blue     | :exit t                    |
+    | amaranth | :foreign-keys warn         |
+    | teal     | :foreign-keys warn :exit t |
+    | pink     | :foreign-keys run          |
+
+It's also a trick to make you instantly aware of the current hydra keys that you're about to press:
+the keys will be highlighted with the appropriate color.
+
+#### `:timeout`
+
+The `:timeout` key starts a timer for the corresponding amount of seconds that disables the hydra.
+Calling any head will refresh the timer.
+
+#### `:hint`
+
+The `:hint` key will be inherited by each head. Each head is allowed to override it, of course.
+One value that makes sense is `:hint nil`. See below for an explanation of head hint.
+
+#### `:bind`
+
+The `:bind` key provides a lambda to be used to bind each head.  This is quite advanced and rarely
+used, you're not likely to need it.  But if you would like to bind your heads with e.g. `bind-key`
+instead of `define-key` you can use this option.
+
+The `:bind` key can be overridden by each head. This is useful if you want to have a few heads that
+are not bound outside the hydra.
+
 ### `awesome-head-1`
 
 Each head looks like this:
@@ -254,12 +307,16 @@ Each head looks like this:
 (head-binding head-command head-hint head-plist)
 ```
 
-For a head `("g" text-scale-increase "in")`:
+For the head `("g" text-scale-increase "in")`:
 
 - `head-binding` is `"g"`.
 - `head-command` is `text-scale-increase`.
 - `head-hint` is `"in"`.
 - `head-plist` is `nil`.
+
+#### `head-binding`
+
+The `head-binding` is a string that can be passed to `kbd`.
 
 #### `head-command`
 
@@ -306,3 +363,11 @@ Press _g_ to zoom in.
   ("g" text-scale-increase nil)
   ("l" text-scale-decrease "out"))
 ```
+
+#### `head-plist`
+
+Here's a list of body keys that can be overridden in each head:
+
+- `:exit`
+- `:color`
+- `:bind`
