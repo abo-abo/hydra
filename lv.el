@@ -49,7 +49,7 @@
         (if (setq buf (get-buffer "*LV*"))
             (switch-to-buffer buf)
           (switch-to-buffer "*LV*")
-          (setq truncate-lines nil)
+          (set-window-hscroll lv-wnd 0)
           (setq mode-line-format nil)
           (setq cursor-type nil)
           (set-window-dedicated-p lv-wnd t)
@@ -58,14 +58,18 @@
 
 (defun lv-message (format-string &rest args)
   "Set LV window contents to (`format' FORMAT-STRING ARGS)."
-  (let ((ori (selected-window))
-        (str (apply #'format format-string args))
-        deactivate-mark
-        golden-ratio-mode)
+  (let* ((ori (selected-window))
+         (str (apply #'format format-string args))
+         (n-lines (cl-count ?\n str))
+         deactivate-mark
+         golden-ratio-mode)
     (select-window (lv-window))
     (unless (string= (buffer-string) str)
       (delete-region (point-min) (point-max))
       (insert str)
+      (set (make-variable-buffer-local 'window-min-height)
+           n-lines)
+      (setq truncate-lines (> n-lines 1))
       (fit-window-to-buffer nil nil 1))
     (goto-char (point-min))
     (select-window ori)))
