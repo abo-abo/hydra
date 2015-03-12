@@ -188,6 +188,7 @@ Vanquishable only through a blue head.")
     (define-key map [kp-8] 'hydra--digit-argument)
     (define-key map [kp-9] 'hydra--digit-argument)
     (define-key map [kp-subtract] 'hydra--negative-argument)
+    (define-key map [switch-frame] 'hydra-keyboard-quit)
     map)
   "Keymap that all Hydras inherit.  See `universal-argument-map'.")
 
