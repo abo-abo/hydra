@@ -188,13 +188,19 @@ Vanquishable only through a blue head.")
     (define-key map [kp-8] 'hydra--digit-argument)
     (define-key map [kp-9] 'hydra--digit-argument)
     (define-key map [kp-subtract] 'hydra--negative-argument)
-    (define-key map [switch-frame] 'hydra-keyboard-quit)
+    (define-key map [switch-frame] 'hydra--handle-switch-frame)
     map)
   "Keymap that all Hydras inherit.  See `universal-argument-map'.")
 
 (defvar hydra-curr-map
   (make-sparse-keymap)
   "Keymap of the current Hydra called.")
+
+(defun hydra--handle-switch-frame (evt)
+  "Quit hydra and call old switch-frame event handler."
+  (interactive "e")
+  (hydra-keyboard-quit)
+  (funcall (lookup-key (current-global-map) [switch-frame]) evt))
 
 (defun hydra--universal-argument (arg)
   "Forward to (`universal-argument' ARG)."
