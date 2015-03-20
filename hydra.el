@@ -610,7 +610,10 @@ OTHER-POST is an optional extension to the :post key of BODY."
                                   `(lambda () (hydra-cleanup)))))
                       ,(or other-post
                            (when body-timeout
-                             `(hydra-timeout ,body-timeout))))))))))
+                             (list 'hydra-timeout
+                                   body-timeout
+                                   (when body-post
+                                     (hydra--make-callable body-post))))))))))))
 
 (defun hydra-pink-fallback ()
   "On intercepting a non-head, try to run it."
@@ -774,8 +777,7 @@ NAMES should be defined by `defhydradio' or similar."
   "Timer for `hydra-timeout'.")
 
 (defun hydra-timeout (secs &optional function)
-  "In SECS seconds call FUNCTION.
-FUNCTION defaults to `hydra-disable'.
+  "In SECS seconds call FUNCTION, then `hydra-keyboard-quit'.
 Cancel the previous `hydra-timeout'."
   (cancel-timer hydra-timer)
   (setq hydra-timer (timer-create))
@@ -783,7 +785,10 @@ Cancel the previous `hydra-timeout'."
                   (timer-relative-time (current-time) secs))
   (timer-set-function
    hydra-timer
-   (or function #'hydra-keyboard-quit))
+   `(lambda ()
+      ,(when function
+             `(funcall ,function))
+      (hydra-keyboard-quit)))
   (timer-activate hydra-timer))
 
 ;;* Macros
