@@ -908,31 +908,32 @@ result of `defhydra'."
                  (cl-mapcar
                   (lambda (head)
                     (let ((name (hydra--head-property head :cmd-name)))
-                      (when (cadr head)
-                        (when (or body-key method)
-                          (let ((bind (hydra--head-property head :bind 'default))
-                                (final-key
-                                 (if body-key
-                                     (vconcat (kbd body-key) (kbd (car head)))
-                                   (kbd (car head)))))
-                            (cond ((null bind) nil)
+                      (when (and (cadr head)
+                                 (not (eq (cadr head) 'hydra-keyboard-quit))
+                                 (or body-key method))
+                        (let ((bind (hydra--head-property head :bind 'default))
+                              (final-key
+                               (if body-key
+                                   (vconcat (kbd body-key) (kbd (car head)))
+                                 (kbd (car head)))))
+                          (cond ((null bind) nil)
 
-                                  ((eq bind 'default)
-                                   (list
-                                    (if (hydra--callablep method)
-                                        'funcall
-                                      'define-key)
-                                    method
-                                    final-key
-                                    (list 'function name)))
+                                ((eq bind 'default)
+                                 (list
+                                  (if (hydra--callablep method)
+                                      'funcall
+                                    'define-key)
+                                  method
+                                  final-key
+                                  (list 'function name)))
 
-                                  ((hydra--callablep bind)
-                                   `(funcall (function ,bind)
-                                             ,final-key
-                                             (function ,name)))
+                                ((hydra--callablep bind)
+                                 `(funcall (function ,bind)
+                                           ,final-key
+                                           (function ,name)))
 
-                                  (t
-                                   (error "Invalid :bind property %S" head))))))))
+                                (t
+                                 (error "Invalid :bind property %S" head)))))))
                   heads))
          (defun ,(intern (format "%S/hint" name)) ()
            ,(hydra--message name body docstring heads))
