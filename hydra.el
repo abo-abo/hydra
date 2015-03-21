@@ -635,6 +635,22 @@ OTHER-POST is an optional extension to the :post key of BODY."
           (message "Pink Hydra can't currently handle prefixes, continuing"))
       (message "Pink Hydra could not resolve: %S" keys))))
 
+(defun hydra--modify-keymap (keymap def)
+  "In KEYMAP, add DEF to each sub-keymap."
+  (cl-labels
+      ((recur (map)
+         (if (atom map)
+             map
+           (if (eq (car map) 'keymap)
+               (cons 'keymap
+                     (cons
+                      def
+                      (recur (cdr map))))
+             (cons
+              (recur (car map))
+              (recur (cdr map)))))))
+    (recur keymap)))
+
 (defun hydra--handle-nonhead (keymap name body heads)
   "Setup KEYMAP for intercepting non-head bindings.
 NAME, BODY and HEADS are parameters to `defhydra'."
@@ -650,19 +666,24 @@ NAME, BODY and HEADS are parameters to `defhydra'."
                       (memq (hydra--head-color h body) '(blue teal)))
                    heads)
           (progn
-            (define-key keymap [t]
-              `(lambda ()
-                 (interactive)
-                 ,(cond
-                   ((memq body-color '(amaranth teal))
-                    '(message "An amaranth Hydra can only exit through a blue head"))
-                   (t
-                    '(hydra-pink-fallback)))
-                 (hydra-set-transient-map hydra-curr-map t)
-                 (when hydra-is-helpful
-                   (unless hydra-lv
-                     (sit-for 0.8))
-                   (,(intern (format "%S/hint" name)))))))
+            (setcdr
+             keymap
+             (cdr
+              (hydra--modify-keymap
+               keymap
+               (cons t
+                     `(lambda ()
+                        (interactive)
+                        ,(cond
+                          ((memq body-color '(amaranth teal))
+                           '(message "An amaranth Hydra can only exit through a blue head"))
+                          (t
+                           '(hydra-pink-fallback)))
+                        (hydra-set-transient-map hydra-curr-map t)
+                        (when hydra-is-helpful
+                          (unless hydra-lv
+                            (sit-for 0.8))
+                          (,(intern (format "%S/hint" name))))))))))
         (unless (eq body-color 'teal)
           (error
            "An %S Hydra must have at least one blue head in order to exit"
