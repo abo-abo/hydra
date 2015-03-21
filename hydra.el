@@ -387,6 +387,8 @@ BODY is the second argument to `defhydra'"
   (hydra-disable)
   (hydra-cleanup)
   (cancel-timer hydra-timer)
+  (unless hydra-lv
+    (message ""))
   nil)
 
 (defun hydra-disable ()
