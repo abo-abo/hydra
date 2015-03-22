@@ -499,7 +499,8 @@ The expressions can be auto-expanded according to NAME."
 
             ((eq ?` (aref (match-string 2 docstring) 0))
              (push (hydra--unalias-var
-                    (substring (match-string 2 docstring) 1) prefix) varlist)
+                    (substring (match-string 2 docstring) 1) prefix)
+                   varlist)
              (setq docstring
                    (replace-match
                     (concat "%" (match-string 1 docstring) "S")
@@ -507,13 +508,14 @@ The expressions can be auto-expanded according to NAME."
 
             (t
              (let* ((spec (match-string 1 docstring))
-                    (lspec (length spec)))
+                    (lspec (length spec))
+                    (me2 (match-end 2)))
                (setq offset
                      (with-temp-buffer
                        (insert (substring docstring (+ 1 start (length spec))))
                        (goto-char (point-min))
                        (push (read (current-buffer)) varlist)
-                       (point)))
+                       (- (point) (point-min))))
                (when (or (zerop lspec)
                          (/= (aref spec (1- (length spec))) ?s))
                  (setq spec (concat spec "S")))
@@ -521,8 +523,7 @@ The expressions can be auto-expanded according to NAME."
                      (concat
                       (substring docstring 0 start)
                       "%" spec
-                      (substring docstring
-                                 (+ (match-end 2) offset -2))))))))
+                      (substring docstring (+ me2 offset -1))))))))
     (if (eq ?\n (aref docstring 0))
         `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
                  ,rest)
@@ -662,8 +663,8 @@ NAME, BODY and HEADS are parameters to `defhydra'."
       (when hydra-keyboard-quit
         (define-key keymap hydra-keyboard-quit #'hydra-keyboard-quit)))
     (when (memq body-color '(amaranth pink teal))
-      (if (cl-some `(lambda (h)
-                      (memq (hydra--head-color h body) '(blue teal)))
+      (if (cl-some (lambda (h)
+                     (memq (hydra--head-color h body) '(blue teal)))
                    heads)
           (progn
             (setcdr
@@ -1034,7 +1035,7 @@ DOC defaults to TOGGLE-NAME split and capitalized."
               (while (< i l)
                 (if (equal (aref range i) val)
                     (throw 'done (1+ i))
-                  (incf i)))
+                  (cl-incf i)))
               (error "Val not in range for %S" sym)))
     (set sym
          (aref range
