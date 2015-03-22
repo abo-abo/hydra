@@ -1,11 +1,11 @@
-;;; hydra.el --- Make bindings that stick around
+;;; hydra.el --- Make bindings that stick around. -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015  Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.11.0
+;; Version: 0.12.0
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -82,7 +82,7 @@
 (defalias 'hydra-set-transient-map
     (if (fboundp 'set-transient-map)
         'set-transient-map
-      (lambda (map keep-pred &optional on-exit)
+      (lambda (map _keep-pred &optional on-exit)
         (with-no-warnings
           (set-temporary-overlay-map map (hydra--pred on-exit))))))
 
@@ -321,26 +321,25 @@ Return DEFAULT if PROP is not in H."
                    'blue))
                 (t
                  (error "Unknown :exit %S" exit)))))
-    (let ((body-exit (plist-get (cddr body) :exit)))
-      (cond ((null (cadr h))
-             (when head-color
-               (hydra--complain
-                "Doubly specified blue head - nil cmd is already blue: %S" h))
-             'blue)
-            ((null head-color)
-             (hydra--body-color body))
-            ((null foreign-keys)
-             head-color)
-            ((eq foreign-keys 'run)
-             (if (eq head-color 'red)
-                 'pink
-               'blue))
-            ((eq foreign-keys 'warn)
-             (if (memq head-color '(red amaranth))
-                 'amaranth
-               'teal))
-            (t
-             (error "Unexpected %S %S" h body))))))
+    (cond ((null (cadr h))
+           (when head-color
+             (hydra--complain
+              "Doubly specified blue head - nil cmd is already blue: %S" h))
+           'blue)
+          ((null head-color)
+           (hydra--body-color body))
+          ((null foreign-keys)
+           head-color)
+          ((eq foreign-keys 'run)
+           (if (eq head-color 'red)
+               'pink
+             'blue))
+          ((eq foreign-keys 'warn)
+           (if (memq head-color '(red amaranth))
+               'amaranth
+             'teal))
+          (t
+           (error "Unexpected %S %S" h body)))))
 
 (defun hydra--body-foreign-keys (body)
   "Return what BODY does with a non-head binding."
@@ -420,9 +419,9 @@ Otherwise, add PREFIX to the symbol name."
         sym
       (intern (concat prefix "/" str)))))
 
-(defun hydra--hint (name body docstring heads)
+(defun hydra--hint (body heads)
   "Generate a hint for the echo area.
-NAME, BODY, DOCSTRING and HEADS are parameters to `defhydra'."
+BODY, and HEADS are parameters to `defhydra'."
   (let (alist)
     (dolist (h heads)
       (let ((val (assoc (cadr h) alist))
@@ -473,8 +472,7 @@ HEAD's binding is returned as a string wrapped with [] or {}."
 NAME, BODY, DOCSTRING and HEADS are parameters of `defhydra'.
 The expressions can be auto-expanded according to NAME."
   (setq docstring (replace-regexp-in-string "\\^" "" docstring))
-  (let ((rest (hydra--hint name body docstring heads))
-        (body-color (hydra--body-color body))
+  (let ((rest (hydra--hint body heads))
         (prefix (symbol-name name))
         (start 0)
         varlist
@@ -726,7 +724,7 @@ In duplicate HEADS, :cmd-name is modified to whatever they duplicate."
 The matrix size is ROWS times COLS."
   (let ((ls (copy-sequence lst))
         res)
-    (dotimes (c cols)
+    (dotimes (_c cols)
       (push (hydra--pad (hydra-multipop ls rows) rows) res))
     (nreverse res)))
 
@@ -881,7 +879,6 @@ result of `defhydra'."
   (let ((keymap (copy-keymap hydra-base-map))
         (body-name (intern (format "%S/body" name)))
         (body-key (cadr body))
-        (body-color (hydra--body-color body))
         (body-pre (plist-get (cddr body) :pre))
         (body-body-pre (plist-get (cddr body) :body-pre))
         (body-post (plist-get (cddr body) :post))
@@ -972,7 +969,7 @@ result of `defhydra'."
            (or body-body-pre body-pre) body-post
            '(setq prefix-arg current-prefix-arg))))))
 
-(defmacro defhydradio (name body &rest heads)
+(defmacro defhydradio (name _body &rest heads)
   "Create radios with prefix NAME.
 BODY specifies the options; there are none currently.
 HEADS have the format:
