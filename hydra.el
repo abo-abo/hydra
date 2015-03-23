@@ -466,14 +466,13 @@ HEAD's binding is returned as a string wrapped with [] or {}."
   (funcall (or hydra-fontify-head-function 'hydra-fontify-head-default)
            head body))
 
-(defun hydra--format (name body docstring heads)
+(defun hydra--format (_name body docstring heads)
   "Generate a `format' statement from STR.
 \"%`...\" expressions are extracted into \"%S\".
 NAME, BODY, DOCSTRING and HEADS are parameters of `defhydra'.
 The expressions can be auto-expanded according to NAME."
   (setq docstring (replace-regexp-in-string "\\^" "" docstring))
   (let ((rest (hydra--hint body heads))
-        (prefix (symbol-name name))
         (start 0)
         varlist
         offset)
@@ -495,22 +494,14 @@ The expressions can be auto-expanded according to NAME."
                             nil nil docstring)))
                  (error "Unrecognized key: _%s_" key))))
 
-            ((eq ?` (aref (match-string 2 docstring) 0))
-             (push (hydra--unalias-var
-                    (substring (match-string 2 docstring) 1) prefix)
-                   varlist)
-             (setq docstring
-                   (replace-match
-                    (concat "%" (match-string 1 docstring) "S")
-                    nil nil docstring 0)))
-
             (t
-             (let* ((spec (match-string 1 docstring))
-                    (lspec (length spec))
-                    (me2 (match-end 2)))
+             (let* ((varp (if (eq ?` (aref (match-string 2 docstring) 0)) 1 0))
+                    (spec (match-string 1 docstring))
+                    (lspec (length spec)))
                (setq offset
                      (with-temp-buffer
-                       (insert (substring docstring (+ 1 start (length spec))))
+                       (insert (substring docstring (+ 1 start varp
+                                                       (length spec))))
                        (goto-char (point-min))
                        (push (read (current-buffer)) varlist)
                        (- (point) (point-min))))
@@ -521,7 +512,7 @@ The expressions can be auto-expanded according to NAME."
                      (concat
                       (substring docstring 0 start)
                       "%" spec
-                      (substring docstring (+ me2 offset -1))))))))
+                      (substring docstring (+ start offset 1 lspec varp))))))))
     (if (eq ?\n (aref docstring 0))
         `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
                  ,rest)

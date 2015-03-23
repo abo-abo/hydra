@@ -705,7 +705,7 @@ The body can be accessed via `hydra-vi/body'."
        ("l" text-scale-decrease "out")
        ("q" nil "quit"))))))
 
-(ert-deftest hydra-format ()
+(ert-deftest hydra-format-1 ()
   (should (equal
            (let ((hydra-fontify-head-function
                   'hydra-fontify-head-greyscale))
@@ -728,7 +728,19 @@ _f_ auto-fill-mode:    %`auto-fill-function
 %s auto-fill-mode:    %S
 " "{a}" abbrev-mode "{d}" debug-on-error "{f}" auto-fill-function) "[[q]]: quit"))))
 
-(ert-deftest hydra-format-with-sexp ()
+(ert-deftest hydra-format-2 ()
+  (should (equal
+           (let ((hydra-fontify-head-function
+                  'hydra-fontify-head-greyscale))
+             (hydra--format
+              'bar
+              nil
+              "\n  bar %s`foo\n"
+              '(("a" (quote t) "" :cmd-name bar/lambda-a)
+                ("q" nil "" :cmd-name bar/nil))))
+           '(concat (format "  bar %s\n" foo) "{a}, [q]"))))
+
+(ert-deftest hydra-format-with-sexp-1 ()
   (should (equal
            (let ((hydra-fontify-head-function
                   'hydra-fontify-head-greyscale))
@@ -737,6 +749,21 @@ _f_ auto-fill-mode:    %`auto-fill-function
               "\n_n_ narrow-or-widen-dwim %(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
               '(("n" narrow-to-region nil) ("q" nil "cancel"))))
            '(concat (format "%s narrow-or-widen-dwim %Sasdf\n"
+                     "{n}"
+                     (progn
+                       (message "checking")
+                       (buffer-narrowed-p)))
+             "[[q]]: cancel"))))
+
+(ert-deftest hydra-format-with-sexp-2 ()
+  (should (equal
+           (let ((hydra-fontify-head-function
+                  'hydra-fontify-head-greyscale))
+             (hydra--format
+              'hydra-toggle nil
+              "\n_n_ narrow-or-widen-dwim %s(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
+              '(("n" narrow-to-region nil) ("q" nil "cancel"))))
+           '(concat (format "%s narrow-or-widen-dwim %sasdf\n"
                      "{n}"
                      (progn
                        (message "checking")
