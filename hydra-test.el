@@ -269,7 +269,7 @@ The body can be accessed via `hydra-error/body'."
        ("a" abbrev-mode "abbrev")
        ("q" nil "cancel")))
     '(progn
-      (defun hydra-toggle/toggle-truncate-lines nil "Create a hydra with no body and the heads:
+      (defun hydra-toggle/toggle-truncate-lines-and-exit nil "Create a hydra with no body and the heads:
 
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
@@ -284,7 +284,7 @@ Call the head: `toggle-truncate-lines'."
              (hydra-cleanup)
              (catch (quote hydra-disable)
                (call-interactively (function toggle-truncate-lines))))
-      (defun hydra-toggle/auto-fill-mode nil "Create a hydra with no body and the heads:
+      (defun hydra-toggle/auto-fill-mode-and-exit nil "Create a hydra with no body and the heads:
 
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
@@ -299,7 +299,7 @@ Call the head: `auto-fill-mode'."
              (hydra-cleanup)
              (catch (quote hydra-disable)
                (call-interactively (function auto-fill-mode))))
-      (defun hydra-toggle/abbrev-mode nil "Create a hydra with no body and the heads:
+      (defun hydra-toggle/abbrev-mode-and-exit nil "Create a hydra with no body and the heads:
 
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
@@ -354,9 +354,9 @@ The body can be accessed via `hydra-toggle/body'."
                       (setq hydra-curr-map
                             (quote (keymap (7 . hydra-keyboard-quit)
                                            (113 . hydra-toggle/nil)
-                                           (97 . hydra-toggle/abbrev-mode)
-                                           (102 . hydra-toggle/auto-fill-mode)
-                                           (116 . hydra-toggle/toggle-truncate-lines)
+                                           (97 . hydra-toggle/abbrev-mode-and-exit)
+                                           (102 . hydra-toggle/auto-fill-mode-and-exit)
+                                           (116 . hydra-toggle/toggle-truncate-lines-and-exit)
                                            (switch-frame . hydra--handle-switch-frame)
                                            (kp-subtract . hydra--negative-argument)
                                            (kp-9 . hydra--digit-argument)
@@ -399,7 +399,7 @@ The body can be accessed via `hydra-toggle/body'."
        ("k" previous-line)
        ("q" nil "quit")))
     '(progn
-      (defun hydra-vi/hydra-keyboard-quit nil "Create a hydra with no body and the heads:
+      (defun hydra-vi/hydra-keyboard-quit-and-exit nil "Create a hydra with no body and the heads:
 
 \"\":    `hydra-keyboard-quit',
 \"j\":    `next-line',
@@ -447,7 +447,7 @@ Call the head: `next-line'."
                                            (113 . hydra-vi/nil)
                                            (107 . hydra-vi/previous-line)
                                            (106 . hydra-vi/next-line)
-                                           (7 . hydra-vi/hydra-keyboard-quit)
+                                           (7 . hydra-vi/hydra-keyboard-quit-and-exit)
                                            (switch-frame . hydra--handle-switch-frame)
                                            (kp-subtract . hydra--negative-argument)
                                            (kp-9 . hydra--digit-argument)
@@ -504,7 +504,7 @@ Call the head: `previous-line'."
                                            (113 . hydra-vi/nil)
                                            (107 . hydra-vi/previous-line)
                                            (106 . hydra-vi/next-line)
-                                           (7 . hydra-vi/hydra-keyboard-quit)
+                                           (7 . hydra-vi/hydra-keyboard-quit-and-exit)
                                            (switch-frame . hydra--handle-switch-frame)
                                            (kp-subtract . hydra--negative-argument)
                                            (kp-9 . hydra--digit-argument)
@@ -577,7 +577,7 @@ The body can be accessed via `hydra-vi/body'."
                                            (113 . hydra-vi/nil)
                                            (107 . hydra-vi/previous-line)
                                            (106 . hydra-vi/next-line)
-                                           (7 . hydra-vi/hydra-keyboard-quit)
+                                           (7 . hydra-vi/hydra-keyboard-quit-and-exit)
                                            (switch-frame . hydra--handle-switch-frame)
                                            (kp-subtract . hydra--negative-argument)
                                            (kp-9 . hydra--digit-argument)
@@ -784,6 +784,10 @@ _f_ auto-fill-mode:    %`auto-fill-function
                   '(nil nil :exit t))
                  'blue))
   (should (equal (hydra--head-color
+                  '("j" next-line "" :exit t)
+                  '(nil nil))
+                 'blue))
+  (should (equal (hydra--head-color
                   '("c" (message "Continuing") "red" :exit nil)
                   '(nil nil :exit t))
                  'red))
@@ -879,7 +883,7 @@ Call the head: `(text-scale-set 0)'."
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function (lambda nil (interactive)
-                                                                             (text-scale-set 0)))))
+                                                                                  (text-scale-set 0)))))
                  ((quit error)
                   (message "%S" err)
                   (unless hydra-lv (sit-for 0.8))
@@ -910,12 +914,12 @@ Call the head: `(text-scale-set 0)'."
                                            (52 . hydra--digit-argument)
                                            (51 . hydra--digit-argument)
                                            (50 . hydra--digit-argument)
-                                           (49 . hydra-zoom/lambda-0)
-                                           (48 . hydra-zoom/lambda-0)
+                                           (49 . hydra-zoom/lambda-0-and-exit)
+                                           (48 . hydra-zoom/lambda-0-and-exit)
                                            (45 . hydra--negative-argument)
                                            (21 . hydra--universal-argument))))
                       t (lambda nil (hydra-cleanup))))))
-      (defun hydra-zoom/lambda-0 nil "Create a hydra with no body and the heads:
+      (defun hydra-zoom/lambda-0-and-exit nil "Create a hydra with no body and the heads:
 
 \"r\":    `(text-scale-set 0)',
 \"0\":    `(text-scale-set 0)',
@@ -929,7 +933,7 @@ Call the head: `(text-scale-set 0)'."
              (hydra-cleanup)
              (catch (quote hydra-disable)
                (call-interactively (function (lambda nil (interactive)
-                                                (text-scale-set 0))))))
+                                                     (text-scale-set 0))))))
       (defun hydra-zoom/hint nil
         (if hydra-lv (lv-message (format #("zoom: [r 0]: reset." 7 8 (face hydra-face-red)
                                            9 10 (face hydra-face-blue))))
@@ -971,8 +975,8 @@ The body can be accessed via `hydra-zoom/body'."
                                            (52 . hydra--digit-argument)
                                            (51 . hydra--digit-argument)
                                            (50 . hydra--digit-argument)
-                                           (49 . hydra-zoom/lambda-0)
-                                           (48 . hydra-zoom/lambda-0)
+                                           (49 . hydra-zoom/lambda-0-and-exit)
+                                           (48 . hydra-zoom/lambda-0-and-exit)
                                            (45 . hydra--negative-argument)
                                            (21 . hydra--universal-argument))))
                       t (lambda nil (hydra-cleanup))))
@@ -1033,11 +1037,11 @@ Call the head: `(text-scale-set 0)'."
                                            (51 . hydra--digit-argument)
                                            (50 . hydra--digit-argument)
                                            (49 . hydra-zoom/lambda-r)
-                                           (48 . hydra-zoom/lambda-0)
+                                           (48 . hydra-zoom/lambda-0-and-exit)
                                            (45 . hydra--negative-argument)
                                            (21 . hydra--universal-argument))))
                       t (lambda nil (hydra-cleanup))))))
-      (defun hydra-zoom/lambda-0 nil "Create a hydra with no body and the heads:
+      (defun hydra-zoom/lambda-0-and-exit nil "Create a hydra with no body and the heads:
 
 \"r\":    `(text-scale-set 0)',
 \"0\":    `(text-scale-set 0)',
@@ -1094,7 +1098,7 @@ The body can be accessed via `hydra-zoom/body'."
                                            (51 . hydra--digit-argument)
                                            (50 . hydra--digit-argument)
                                            (49 . hydra-zoom/lambda-r)
-                                           (48 . hydra-zoom/lambda-0)
+                                           (48 . hydra-zoom/lambda-0-and-exit)
                                            (45 . hydra--negative-argument)
                                            (21 . hydra--universal-argument))))
                       t (lambda nil (hydra-cleanup))))

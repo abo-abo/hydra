@@ -556,7 +556,7 @@ DOC was generated with `hydra--doc'.
 HEAD is one of the HEADS passed to `defhydra'.
 BODY-PRE and BODY-POST are pre-processed in `defhydra'.
 OTHER-POST is an optional extension to the :post key of BODY."
-  (let ((name (hydra--head-name head name))
+  (let ((name (hydra--head-name head name body))
         (cmd (when (car head)
                (hydra--make-callable
                 (cadr head))))
@@ -679,12 +679,16 @@ NAME, BODY and HEADS are parameters to `defhydra'."
            "An %S Hydra must have at least one blue head in order to exit"
            body-color))))))
 
-(defun hydra--head-name (h body-name)
-  "Return the symbol for head H of body BODY-NAME."
-  (intern (format "%S/%s" body-name
-                  (if (symbolp (cadr h))
-                      (cadr h)
-                    (concat "lambda-" (car h))))))
+(defun hydra--head-name (h name body)
+  "Return the symbol for head H of hydra with NAME and BODY."
+  (let ((str (format "%S/%s" name
+                     (if (symbolp (cadr h))
+                         (cadr h)
+                       (concat "lambda-" (car h))))))
+    (when (and (memq (hydra--head-color h body) '(blue teal))
+               (not (memq (cadr h) '(body nil))))
+      (setq str (concat str "-and-exit")))
+    (intern str)))
 
 (defun hydra--delete-duplicates (heads)
   "Return HEADS without entries that have the same CMD part.
@@ -881,15 +885,15 @@ result of `defhydra'."
       (setq heads (cons (list hydra-keyboard-quit #'hydra-keyboard-quit nil :exit t)
                         heads)))
     (dolist (h heads)
-      (let ((len (length h))
-            (cmd-name (hydra--head-name h name)))
+      (let ((len (length h)))
         (cond ((< len 2)
                (error "Each head should have at least two items: %S" h))
               ((= len 2)
                (setcdr (cdr h)
                        (list
-                        (hydra-plist-get-default (cddr body) :hint "")
-                        :cmd-name cmd-name)))
+                        (hydra-plist-get-default (cddr body) :hint "")))
+               (setcdr (nthcdr 2 h)
+                       (list :cmd-name (hydra--head-name h name body))))
               (t
                (let ((hint (cl-caddr h)))
                  (unless (or (null hint)
@@ -897,7 +901,10 @@ result of `defhydra'."
                    (setcdr (cdr h) (cons
                                     (hydra-plist-get-default (cddr body) :hint "")
                                     (cddr h))))
-                 (setcdr (cddr h) `(:cmd-name ,cmd-name ,@(cl-cdddr h))))))))
+                 (setcdr (cddr h)
+                         `(:cmd-name
+                           ,(hydra--head-name h name body)
+                           ,@(cl-cdddr h))))))))
     (let ((doc (hydra--doc body-key body-name heads))
           (heads-nodup (hydra--delete-duplicates heads)))
       (mapc
