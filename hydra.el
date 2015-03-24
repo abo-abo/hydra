@@ -197,7 +197,7 @@ Vanquishable only through a blue head.")
   "Keymap of the current Hydra called.")
 
 (defun hydra--handle-switch-frame (evt)
-  "Quit hydra and call old switch-frame event handler."
+  "Quit hydra and call old switch-frame event handler for EVT."
   (interactive "e")
   (hydra-keyboard-quit)
   (funcall (lookup-key (current-global-map) [switch-frame]) evt))
@@ -469,7 +469,7 @@ HEAD's binding is returned as a string wrapped with [] or {}."
 (defun hydra--format (_name body docstring heads)
   "Generate a `format' statement from STR.
 \"%`...\" expressions are extracted into \"%S\".
-NAME, BODY, DOCSTRING and HEADS are parameters of `defhydra'.
+_NAME, BODY, DOCSTRING and HEADS are parameters of `defhydra'.
 The expressions can be auto-expanded according to NAME."
   (setq docstring (replace-regexp-in-string "\\^" "" docstring))
   (let ((rest (hydra--hint body heads))
@@ -794,7 +794,7 @@ NAMES should be defined by `defhydradio' or similar."
   "Timer for `hydra-timeout'.")
 
 (defun hydra-timeout (secs &optional function)
-  "In SECS seconds call FUNCTION, then `hydra-keyboard-quit'.
+  "In SECS seconds call FUNCTION, then function `hydra-keyboard-quit'.
 Cancel the previous `hydra-timeout'."
   (cancel-timer hydra-timer)
   (setq hydra-timer (timer-create))
@@ -822,7 +822,8 @@ BODY has the format:
     (BODY-MAP BODY-KEY &rest PLIST)
 
 DOCSTRING will be displayed in the echo area to identify the
-Hydra.
+Hydra.  When DOCSTRING starts with a newline, special Ruby-style
+substitution will be performed by `hydra--format'.
 
 Functions are created on basis of HEADS, each of which has the
 format:
@@ -969,7 +970,7 @@ result of `defhydra'."
 
 (defmacro defhydradio (name _body &rest heads)
   "Create radios with prefix NAME.
-BODY specifies the options; there are none currently.
+_BODY specifies the options; there are none currently.
 HEADS have the format:
 
     (TOGGLE-NAME &optional VALUE DOC)
