@@ -491,7 +491,7 @@ The expressions can be auto-expanded according to NAME."
                             (or
                              hydra-key-format-spec
                              (concat "%" (match-string 3 docstring) "s"))
-                            nil nil docstring)))
+                            t nil docstring)))
                  (error "Unrecognized key: _%s_" key))))
 
             (t

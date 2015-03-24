@@ -740,6 +740,17 @@ _f_ auto-fill-mode:    %`auto-fill-function
                 ("q" nil "" :cmd-name bar/nil))))
            '(concat (format "  bar %s\n" foo) "{a}, [q]"))))
 
+(ert-deftest hydra-format-3 ()
+  (should (equal
+           (let ((hydra-fontify-head-function
+                  'hydra-fontify-head-greyscale))
+             (hydra--format
+              'bar
+              nil
+              "\n_<SPC>_   ^^ace jump\n"
+              '(("<SPC>" ace-jump-char-mode nil :cmd-name bar/ace-jump-char-mode))))
+           '(concat (format "%s   ace jump\n" "{<SPC>}") ""))))
+
 (ert-deftest hydra-format-with-sexp-1 ()
   (should (equal
            (let ((hydra-fontify-head-function
