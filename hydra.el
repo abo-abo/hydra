@@ -235,7 +235,7 @@ Vanquishable only through a blue head.")
   (interactive)
   (unless (string-match "hydra-repeat$" (symbol-name last-command))
     (setq hydra-repeat--command last-command)
-    (setq hydra-repeat--prefix-arg (or last-prefix-arg 1)))
+    (setq hydra-repeat--prefix-arg last-prefix-arg))
   (setq current-prefix-arg hydra-repeat--prefix-arg)
   (funcall hydra-repeat--command))
 
