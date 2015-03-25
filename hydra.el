@@ -230,12 +230,15 @@ Vanquishable only through a blue head.")
 (defvar hydra-repeat--command nil
   "Command to use with `hydra-repeat'.")
 
-(defun hydra-repeat ()
-  "Repeat last command with last prefix arg."
-  (interactive)
-  (unless (string-match "hydra-repeat$" (symbol-name last-command))
-    (setq hydra-repeat--command last-command)
-    (setq hydra-repeat--prefix-arg last-prefix-arg))
+(defun hydra-repeat (&optional arg)
+  "Repeat last command with last prefix arg.
+When ARG is non-nil, use that instead."
+  (interactive "p")
+  (if (eq arg 1)
+      (unless (string-match "hydra-repeat$" (symbol-name last-command))
+        (setq hydra-repeat--command last-command)
+        (setq hydra-repeat--prefix-arg last-prefix-arg))
+    (setq hydra-repeat--prefix-arg arg))
   (setq current-prefix-arg hydra-repeat--prefix-arg)
   (funcall hydra-repeat--command))
 
