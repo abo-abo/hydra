@@ -262,10 +262,10 @@ _v_ariable       _u_ser-option
                            :color pink
                            :post (deactivate-mark))
   "
-  ^_k_^     _d_elete    _s_tring     |\\     _,,,--,,_
-_h_   _l_   _o_k        _y_ank       /,`.-'`'   ._  \-;;,_
-  ^_j_^     _n_ew-copy  _r_eset     |,4-  ) )_   .;.(  `'-'
-^^^^        _e_xchange  _u_ndo     '---''(_/._)-'(_\_)
+  ^_k_^     _d_elete    _s_tring
+_h_   _l_   _o_k        _y_ank
+  ^_j_^     _n_ew-copy  _r_eset
+^^^^        _e_xchange  _u_ndo
 ^^^^        ^ ^         _p_aste
 "
   ("h" backward-char nil)
