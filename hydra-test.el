@@ -48,6 +48,7 @@ The body can be accessed via `hydra-error/body'.
 
 Call the head: `first-error'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function first-error)))
@@ -100,6 +101,7 @@ The body can be accessed via `hydra-error/body'.
 
 Call the head: `next-error'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function next-error)))
@@ -152,6 +154,7 @@ The body can be accessed via `hydra-error/body'.
 
 Call the head: `previous-error'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function previous-error)))
@@ -220,6 +223,7 @@ Call the head: `previous-error'."
 
 The body can be accessed via `hydra-error/body'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (catch (quote hydra-disable)
                (when hydra-is-helpful (hydra-error/hint))
@@ -280,6 +284,7 @@ The body can be accessed via `hydra-toggle/body'.
 
 Call the head: `toggle-truncate-lines'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (hydra-cleanup)
              (catch (quote hydra-disable)
@@ -295,6 +300,7 @@ The body can be accessed via `hydra-toggle/body'.
 
 Call the head: `auto-fill-mode'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (hydra-cleanup)
              (catch (quote hydra-disable)
@@ -310,6 +316,7 @@ The body can be accessed via `hydra-toggle/body'.
 
 Call the head: `abbrev-mode'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (hydra-cleanup)
              (catch (quote hydra-disable)
@@ -325,6 +332,7 @@ The body can be accessed via `hydra-toggle/body'.
 
 Call the head: `nil'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (hydra-cleanup)
              (catch (quote hydra-disable)))
@@ -346,6 +354,7 @@ Call the head: `nil'."
 
 The body can be accessed via `hydra-toggle/body'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (catch (quote hydra-disable)
                (when hydra-is-helpful (hydra-toggle/hint))
@@ -410,6 +419,7 @@ The body can be accessed via `hydra-vi/body'.
 
 Call the head: `hydra-keyboard-quit'."
              (interactive)
+             (hydra-default-pre)
              (set-cursor-color "#e52b50")
              (hydra-disable)
              (hydra-cleanup)
@@ -427,6 +437,7 @@ The body can be accessed via `hydra-vi/body'.
 
 Call the head: `next-line'."
              (interactive)
+             (hydra-default-pre)
              (set-cursor-color "#e52b50")
              (hydra-disable)
              (catch (quote hydra-disable)
@@ -484,6 +495,7 @@ The body can be accessed via `hydra-vi/body'.
 
 Call the head: `previous-line'."
              (interactive)
+             (hydra-default-pre)
              (set-cursor-color "#e52b50")
              (hydra-disable)
              (catch (quote hydra-disable)
@@ -541,6 +553,7 @@ The body can be accessed via `hydra-vi/body'.
 
 Call the head: `nil'."
              (interactive)
+             (hydra-default-pre)
              (set-cursor-color "#e52b50")
              (hydra-disable)
              (hydra-cleanup)
@@ -562,6 +575,7 @@ Call the head: `nil'."
 
 The body can be accessed via `hydra-vi/body'."
              (interactive)
+             (hydra-default-pre)
              (set-cursor-color "#e52b50")
              (hydra-disable)
              (catch (quote hydra-disable)
@@ -902,10 +916,11 @@ The body can be accessed via `hydra-zoom/body'.
 
 Call the head: `(text-scale-set 0)'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function (lambda nil (interactive)
-                                                                                  (text-scale-set 0)))))
+                                                                             (text-scale-set 0)))))
                  ((quit error)
                   (message "%S" err)
                   (unless hydra-lv (sit-for 0.8))
@@ -951,11 +966,12 @@ The body can be accessed via `hydra-zoom/body'.
 
 Call the head: `(text-scale-set 0)'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (hydra-cleanup)
              (catch (quote hydra-disable)
                (call-interactively (function (lambda nil (interactive)
-                                                     (text-scale-set 0))))))
+                                                (text-scale-set 0))))))
       (defun hydra-zoom/hint nil
         (if hydra-lv (lv-message (format #("zoom: [r 0]: reset." 7 8 (face hydra-face-red)
                                            9 10 (face hydra-face-blue))))
@@ -969,6 +985,7 @@ Call the head: `(text-scale-set 0)'."
 
 The body can be accessed via `hydra-zoom/body'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (catch (quote hydra-disable)
                (when hydra-is-helpful (hydra-zoom/hint))
@@ -1024,6 +1041,7 @@ The body can be accessed via `hydra-zoom/body'.
 
 Call the head: `(text-scale-set 0)'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (catch (quote hydra-disable)
                (condition-case err (prog1 t (call-interactively (function (lambda nil (interactive)
@@ -1073,6 +1091,7 @@ The body can be accessed via `hydra-zoom/body'.
 
 Call the head: `(text-scale-set 0)'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (hydra-cleanup)
              (catch (quote hydra-disable)
@@ -1091,6 +1110,7 @@ Call the head: `(text-scale-set 0)'."
 
 The body can be accessed via `hydra-zoom/body'."
              (interactive)
+             (hydra-default-pre)
              (hydra-disable)
              (catch (quote hydra-disable)
                (when hydra-is-helpful (hydra-zoom/hint))

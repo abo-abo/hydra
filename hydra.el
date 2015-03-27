@@ -376,8 +376,21 @@ BODY is the second argument to `defhydra'"
     (teal 'hydra-face-teal)
     (t (error "Unknown color for %S" h))))
 
+(defvar hydra--input-method-function nil
+  "Store overridden `input-method-function' here.")
+
+(defun hydra-default-pre ()
+  "Default setup that happens in each head before :pre."
+  (when (eq input-method-function 'key-chord-input-method)
+    (unless hydra--input-method-function
+      (setq hydra--input-method-function input-method-function)
+      (setq input-method-function nil))))
+
 (defun hydra-cleanup ()
   "Clean up after a Hydra."
+  (when hydra--input-method-function
+    (setq input-method-function hydra--input-method-function)
+    (setq hydra--input-method-function nil))
   (when (window-live-p lv-wnd)
     (let ((buf (window-buffer lv-wnd)))
       (delete-window lv-wnd)
@@ -574,6 +587,7 @@ OTHER-POST is an optional extension to the :post key of BODY."
     `(defun ,name ()
        ,doc
        (interactive)
+       (hydra-default-pre)
        ,@(when body-pre (list body-pre))
        (hydra-disable)
        ,@(when (memq color '(blue teal)) '((hydra-cleanup)))
