@@ -751,6 +751,17 @@ _f_ auto-fill-mode:    %`auto-fill-function
               '(("<SPC>" ace-jump-char-mode nil :cmd-name bar/ace-jump-char-mode))))
            '(concat (format "%s   ace jump\n" "{<SPC>}") ""))))
 
+(ert-deftest hydra-format-4 ()
+  (should
+   (equal (hydra--format
+           nil
+           '(nil nil :hint nil)
+           "\n_j_,_k_"
+           '(("j" nil) ("k" nil)))
+          '(concat (format "%s,%s"
+                    #("j" 0 1 (face hydra-face-blue))
+                    #("k" 0 1 (face hydra-face-blue))) ""))))
+
 (ert-deftest hydra-format-with-sexp-1 ()
   (should (equal
            (let ((hydra-fontify-head-function
