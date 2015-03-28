@@ -659,6 +659,11 @@ OTHER-POST is an optional extension to the :post key of BODY."
               (recur (cdr map)))))))
     (recur keymap)))
 
+(defmacro hydra--make-funcall (sym)
+  "Transform SYM into a `funcall' that calls it."
+  `(when (and ,sym (symbolp ,sym))
+     (setq ,sym `(funcall #',,sym))))
+
 (defun hydra--handle-nonhead (keymap name body heads)
   "Setup KEYMAP for intercepting non-head bindings.
 NAME, BODY and HEADS are parameters to `defhydra'."
@@ -984,11 +989,6 @@ result of `defhydra'."
            keymap-name
            (or body-body-pre body-pre) body-post
            '(setq prefix-arg current-prefix-arg))))))
-
-(defmacro hydra--make-funcall (sym)
-  "Transform SYM into a `funcall' that calls it."
-  `(when (and ,sym (symbolp ,sym))
-     (setq ,sym `(funcall #',,sym))))
 
 (defmacro defhydradio (name _body &rest heads)
   "Create radios with prefix NAME.
