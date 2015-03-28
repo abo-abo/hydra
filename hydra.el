@@ -598,18 +598,16 @@ OTHER-POST is an optional extension to the :post key of BODY."
                         ,body-post)
                    `(,(when cmd
                             `(condition-case err
-                                 (prog1 t
-                                   (call-interactively #',cmd))
+                                 (call-interactively #',cmd)
                                ((quit error)
                                 (message "%S" err)
                                 (unless hydra-lv
-                                  (sit-for 0.8))
-                                nil)))
+                                  (sit-for 0.8)))))
                       (when hydra-is-helpful
                         (,hint))
                       (setq hydra-last
                             (hydra-set-transient-map
-                             (setq hydra-curr-map ',keymap)
+                             (setq hydra-curr-map ,keymap)
                              t
                              ,(if (and
                                    (not (memq body-color
@@ -886,6 +884,7 @@ result of `defhydra'."
   (when (keywordp (car body))
     (setq body (cons nil (cons nil body))))
   (let* ((keymap (copy-keymap hydra-base-map))
+         (keymap-name (intern (format "%S/keymap" name)))
          (body-name (intern (format "%S/body" name)))
          (body-key (cadr body))
          (body-plist (cddr body))
@@ -930,10 +929,14 @@ result of `defhydra'."
       (hydra--make-funcall body-body-pre)
       (hydra--handle-nonhead keymap name body heads)
       `(progn
+         ;; create keymap
+         (defvar ,keymap-name
+           ',keymap
+           ,(format "Keymap for %S." name))
          ;; create defuns
          ,@(mapcar
             (lambda (head)
-              (hydra--make-defun name body doc head keymap
+              (hydra--make-defun name body doc head keymap-name
                                  body-pre body-post))
             heads-nodup)
          ;; free up keymap prefix
@@ -970,7 +973,7 @@ result of `defhydra'."
            ,(hydra--message name body docstring heads))
          ,(hydra--make-defun
            name body doc '(nil body)
-           keymap
+           keymap-name
            (or body-body-pre body-pre) body-post
            '(setq prefix-arg current-prefix-arg))))))
 
