@@ -914,10 +914,14 @@ result of `defhydra'."
                    (setcdr (cdr h) (cons
                                     (hydra-plist-get-default body-plist :hint "")
                                     (cddr h))))
-                 (setcdr (cddr h)
-                         `(:cmd-name
-                           ,(hydra--head-name h name body)
-                           ,@(cl-cdddr h))))))))
+                 (let ((hint-and-plist (cddr h)))
+                   (if (null (cdr hint-and-plist))
+                       (setcdr hint-and-plist
+                               (list :cmd-name
+                                     (hydra--head-name h name body)))
+                     (plist-put (cdr hint-and-plist)
+                                :cmd-name
+                                (hydra--head-name h name body)))))))))
     (let ((doc (hydra--doc body-key body-name heads))
           (heads-nodup (hydra--delete-duplicates heads)))
       (mapc
