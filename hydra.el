@@ -885,16 +885,17 @@ result of `defhydra'."
          (setq docstring "hydra")))
   (when (keywordp (car body))
     (setq body (cons nil (cons nil body))))
-  (let ((keymap (copy-keymap hydra-base-map))
-        (body-name (intern (format "%S/body" name)))
-        (body-key (cadr body))
-        (body-pre (plist-get (cddr body) :pre))
-        (body-body-pre (plist-get (cddr body) :body-pre))
-        (body-post (plist-get (cddr body) :post))
-        (method (or (plist-get body :bind)
-                    (car body))))
+  (let* ((keymap (copy-keymap hydra-base-map))
+         (body-name (intern (format "%S/body" name)))
+         (body-key (cadr body))
+         (body-plist (cddr body))
+         (body-map (or (car body)
+                       (plist-get body-plist :bind)))
+         (body-pre (plist-get body-plist :pre))
+         (body-body-pre (plist-get body-plist :body-pre))
+         (body-post (plist-get body-plist :post)))
+    (hydra--make-funcall body-post)
     (when body-post
-      (hydra--make-funcall body-post)
       (setq heads (cons (list hydra-keyboard-quit #'hydra-keyboard-quit nil :exit t)
                         heads)))
     (dolist (h heads)
@@ -904,7 +905,7 @@ result of `defhydra'."
               ((= len 2)
                (setcdr (cdr h)
                        (list
-                        (hydra-plist-get-default (cddr body) :hint "")))
+                        (hydra-plist-get-default body-plist :hint "")))
                (setcdr (nthcdr 2 h)
                        (list :cmd-name (hydra--head-name h name body))))
               (t
@@ -912,7 +913,7 @@ result of `defhydra'."
                  (unless (or (null hint)
                              (stringp hint))
                    (setcdr (cdr h) (cons
-                                    (hydra-plist-get-default (cddr body) :hint "")
+                                    (hydra-plist-get-default body-plist :hint "")
                                     (cddr h))))
                  (setcdr (cddr h)
                          `(:cmd-name
@@ -929,46 +930,39 @@ result of `defhydra'."
       (hydra--make-funcall body-body-pre)
       (hydra--handle-nonhead keymap name body heads)
       `(progn
+         ;; create defuns
          ,@(mapcar
             (lambda (head)
               (hydra--make-defun name body doc head keymap
                                  body-pre body-post))
             heads-nodup)
+         ;; free up keymap prefix
          ,@(unless (or (null body-key)
-                       (null method)
-                       (hydra--callablep method))
-                   `((unless (keymapp (lookup-key ,method (kbd ,body-key)))
-                       (define-key ,method (kbd ,body-key) nil))))
+                       (null body-map)
+                       (hydra--callablep body-map))
+                   `((unless (keymapp (lookup-key ,body-map (kbd ,body-key)))
+                       (define-key ,body-map (kbd ,body-key) nil))))
+         ;; bind keys
          ,@(delq nil
-                 (cl-mapcar
+                 (mapcar
                   (lambda (head)
                     (let ((name (hydra--head-property head :cmd-name)))
                       (when (and (cadr head)
                                  (not (eq (cadr head) 'hydra-keyboard-quit))
-                                 (or body-key method))
-                        (let ((bind (hydra--head-property head :bind 'default))
+                                 (or body-key body-map))
+                        (let ((bind (hydra--head-property head :bind body-map))
                               (final-key
                                (if body-key
                                    (vconcat (kbd body-key) (kbd (car head)))
                                  (kbd (car head)))))
                           (cond ((null bind) nil)
-
-                                ((eq bind 'default)
-                                 (list
-                                  (if (hydra--callablep method)
-                                      'funcall
-                                    'define-key)
-                                  method
-                                  final-key
-                                  (list 'function name)))
-
                                 ((hydra--callablep bind)
-                                 `(funcall (function ,bind)
-                                           ,final-key
-                                           (function ,name)))
-
+                                 `(funcall ,bind ,final-key (function ,name)))
+                                ((and (symbolp bind)
+                                      (keymapp (symbol-value bind)))
+                                 `(define-key ,bind ,final-key (function ,name)))
                                 (t
-                                 (error "Invalid :bind property %S" head)))))))
+                                 (error "Invalid :bind property `%S' for head %S" bind  head)))))))
                   heads))
          (defun ,(intern (format "%S/hint" name)) ()
            ,(hydra--message name body docstring heads))
