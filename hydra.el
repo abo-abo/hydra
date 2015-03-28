@@ -664,8 +664,7 @@ NAME, BODY and HEADS are parameters to `defhydra'."
   (let ((body-color (hydra--body-color body))
         (body-post (plist-get (cddr body) :post)))
     (if body-post
-        (when (symbolp body-post)
-          (setq body-post `(funcall #',body-post)))
+        (hydra--make-funcall body-post)
       (when hydra-keyboard-quit
         (define-key keymap hydra-keyboard-quit #'hydra-keyboard-quit)))
     (when (memq body-color '(amaranth pink teal))
@@ -826,7 +825,6 @@ Cancel the previous `hydra-timeout'."
   (timer-activate hydra-timer))
 
 ;;* Macros
-;;** defhydra
 ;;;###autoload
 (defmacro defhydra (name body &optional docstring &rest heads)
   "Create a Hydra - a family of functions with prefix NAME.
@@ -896,8 +894,7 @@ result of `defhydra'."
         (method (or (plist-get body :bind)
                     (car body))))
     (when body-post
-      (when (symbolp body-post)
-        (setq body-post `(funcall #',body-post)))
+      (hydra--make-funcall body-post)
       (setq heads (cons (list hydra-keyboard-quit #'hydra-keyboard-quit nil :exit t)
                         heads)))
     (dolist (h heads)
@@ -928,10 +925,8 @@ result of `defhydra'."
          (define-key keymap (kbd (car x))
            (plist-get (cl-cdddr x) :cmd-name)))
        heads)
-      (when (and body-pre (symbolp body-pre))
-        (setq body-pre `(funcall #',body-pre)))
-      (when (and body-body-pre (symbolp body-body-pre))
-        (setq body-body-pre `(funcall #',body-body-pre)))
+      (hydra--make-funcall body-pre)
+      (hydra--make-funcall body-body-pre)
       (hydra--handle-nonhead keymap name body heads)
       `(progn
          ,@(mapcar
@@ -982,6 +977,11 @@ result of `defhydra'."
            keymap
            (or body-body-pre body-pre) body-post
            '(setq prefix-arg current-prefix-arg))))))
+
+(defmacro hydra--make-funcall (sym)
+  "Transform SYM into a `funcall' that calls it."
+  `(when (and ,sym (symbolp ,sym))
+     (setq ,sym `(funcall #',,sym))))
 
 (defmacro defhydradio (name _body &rest heads)
   "Create radios with prefix NAME.

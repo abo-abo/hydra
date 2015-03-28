@@ -1193,6 +1193,12 @@ _r_ Commander William Riker:   % -8`hydra-tng/riker^    _t_ Deanna Troi:        
 _d_ Lieutenant Commander Data: % -8`hydra-tng/data^^    _c_ Doctor Beverly Crusher:    % -8`hydra-tng/dr-crusher
 _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to             % -8`hydra-tng/phaser^^^^" 1)))))
 
+(ert-deftest hydra--make-funcall ()
+  (should (equal (let ((body-pre 'foo))
+                   (hydra--make-funcall body-pre)
+                   body-pre)
+                 '(funcall (function foo)))))
+
 (provide 'hydra-test)
 
 ;;; hydra-test.el ends here
