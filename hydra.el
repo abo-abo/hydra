@@ -930,9 +930,10 @@ result of `defhydra'."
       (hydra--handle-nonhead keymap name body heads)
       `(progn
          ;; create keymap
-         (defvar ,keymap-name
-           ',keymap
-           ,(format "Keymap for %S." name))
+         (set (defvar ,keymap-name
+                nil
+                ,(format "Keymap for %S." name))
+              ',keymap)
          ;; create defuns
          ,@(mapcar
             (lambda (head)
