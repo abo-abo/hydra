@@ -215,7 +215,10 @@ Vanquishable only through a blue head.")
 (defun hydra--digit-argument (arg)
   "Forward to (`digit-argument' ARG)."
   (interactive "P")
-  (let ((universal-argument-map hydra-curr-map))
+  (let ((universal-argument-map
+         (if (fboundp 'universal-argument--mode)
+             hydra-curr-map
+           universal-argument-map)))
     (digit-argument arg)))
 
 (defun hydra--negative-argument (arg)
