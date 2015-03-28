@@ -959,7 +959,9 @@ result of `defhydra'."
                                 ((hydra--callablep bind)
                                  `(funcall ,bind ,final-key (function ,name)))
                                 ((and (symbolp bind)
-                                      (keymapp (symbol-value bind)))
+                                      (if (boundp bind)
+                                          (keymapp (symbol-value bind))
+                                        t))
                                  `(define-key ,bind ,final-key (function ,name)))
                                 (t
                                  (error "Invalid :bind property `%S' for head %S" bind  head)))))))
