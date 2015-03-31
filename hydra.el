@@ -79,12 +79,11 @@
 (require 'cl-lib)
 (require 'lv)
 
-(defalias 'hydra-set-transient-map
-    (if (fboundp 'set-transient-map)
-        'set-transient-map
-      (lambda (map _keep-pred &optional on-exit)
-        (with-no-warnings
-          (set-temporary-overlay-map map (hydra--pred on-exit))))))
+(defun hydra-set-transient-map (map _keep-pred &optional on-exit)
+  (if (fboundp 'set-transient-map)
+      (set-transient-map map (hydra--pred on-exit))
+    (with-no-warnings
+      (set-temporary-overlay-map map (hydra--pred on-exit)))))
 
 (defun hydra--pred (on-exit)
   "Generate a predicate on whether to continue the Hydra state.
