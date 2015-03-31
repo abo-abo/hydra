@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'ert)
+(message "Emacs version: %s" emacs-version)
 
 (ert-deftest hydra-red-error ()
   (should

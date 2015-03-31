@@ -8,6 +8,7 @@ LOAD = -l lv.el -l hydra.el -l hydra-test.el
 all: test
 
 test:
+	@echo "Using $(shell which $(emacs))..."
 	$(emacs) -batch $(LOAD) -f ert-run-tests-batch-and-exit
 
 compile:

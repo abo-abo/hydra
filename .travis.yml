@@ -1,12 +1,14 @@
 language: emacs-lisp
 env:
   matrix:
-    - EMACS=emacs24
+    - emacs=emacs24
+    - emacs=emacs-snapshot
 
 before_install:
   - sudo add-apt-repository -y ppa:cassou/emacs
+  - sudo add-apt-repository -y ppa:ubuntu-elisp
   - sudo apt-get update -qq
-  - sudo apt-get install -qq $EMACS
+  - sudo apt-get install -qq $emacs
 
 script:
   - make test
