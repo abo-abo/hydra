@@ -968,6 +968,48 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
                    body-pre)
                  '(funcall (function foo)))))
 
+(defhydra hydra-simple (global-map "C-c")
+  ("a" (insert "j"))
+  ("b" (insert "k"))
+  ("q" nil))
+
+(defmacro hydra-with (in &rest body)
+  `(let ((temp-buffer (generate-new-buffer " *temp*")))
+     (save-window-excursion
+       (unwind-protect
+            (progn
+              (switch-to-buffer temp-buffer)
+              (transient-mark-mode 1)
+              (insert ,in)
+              (goto-char (point-min))
+              (when (search-forward "~" nil t)
+                (backward-delete-char 1)
+                (set-mark (point)))
+              (goto-char (point-max))
+              (search-backward "|")
+              (delete-char 1)
+              (setq current-prefix-arg)
+              ,@body
+              (insert "|")
+              (when (region-active-p)
+                (exchange-point-and-mark)
+                (insert "~"))
+              (buffer-substring-no-properties
+               (point-min)
+               (point-max)))
+         (and (buffer-name temp-buffer)
+              (kill-buffer temp-buffer))))))
+
+(ert-deftest hydra-integration-1 ()
+  (should (string= (hydra-with "|"
+                               (execute-kbd-macro
+                                (kbd "C-c aabbaaqaabbaa")))
+                   "jjkkjjaabbaa|"))
+  (should (string= (hydra-with "|"
+                               (execute-kbd-macro
+                                (kbd "C-c aabb C-g aaqaabbaa")))
+                   "jjkkaaqaabbaa|")))
+
 (provide 'hydra-test)
 
 ;;; hydra-test.el ends here
