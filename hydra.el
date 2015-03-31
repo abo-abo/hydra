@@ -682,10 +682,21 @@ NAME, BODY and HEADS are parameters to `defhydra'."
                      `(lambda ()
                         (interactive)
                         ,(cond
-                          ((memq body-color '(amaranth teal))
-                           '(message "An amaranth Hydra can only exit through a blue head"))
-                          (t
-                           '(hydra-pink-fallback)))
+                           ((memq body-color '(amaranth teal))
+                            '(let ((k (or (lookup-key
+                                           input-decode-map
+                                           (vconcat [27 91]
+                                                    (this-command-keys-vector)))
+                                          (lookup-key
+                                           input-decode-map
+                                           (vconcat [27 79]
+                                                    (this-command-keys-vector)))))
+                                   f)
+                              (if (and k (setq f (lookup-key test/keymap k)))
+                                  (funcall f)
+                                (message "An amaranth Hydra can only exit through a blue head"))))
+                           (t
+                            '(hydra-pink-fallback)))
                         (hydra-set-transient-map hydra-curr-map t)
                         (when hydra-is-helpful
                           (unless hydra-lv
