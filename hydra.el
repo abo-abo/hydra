@@ -623,7 +623,7 @@ OTHER-POST is an optional extension to the :post key of BODY."
 
 (defun hydra-pink-fallback ()
   "On intercepting a non-head, try to run it."
-  (let ((keys (this-command-keys))
+  (let ((keys (this-single-command-keys))
         kb)
     (when (equal keys [backspace])
       (setq keys ""))
