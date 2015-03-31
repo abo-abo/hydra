@@ -79,11 +79,46 @@
 (require 'cl-lib)
 (require 'lv)
 
-(defun hydra-set-transient-map (map _keep-pred &optional on-exit)
-  (if (fboundp 'set-transient-map)
-      (set-transient-map map (hydra--pred on-exit))
-    (with-no-warnings
-      (set-temporary-overlay-map map (hydra--pred on-exit)))))
+(defvar hydra-curr-on-exit nil
+  "The on-exit predicate for the current Hydra.")
+
+(defvar hydra-curr-foreign-keys nil
+  "The current :foreign-keys behavior.")
+
+(defun hydra-clearfun ()
+  (with-demoted-errors "set-transient-map PCH: %S"
+    (unless (or
+             (not (eq hydra-curr-map (cadr overriding-terminal-local-map)))
+             ;; There's presumably some other transient-map in
+             ;; effect.  Wait for that one to terminate before we
+             ;; remove ourselves.
+             ;; For example, if isearch and C-u both use transient
+             ;; maps, then the lifetime of the C-u should be nested
+             ;; within isearch's, so the pre-command-hook of
+             ;; isearch should be suspended during the C-u one so
+             ;; we don't exit isearch just because we hit 1 after
+             ;; C-u and that 1 exits isearch whereas it doesn't
+             ;; exit C-u.
+             (eq this-command
+                 (lookup-key hydra-curr-map (this-command-keys-vector))))
+      (unless (cl-case hydra-curr-foreign-keys
+                (warn
+                 (setq this-command 'hydra-amaranth-warn))
+                (run
+                 t)
+                (t nil))
+        (remove-hook 'pre-command-hook 'hydra-clearfun)
+        (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map)
+        (when hydra-curr-on-exit (funcall hydra-curr-on-exit))))))
+
+(defun hydra-amaranth-warn ()
+  (interactive)
+  (message "An amaranth Hydra can only exit through a blue head"))
+
+(defun hydra-set-transient-map (map on-exit)
+  (setq hydra-curr-on-exit on-exit)
+  (add-hook 'pre-command-hook 'hydra-clearfun)
+  (internal-push-keymap map 'overriding-terminal-local-map))
 
 (defun hydra--pred (on-exit)
   "Generate a predicate on whether to continue the Hydra state.
@@ -209,7 +244,7 @@ Vanquishable only through a blue head.")
                      (if (eq arg '-)
                          (list -4)
                        '(4))))
-  (hydra-set-transient-map hydra-curr-map t))
+  (hydra-set-transient-map hydra-curr-map hydra-curr-on-exit))
 
 (defun hydra--digit-argument (arg)
   "Forward to (`digit-argument' ARG)."
@@ -603,16 +638,23 @@ OTHER-POST is an optional extension to the :post key of BODY."
                                   (sit-for 0.8)))))
                       (when hydra-is-helpful
                         (,hint))
+                      (setq hydra-curr-map ,keymap)
+                      (setq hydra-curr-foreign-keys
+                            ,(cond
+                              ((memq body-color '(amaranth teal))
+                               ''warn)
+                              ((eq body-color 'pink)
+                               ''run)
+                              (t
+                               nil)))
+                      (setq hydra-curr-on-exit
+                            (lambda ()
+                              (hydra-keyboard-quit)
+                              ,body-post))
                       (setq hydra-last
                             (hydra-set-transient-map
-                             (setq hydra-curr-map ,keymap)
-                             t
-                             ,(if (and
-                                   (not (memq body-color
-                                              '(amaranth pink teal)))
-                                   body-post)
-                                  `(lambda () (hydra-keyboard-quit) ,body-post)
-                                  `(lambda () (hydra-keyboard-quit)))))
+                             hydra-curr-map
+                             hydra-curr-on-exit))
                       ,(or other-post
                            (when body-timeout
                              (list 'hydra-timeout
@@ -658,54 +700,6 @@ OTHER-POST is an optional extension to the :post key of BODY."
   "Transform SYM into a `funcall' that calls it."
   `(when (and ,sym (symbolp ,sym))
      (setq ,sym `(funcall #',,sym))))
-
-(defun hydra--handle-nonhead (keymap name body heads)
-  "Setup KEYMAP for intercepting non-head bindings.
-NAME, BODY and HEADS are parameters to `defhydra'."
-  (let ((body-color (hydra--body-color body))
-        (body-post (plist-get (cddr body) :post)))
-    (if body-post
-        (hydra--make-funcall body-post)
-      (when hydra-keyboard-quit
-        (define-key keymap hydra-keyboard-quit #'hydra-keyboard-quit)))
-    (when (memq body-color '(amaranth pink teal))
-      (if (cl-some (lambda (h)
-                     (memq (hydra--head-color h body) '(blue teal)))
-                   heads)
-          (progn
-            (setcdr
-             keymap
-             (cdr
-              (hydra--modify-keymap
-               keymap
-               (cons t
-                     `(lambda ()
-                        (interactive)
-                        ,(cond
-                           ((memq body-color '(amaranth teal))
-                            '(let ((k (or (lookup-key
-                                           input-decode-map
-                                           (vconcat [27 91]
-                                                    (this-command-keys-vector)))
-                                          (lookup-key
-                                           input-decode-map
-                                           (vconcat [27 79]
-                                                    (this-command-keys-vector)))))
-                                   f)
-                              (if (and k (setq f (lookup-key test/keymap k)))
-                                  (funcall f)
-                                (message "An amaranth Hydra can only exit through a blue head"))))
-                           (t
-                            '(hydra-pink-fallback)))
-                        (hydra-set-transient-map hydra-curr-map t)
-                        (when hydra-is-helpful
-                          (unless hydra-lv
-                            (sit-for 0.8))
-                          (,(intern (format "%S/hint" name))))))))))
-        (unless (eq body-color 'teal)
-          (error
-           "An %S Hydra must have at least one blue head in order to exit"
-           body-color))))))
 
 (defun hydra--head-name (h name body)
   "Return the symbol for head H of hydra with NAME and BODY."
@@ -906,11 +900,14 @@ result of `defhydra'."
                        (plist-get body-plist :bind)))
          (body-pre (plist-get body-plist :pre))
          (body-body-pre (plist-get body-plist :body-pre))
-         (body-post (plist-get body-plist :post)))
+         (body-post (plist-get body-plist :post))
+         (body-color (hydra--body-color body)))
     (hydra--make-funcall body-post)
-    (when body-post
-      (setq heads (cons (list hydra-keyboard-quit #'hydra-keyboard-quit nil :exit t)
-                        heads)))
+    (when hydra-keyboard-quit
+      (if body-post
+          (setq heads (cons (list hydra-keyboard-quit #'hydra-keyboard-quit nil :exit t)
+                            heads))
+        (define-key keymap hydra-keyboard-quit #'hydra-keyboard-quit)))
     (dolist (h heads)
       (let ((len (length h)))
         (cond ((< len 2)
@@ -945,7 +942,14 @@ result of `defhydra'."
        heads)
       (hydra--make-funcall body-pre)
       (hydra--make-funcall body-body-pre)
-      (hydra--handle-nonhead keymap name body heads)
+      (when (memq body-color '(amaranth pink))
+        (unless (cl-some
+                 (lambda (h)
+                   (memq (hydra--head-color h body) '(blue teal)))
+                 heads)
+          (error
+           "An %S Hydra must have at least one blue head in order to exit"
+           body-color)))
       `(progn
          ;; create keymap
          (set (defvar ,keymap-name
