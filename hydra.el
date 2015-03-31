@@ -93,7 +93,7 @@ This is a compatibility code for Emacs older than 24.4."
   `(lambda ()
      (if (lookup-key hydra-curr-map (this-command-keys-vector))
          t
-       (hydra-cleanup)
+       (hydra-keyboard-quit)
        ,(when on-exit
               `(funcall ,(hydra--make-callable on-exit)))
        nil)))
@@ -389,23 +389,19 @@ BODY is the second argument to `defhydra'"
       (setq hydra--input-method-function input-method-function)
       (setq input-method-function nil))))
 
-(defun hydra-cleanup ()
-  "Clean up after a Hydra."
-  (when hydra--input-method-function
-    (setq input-method-function hydra--input-method-function)
-    (setq hydra--input-method-function nil))
-  (when (window-live-p lv-wnd)
-    (let ((buf (window-buffer lv-wnd)))
-      (delete-window lv-wnd)
-      (kill-buffer buf))))
-
 (defun hydra-keyboard-quit ()
   "Quitting function similar to `keyboard-quit'."
   (interactive)
   (hydra-disable)
-  (hydra-cleanup)
   (cancel-timer hydra-timer)
-  (unless hydra-lv
+  (when hydra--input-method-function
+    (setq input-method-function hydra--input-method-function)
+    (setq hydra--input-method-function nil))
+  (if hydra-lv
+      (when (window-live-p lv-wnd)
+        (let ((buf (window-buffer lv-wnd)))
+          (delete-window lv-wnd)
+          (kill-buffer buf)))
     (message ""))
   nil)
 
@@ -593,7 +589,7 @@ OTHER-POST is an optional extension to the :post key of BODY."
        (hydra-default-pre)
        ,@(when body-pre (list body-pre))
        (hydra-disable)
-       ,@(when (memq color '(blue teal)) '((hydra-cleanup)))
+       ,@(when (memq color '(blue teal)) '((hydra-keyboard-quit)))
        (catch 'hydra-disable
          ,@(delq nil
                  (if (memq color '(blue teal))
@@ -616,8 +612,8 @@ OTHER-POST is an optional extension to the :post key of BODY."
                                    (not (memq body-color
                                               '(amaranth pink teal)))
                                    body-post)
-                                  `(lambda () (hydra-cleanup) ,body-post)
-                                  `(lambda () (hydra-cleanup)))))
+                                  `(lambda () (hydra-keyboard-quit) ,body-post)
+                                  `(lambda () (hydra-keyboard-quit)))))
                       ,(or other-post
                            (when body-timeout
                              (list 'hydra-timeout
