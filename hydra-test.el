@@ -45,7 +45,6 @@
                       (107 . hydra-error/previous-error)
                       (106 . hydra-error/next-error)
                       (104 . hydra-error/first-error)
-                      (7 . hydra-keyboard-quit)
                       (kp-subtract . hydra--negative-argument)
                       (kp-9 . hydra--digit-argument)
                       (kp-8 . hydra--digit-argument)
@@ -221,7 +220,6 @@ The body can be accessed via `hydra-error/body'."
                       (97 . hydra-toggle/abbrev-mode-and-exit)
                       (102 . hydra-toggle/auto-fill-mode-and-exit)
                       (116 . hydra-toggle/toggle-truncate-lines-and-exit)
-                      (7 . hydra-keyboard-quit)
                       (kp-subtract . hydra--negative-argument)
                       (kp-9 . hydra--digit-argument)
                       (kp-8 . hydra--digit-argument)
@@ -368,7 +366,6 @@ The body can be accessed via `hydra-toggle/body'."
        (quote (keymap (113 . hydra-vi/nil)
                       (107 . hydra-vi/previous-line)
                       (106 . hydra-vi/next-line)
-                      (7 . hydra-vi/hydra-keyboard-quit-and-exit)
                       (kp-subtract . hydra--negative-argument)
                       (kp-9 . hydra--digit-argument)
                       (kp-8 . hydra--digit-argument)
@@ -392,27 +389,9 @@ The body can be accessed via `hydra-toggle/body'."
                       (48 . hydra--digit-argument)
                       (45 . hydra--negative-argument)
                       (21 . hydra--universal-argument))))
-      (defun hydra-vi/hydra-keyboard-quit-and-exit nil
-        "Create a hydra with no body and the heads:
-
-\"\":    `hydra-keyboard-quit',
-\"j\":    `next-line',
-\"k\":    `previous-line',
-\"q\":    `nil'
-
-The body can be accessed via `hydra-vi/body'.
-
-Call the head: `hydra-keyboard-quit'."
-        (interactive)
-        (hydra-default-pre)
-        (set-cursor-color "#e52b50")
-        (hydra-keyboard-quit)
-        (call-interactively
-         (function hydra-keyboard-quit)))
       (defun hydra-vi/next-line nil
         "Create a hydra with no body and the heads:
 
-\"\":    `hydra-keyboard-quit',
 \"j\":    `next-line',
 \"k\":    `previous-line',
 \"q\":    `nil'
@@ -440,7 +419,6 @@ Call the head: `next-line'."
       (defun hydra-vi/previous-line nil
         "Create a hydra with no body and the heads:
 
-\"\":    `hydra-keyboard-quit',
 \"j\":    `next-line',
 \"k\":    `previous-line',
 \"q\":    `nil'
@@ -468,7 +446,6 @@ Call the head: `previous-line'."
       (defun hydra-vi/nil nil
         "Create a hydra with no body and the heads:
 
-\"\":    `hydra-keyboard-quit',
 \"j\":    `next-line',
 \"k\":    `previous-line',
 \"q\":    `nil'
@@ -498,7 +475,6 @@ Call the head: `nil'."
       (defun hydra-vi/body nil
         "Create a hydra with no body and the heads:
 
-\"\":    `hydra-keyboard-quit',
 \"j\":    `next-line',
 \"k\":    `previous-line',
 \"q\":    `nil'
@@ -532,7 +508,6 @@ The body can be accessed via `hydra-vi/body'."
        (defvar hydra-zoom/keymap nil
          "Keymap for hydra-zoom.")
        (quote (keymap (114 . hydra-zoom/lambda-r)
-                      (7 . hydra-keyboard-quit)
                       (kp-subtract . hydra--negative-argument)
                       (kp-9 . hydra--digit-argument)
                       (kp-8 . hydra--digit-argument)
@@ -650,7 +625,6 @@ The body can be accessed via `hydra-zoom/body'."
        (defvar hydra-zoom/keymap nil
          "Keymap for hydra-zoom.")
        (quote (keymap (114 . hydra-zoom/lambda-r)
-                      (7 . hydra-keyboard-quit)
                       (kp-subtract . hydra--negative-argument)
                       (kp-9 . hydra--digit-argument)
                       (kp-8 . hydra--digit-argument)
@@ -1122,8 +1096,11 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
                                 (kbd "C-c aabbaaqaabbaa")))
                    "jjkkjjaabbaa|"))
   (should (string= (hydra-with "|"
-                               (execute-kbd-macro
-                                (kbd "C-c aabb C-g aaqaabbaa")))
+                               (condition-case nil
+                                   (execute-kbd-macro
+                                    (kbd "C-c aabb C-g"))
+                                 (quit nil))
+                               (execute-kbd-macro "aaqaabbaa"))
                    "jjkkaaqaabbaa|")))
 
 (provide 'hydra-test)

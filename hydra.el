@@ -107,7 +107,8 @@ warn: keep KEYMAP and issue a warning instead of running the command."
 
 (defun hydra--clearfun ()
   "Disable the current Hydra unless `this-command' is a head."
-  (if (eq this-command 'handle-switch-frame)
+  (if (memq this-command '(handle-switch-frame
+                           keyboard-quit))
       (hydra-disable)
     (unless (eq this-command
                 (lookup-key hydra-curr-map (this-command-keys-vector)))
@@ -162,11 +163,6 @@ warn: keep KEYMAP and issue a warning instead of running the command."
   "When t, display a hint with possible bindings in the echo area."
   :type 'boolean
   :group 'hydra)
-
-(defcustom hydra-keyboard-quit ""
-  "This binding will quit an amaranth Hydra.
-It's the only other way to quit it besides though a blue head.
-It's possible to set this to nil.")
 
 (defcustom hydra-lv t
   "When non-nil, `lv-message' (not `message') will be used to display hints."
@@ -814,11 +810,6 @@ result of `defhydra'."
          (body-post (plist-get body-plist :post))
          (body-color (hydra--body-color body)))
     (hydra--make-funcall body-post)
-    (when hydra-keyboard-quit
-      (if body-post
-          (setq heads (cons (list hydra-keyboard-quit #'hydra-keyboard-quit nil :exit t)
-                            heads))
-        (define-key keymap hydra-keyboard-quit #'hydra-keyboard-quit)))
     (dolist (h heads)
       (let ((len (length h)))
         (cond ((< len 2)
@@ -885,7 +876,6 @@ result of `defhydra'."
                   (lambda (head)
                     (let ((name (hydra--head-property head :cmd-name)))
                       (when (and (cadr head)
-                                 (not (eq (cadr head) 'hydra-keyboard-quit))
                                  (or body-key body-map))
                         (let ((bind (hydra--head-property head :bind body-map))
                               (final-key
