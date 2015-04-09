@@ -79,58 +79,76 @@
 (require 'cl-lib)
 (require 'lv)
 
+(defvar hydra-curr-map nil
+  "The keymap of the current Hydra called.")
+
 (defvar hydra-curr-on-exit nil
   "The on-exit predicate for the current Hydra.")
 
 (defvar hydra-curr-foreign-keys nil
   "The current :foreign-keys behavior.")
 
-(defun hydra-clearfun ()
-  (with-demoted-errors "set-transient-map PCH: %S"
-    (unless (or
-             (not (eq hydra-curr-map (cadr overriding-terminal-local-map)))
-             ;; There's presumably some other transient-map in
-             ;; effect.  Wait for that one to terminate before we
-             ;; remove ourselves.
-             ;; For example, if isearch and C-u both use transient
-             ;; maps, then the lifetime of the C-u should be nested
-             ;; within isearch's, so the pre-command-hook of
-             ;; isearch should be suspended during the C-u one so
-             ;; we don't exit isearch just because we hit 1 after
-             ;; C-u and that 1 exits isearch whereas it doesn't
-             ;; exit C-u.
-             (eq this-command
-                 (lookup-key hydra-curr-map (this-command-keys-vector))))
-      (unless (cl-case hydra-curr-foreign-keys
-                (warn
-                 (setq this-command 'hydra-amaranth-warn))
-                (run
-                 t)
-                (t nil))
-        (remove-hook 'pre-command-hook 'hydra-clearfun)
-        (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map)
-        (when hydra-curr-on-exit (funcall hydra-curr-on-exit))))))
+(defun hydra-set-transient-map (keymap on-exit &optional foreign-keys)
+  "Set KEYMAP to the highest priority.
+
+Call ON-EXIT when the KEYMAP is deactivated.
+
+FOREIGN-KEYS determines the deactivation behavior, when a command
+that isn't in KEYMAP is called:
+
+nil: deactivate KEYMAP and run the command.
+run: keep KEYMAP and run the command.
+warn: keep KEYMAP and issue a warning instead of running the command."
+  (setq hydra-curr-map keymap)
+  (setq hydra-curr-on-exit on-exit)
+  (setq hydra-curr-foreign-keys foreign-keys)
+  (add-hook 'pre-command-hook 'hydra--clearfun)
+  (internal-push-keymap keymap 'overriding-terminal-local-map))
+
+(defun hydra--clearfun ()
+  "Disable the current Hydra unless `this-command' is a head."
+  (unless (eq this-command
+              (lookup-key hydra-curr-map (this-command-keys-vector)))
+    (unless (cl-case hydra-curr-foreign-keys
+              (warn
+               (setq this-command 'hydra-amaranth-warn))
+              (run
+               t)
+              (t nil))
+      (hydra-disable))))
+
+(defun hydra-disable ()
+  "Disable the current Hydra."
+  (remove-hook 'pre-command-hook 'hydra--clearfun)
+  (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map)
+  (when hydra-curr-on-exit
+    (let ((on-exit hydra-curr-on-exit))
+      (setq hydra-curr-on-exit nil)
+      (funcall on-exit))))
+
+(unless (fboundp 'internal-push-keymap)
+  (defun internal-push-keymap (keymap symbol)
+    (let ((map (symbol-value symbol)))
+      (unless (memq keymap map)
+        (unless (memq 'add-keymap-witness (symbol-value symbol))
+          (setq map (make-composed-keymap nil (symbol-value symbol)))
+          (push 'add-keymap-witness (cdr map))
+          (set symbol map))
+        (push keymap (cdr map))))))
+
+(unless (fboundp 'internal-pop-keymap)
+  (defun internal-pop-keymap (keymap symbol)
+    (let ((map (symbol-value symbol)))
+      (when (memq keymap map)
+        (setf (cdr map) (delq keymap (cdr map))))
+      (let ((tail (cddr map)))
+        (and (or (null tail) (keymapp tail))
+             (eq 'add-keymap-witness (nth 1 map))
+             (set symbol tail))))))
 
 (defun hydra-amaranth-warn ()
   (interactive)
   (message "An amaranth Hydra can only exit through a blue head"))
-
-(defun hydra-set-transient-map (map on-exit)
-  (setq hydra-curr-on-exit on-exit)
-  (add-hook 'pre-command-hook 'hydra-clearfun)
-  (internal-push-keymap map 'overriding-terminal-local-map))
-
-(defun hydra--pred (on-exit)
-  "Generate a predicate on whether to continue the Hydra state.
-Call ON-EXIT for clean-up.
-This is a compatibility code for Emacs older than 24.4."
-  `(lambda ()
-     (if (lookup-key hydra-curr-map (this-command-keys-vector))
-         t
-       (hydra-keyboard-quit)
-       ,(when on-exit
-              `(funcall ,(hydra--make-callable on-exit)))
-       nil)))
 
 ;;* Customize
 (defgroup hydra nil
@@ -226,10 +244,6 @@ Vanquishable only through a blue head.")
     map)
   "Keymap that all Hydras inherit.  See `universal-argument-map'.")
 
-(defvar hydra-curr-map
-  (make-sparse-keymap)
-  "Keymap of the current Hydra called.")
-
 (defun hydra--handle-switch-frame (evt)
   "Quit hydra and call old switch-frame event handler for EVT."
   (interactive "e")
@@ -243,8 +257,7 @@ Vanquishable only through a blue head.")
                        (list (* 4 (car arg)))
                      (if (eq arg '-)
                          (list -4)
-                       '(4))))
-  (hydra-set-transient-map hydra-curr-map hydra-curr-on-exit))
+                       '(4)))))
 
 (defun hydra--digit-argument (arg)
   "Forward to (`digit-argument' ARG)."
@@ -260,6 +273,7 @@ Vanquishable only through a blue head.")
   (interactive "P")
   (let ((universal-argument-map hydra-curr-map))
     (negative-argument arg)))
+
 ;;* Repeat
 (defvar hydra-repeat--prefix-arg nil
   "Prefix arg to use with `hydra-repeat'.")
@@ -280,9 +294,6 @@ When ARG is non-nil, use that instead."
   (funcall hydra-repeat--command))
 
 ;;* Misc internals
-(defvar hydra-last nil
-  "The result of the last `hydra-set-transient-map' call.")
-
 (defun hydra--callablep (x)
   "Test if X is callable."
   (or (functionp x)
@@ -314,26 +325,6 @@ one of the properties on the list."
   "Return for Hydra head H the value of property PROP.
 Return DEFAULT if PROP is not in H."
   (hydra-plist-get-default (cl-cdddr h) prop default))
-
-(defun hydra--aggregate-color (head-color body-color)
-  "Return the resulting head color for HEAD-COLOR and BODY-COLOR."
-  (cond ((eq head-color 'red)
-         (cl-case body-color
-           (red 'red)
-           (blue 'red)
-           (amaranth 'amaranth)
-           (pink 'pink)
-           (cyan 'amaranth)))
-        ((eq head-color 'blue)
-         (cl-case body-color
-           (red 'blue)
-           (blue 'blue)
-           (amaranth 'teal)
-           (pink 'blue)
-           (cyan 'teal)))
-        (t
-         (error "Can't aggregate head %S to body %S"
-                head-color body-color))))
 
 (defun hydra--head-color (h body)
   "Return the color of a Hydra head H with BODY."
@@ -438,35 +429,6 @@ BODY is the second argument to `defhydra'"
           (kill-buffer buf)))
     (message ""))
   nil)
-
-(defun hydra-disable ()
-  "Disable the current Hydra."
-  (cond
-    ;; Emacs 25
-    ((functionp hydra-last)
-     (funcall hydra-last))
-
-    ;; Emacs 24.3 or older
-    ((< emacs-minor-version 4)
-     (setq emulation-mode-map-alists
-           (cl-remove-if
-            (lambda (x)
-              (and (consp x)
-                   (consp (car x))
-                   (equal (cdar x) hydra-curr-map)))
-            emulation-mode-map-alists)))
-
-    ;; Emacs 24.4.1
-    (t
-     (setq overriding-terminal-local-map nil))))
-
-(defun hydra--unalias-var (str prefix)
-  "Return the symbol named STR if it's bound as a variable.
-Otherwise, add PREFIX to the symbol name."
-  (let ((sym (intern-soft str)))
-    (if (boundp sym)
-        sym
-      (intern (concat prefix "/" str)))))
 
 (defun hydra--hint (body heads)
   "Generate a hint for the echo area.
@@ -622,79 +584,37 @@ OTHER-POST is an optional extension to the :post key of BODY."
        (interactive)
        (hydra-default-pre)
        ,@(when body-pre (list body-pre))
-       (hydra-disable)
-       ,@(when (memq color '(blue teal)) '((hydra-keyboard-quit)))
-       (catch 'hydra-disable
-         ,@(delq nil
-                 (if (memq color '(blue teal))
-                     `(,(when cmd `(call-interactively #',cmd))
-                        ,body-post)
-                   `(,(when cmd
-                            `(condition-case err
-                                 (call-interactively #',cmd)
-                               ((quit error)
-                                (message "%S" err)
-                                (unless hydra-lv
-                                  (sit-for 0.8)))))
-                      (when hydra-is-helpful
-                        (,hint))
-                      (setq hydra-curr-map ,keymap)
-                      (setq hydra-curr-foreign-keys
-                            ,(cond
-                              ((memq body-color '(amaranth teal))
-                               ''warn)
-                              ((eq body-color 'pink)
-                               ''run)
-                              (t
-                               nil)))
-                      (setq hydra-curr-on-exit
-                            (lambda ()
-                              (hydra-keyboard-quit)
-                              ,body-post))
-                      (setq hydra-last
-                            (hydra-set-transient-map
-                             hydra-curr-map
-                             hydra-curr-on-exit))
-                      ,(or other-post
-                           (when body-timeout
-                             (list 'hydra-timeout
-                                   body-timeout
-                                   (when body-post
-                                     (hydra--make-callable body-post))))))))))))
-
-(defun hydra-pink-fallback ()
-  "On intercepting a non-head, try to run it."
-  (let ((keys (this-single-command-keys))
-        kb)
-    (when (equal keys [backspace])
-      (setq keys ""))
-    (setq kb (key-binding keys))
-    (if kb
-        (if (commandp kb)
-            (condition-case err
-                (call-interactively kb)
-              ((quit error)
-               (message "%S" err)
-               (unless hydra-lv
-                 (sit-for 0.8))))
-          (message "Pink Hydra can't currently handle prefixes, continuing"))
-      (message "Pink Hydra could not resolve: %S" keys))))
-
-(defun hydra--modify-keymap (keymap def)
-  "In KEYMAP, add DEF to each sub-keymap."
-  (cl-labels
-      ((recur (map)
-         (if (atom map)
-             map
-           (if (eq (car map) 'keymap)
-               (cons 'keymap
-                     (cons
-                      def
-                      (recur (cdr map))))
-             (cons
-              (recur (car map))
-              (recur (cdr map)))))))
-    (recur keymap)))
+       ,@(if (memq color '(blue teal))
+             `((hydra-keyboard-quit)
+               ,(when cmd `(call-interactively #',cmd))
+               ,body-post)
+             (delq
+              nil
+              `(,(when cmd
+                       `(condition-case err
+                            (call-interactively #',cmd)
+                          ((quit error)
+                           (message "%S" err)
+                           (unless hydra-lv
+                             (sit-for 0.8)))))
+                 (when hydra-is-helpful
+                   (,hint))
+                 (hydra-set-transient-map
+                  ,keymap
+                  (lambda () (hydra-keyboard-quit) ,body-post)
+                  ,(cond
+                    ((memq body-color '(amaranth teal))
+                     ''warn)
+                    ((eq body-color 'pink)
+                     ''run)
+                    (t
+                     nil)))
+                 ,(or other-post
+                      (when body-timeout
+                        `(hydra-timeout
+                          ,body-timeout
+                          ,(when body-post
+                                 (hydra--make-callable body-post)))))))))))
 
 (defmacro hydra--make-funcall (sym)
   "Transform SYM into a `funcall' that calls it."
