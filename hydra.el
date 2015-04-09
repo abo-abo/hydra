@@ -107,15 +107,17 @@ warn: keep KEYMAP and issue a warning instead of running the command."
 
 (defun hydra--clearfun ()
   "Disable the current Hydra unless `this-command' is a head."
-  (unless (eq this-command
-              (lookup-key hydra-curr-map (this-command-keys-vector)))
-    (unless (cl-case hydra-curr-foreign-keys
-              (warn
-               (setq this-command 'hydra-amaranth-warn))
-              (run
-               t)
-              (t nil))
-      (hydra-disable))))
+  (if (eq this-command 'handle-switch-frame)
+      (hydra-disable)
+    (unless (eq this-command
+                (lookup-key hydra-curr-map (this-command-keys-vector)))
+      (unless (cl-case hydra-curr-foreign-keys
+                (warn
+                 (setq this-command 'hydra-amaranth-warn))
+                (run
+                 t)
+                (t nil))
+        (hydra-disable)))))
 
 (defun hydra-disable ()
   "Disable the current Hydra."
@@ -240,15 +242,8 @@ Vanquishable only through a blue head.")
     (define-key map [kp-8] 'hydra--digit-argument)
     (define-key map [kp-9] 'hydra--digit-argument)
     (define-key map [kp-subtract] 'hydra--negative-argument)
-    (define-key map [switch-frame] 'hydra--handle-switch-frame)
     map)
   "Keymap that all Hydras inherit.  See `universal-argument-map'.")
-
-(defun hydra--handle-switch-frame (evt)
-  "Quit hydra and call old switch-frame event handler for EVT."
-  (interactive "e")
-  (hydra-keyboard-quit)
-  (funcall (lookup-key (current-global-map) [switch-frame]) evt))
 
 (defun hydra--universal-argument (arg)
   "Forward to (`universal-argument' ARG)."
