@@ -261,8 +261,7 @@ Call the head: `toggle-truncate-lines'."
         (hydra-keyboard-quit)
         (call-interactively
          (function
-          toggle-truncate-lines))
-        nil)
+          toggle-truncate-lines)))
       (defun hydra-toggle/auto-fill-mode-and-exit nil
         "Create a hydra with no body and the heads:
 
@@ -278,8 +277,7 @@ Call the head: `auto-fill-mode'."
         (hydra-default-pre)
         (hydra-keyboard-quit)
         (call-interactively
-         (function auto-fill-mode))
-        nil)
+         (function auto-fill-mode)))
       (defun hydra-toggle/abbrev-mode-and-exit nil
         "Create a hydra with no body and the heads:
 
@@ -295,8 +293,7 @@ Call the head: `abbrev-mode'."
         (hydra-default-pre)
         (hydra-keyboard-quit)
         (call-interactively
-         (function abbrev-mode))
-        nil)
+         (function abbrev-mode)))
       (defun hydra-toggle/nil nil
         "Create a hydra with no body and the heads:
 
@@ -311,7 +308,6 @@ Call the head: `nil'."
         (interactive)
         (hydra-default-pre)
         (hydra-keyboard-quit)
-        nil
         nil)
       (defun hydra-toggle/hint nil
         (if hydra-lv
@@ -412,8 +408,7 @@ Call the head: `hydra-keyboard-quit'."
         (set-cursor-color "#e52b50")
         (hydra-keyboard-quit)
         (call-interactively
-         (function hydra-keyboard-quit))
-        (set-cursor-color "#ffffff"))
+         (function hydra-keyboard-quit)))
       (defun hydra-vi/next-line nil
         "Create a hydra with no body and the heads:
 
@@ -485,8 +480,7 @@ Call the head: `nil'."
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (hydra-keyboard-quit)
-        nil
-        (set-cursor-color "#ffffff"))
+        nil)
       (defun hydra-vi/hint nil
         (if hydra-lv
             (lv-message
@@ -608,8 +602,7 @@ Call the head: `(text-scale-set 0)'."
          (function
           (lambda nil
            (interactive)
-           (text-scale-set 0))))
-        nil)
+           (text-scale-set 0)))))
       (defun hydra-zoom/hint nil
         (if hydra-lv
             (lv-message
@@ -727,8 +720,7 @@ Call the head: `(text-scale-set 0)'."
          (function
           (lambda nil
            (interactive)
-           (text-scale-set 0))))
-        nil)
+           (text-scale-set 0)))))
       (defun hydra-zoom/hint nil
         (if hydra-lv
             (lv-message

@@ -581,8 +581,7 @@ OTHER-POST is an optional extension to the :post key of BODY."
        ,@(when body-pre (list body-pre))
        ,@(if (memq color '(blue teal))
              `((hydra-keyboard-quit)
-               ,(when cmd `(call-interactively #',cmd))
-               ,body-post)
+               ,(when cmd `(call-interactively #',cmd)))
              (delq
               nil
               `(,(when cmd
@@ -606,10 +605,7 @@ OTHER-POST is an optional extension to the :post key of BODY."
                      nil)))
                  ,(or other-post
                       (when body-timeout
-                        `(hydra-timeout
-                          ,body-timeout
-                          ,(when body-post
-                                 (hydra--make-callable body-post)))))))))))
+                        `(hydra-timeout ,body-timeout)))))))))
 
 (defmacro hydra--make-funcall (sym)
   "Transform SYM into a `funcall' that calls it."
