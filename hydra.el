@@ -520,15 +520,6 @@ The expressions can be auto-expanded according to NAME."
                  ,rest)
       `(format ,(concat docstring ": " rest ".")))))
 
-(defun hydra--message (name body docstring heads)
-  "Generate code to display the hint in the preferred echo area.
-Set `hydra-lv' to choose the echo area.
-NAME, BODY, DOCSTRING, and HEADS are parameters of `defhydra'."
-  (let ((format-expr (hydra--format name body docstring heads)))
-    `(if hydra-lv
-         (lv-message ,format-expr)
-       (message ,format-expr))))
-
 (defun hydra--complain (format-string &rest args)
   "Forward to (`message' FORMAT-STRING ARGS) unless `hydra-verbose' is nil."
   (when hydra-verbose
@@ -594,7 +585,9 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                            (unless hydra-lv
                              (sit-for 0.8)))))
                  (when hydra-is-helpful
-                   (,hint))
+                   (if hydra-lv
+                       (lv-message (eval ,hint))
+                     (message (eval ,hint))))
                  (hydra-set-transient-map
                   ,keymap
                   (lambda () (hydra-keyboard-quit) ,body-before-exit)
@@ -905,8 +898,10 @@ result of `defhydra'."
                                     (t
                                      (error "Invalid :bind property `%S' for head %S" bind head)))))))
                       heads))
-             (defun ,(intern (format "%S/hint" name)) ()
-               ,(hydra--message name body docstring heads))
+             (set
+              (defvar ,(intern (format "%S/hint" name)) nil
+                ,(format "Dynamic hint for %S." name))
+              ',(hydra--format name body docstring heads))
              ,(hydra--make-defun
                name body doc '(nil body)
                keymap-name

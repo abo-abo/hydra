@@ -41,33 +41,35 @@
       (set
        (defvar hydra-error/keymap nil
          "Keymap for hydra-error.")
-       (quote (keymap (32 . hydra-repeat)
-                      (107 . hydra-error/previous-error)
-                      (106 . hydra-error/next-error)
-                      (104 . hydra-error/first-error)
-                      (kp-subtract . hydra--negative-argument)
-                      (kp-9 . hydra--digit-argument)
-                      (kp-8 . hydra--digit-argument)
-                      (kp-7 . hydra--digit-argument)
-                      (kp-6 . hydra--digit-argument)
-                      (kp-5 . hydra--digit-argument)
-                      (kp-4 . hydra--digit-argument)
-                      (kp-3 . hydra--digit-argument)
-                      (kp-2 . hydra--digit-argument)
-                      (kp-1 . hydra--digit-argument)
-                      (kp-0 . hydra--digit-argument)
-                      (57 . hydra--digit-argument)
-                      (56 . hydra--digit-argument)
-                      (55 . hydra--digit-argument)
-                      (54 . hydra--digit-argument)
-                      (53 . hydra--digit-argument)
-                      (52 . hydra--digit-argument)
-                      (51 . hydra--digit-argument)
-                      (50 . hydra--digit-argument)
-                      (49 . hydra--digit-argument)
-                      (48 . hydra--digit-argument)
-                      (45 . hydra--negative-argument)
-                      (21 . hydra--universal-argument))))
+       (quote
+        (keymap
+         (32 . hydra-repeat)
+         (107 . hydra-error/previous-error)
+         (106 . hydra-error/next-error)
+         (104 . hydra-error/first-error)
+         (kp-subtract . hydra--negative-argument)
+         (kp-9 . hydra--digit-argument)
+         (kp-8 . hydra--digit-argument)
+         (kp-7 . hydra--digit-argument)
+         (kp-6 . hydra--digit-argument)
+         (kp-5 . hydra--digit-argument)
+         (kp-4 . hydra--digit-argument)
+         (kp-3 . hydra--digit-argument)
+         (kp-2 . hydra--digit-argument)
+         (kp-1 . hydra--digit-argument)
+         (kp-0 . hydra--digit-argument)
+         (57 . hydra--digit-argument)
+         (56 . hydra--digit-argument)
+         (55 . hydra--digit-argument)
+         (54 . hydra--digit-argument)
+         (53 . hydra--digit-argument)
+         (52 . hydra--digit-argument)
+         (51 . hydra--digit-argument)
+         (50 . hydra--digit-argument)
+         (49 . hydra--digit-argument)
+         (48 . hydra--digit-argument)
+         (45 . hydra--negative-argument)
+         (21 . hydra--universal-argument))))
       (defun hydra-error/first-error nil
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -88,7 +90,11 @@ Call the head: `first-error'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (when hydra-is-helpful
-          (hydra-error/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-error/hint))
+            (message
+             (eval hydra-error/hint))))
         (hydra-set-transient-map
          hydra-error/keymap
          (lambda nil
@@ -115,7 +121,11 @@ Call the head: `next-error'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (when hydra-is-helpful
-          (hydra-error/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-error/hint))
+            (message
+             (eval hydra-error/hint))))
         (hydra-set-transient-map
          hydra-error/keymap
          (lambda nil
@@ -142,7 +152,11 @@ Call the head: `previous-error'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (when hydra-is-helpful
-          (hydra-error/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-error/hint))
+            (message
+             (eval hydra-error/hint))))
         (hydra-set-transient-map
          hydra-error/keymap
          (lambda nil
@@ -164,22 +178,16 @@ Call the head: `previous-error'."
       (define-key global-map [134217831 107]
        (function
         hydra-error/previous-error))
-      (defun hydra-error/hint nil
-        (if hydra-lv
-            (lv-message
-             (format
-              #("error: [h]: first, [j]: next, [k]: prev, [SPC]: rep."
-                8 9 (face hydra-face-red)
-                20 21 (face hydra-face-red)
-                31 32 (face hydra-face-red)
-                42 45 (face hydra-face-red))))
-          (message
-           (format
-            #("error: [h]: first, [j]: next, [k]: prev, [SPC]: rep."
-              8 9 (face hydra-face-red)
-              20 21 (face hydra-face-red)
-              31 32 (face hydra-face-red)
-              42 45 (face hydra-face-red))))))
+      (set
+       (defvar hydra-error/hint nil
+         "Dynamic hint for hydra-error.")
+       (quote
+        (format
+         #("error: [h]: first, [j]: next, [k]: prev, [SPC]: rep."
+           8 9 (face hydra-face-red)
+           20 21 (face hydra-face-red)
+           31 32 (face hydra-face-red)
+           42 45 (face hydra-face-red)))))
       (defun hydra-error/body nil
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -192,7 +200,11 @@ The body can be accessed via `hydra-error/body'."
         (interactive)
         (hydra-default-pre)
         (when hydra-is-helpful
-          (hydra-error/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-error/hint))
+            (message
+             (eval hydra-error/hint))))
         (hydra-set-transient-map
          hydra-error/keymap
          (lambda nil
@@ -216,33 +228,35 @@ The body can be accessed via `hydra-error/body'."
       (set
        (defvar hydra-toggle/keymap nil
          "Keymap for hydra-toggle.")
-       (quote (keymap (113 . hydra-toggle/nil)
-                      (97 . hydra-toggle/abbrev-mode-and-exit)
-                      (102 . hydra-toggle/auto-fill-mode-and-exit)
-                      (116 . hydra-toggle/toggle-truncate-lines-and-exit)
-                      (kp-subtract . hydra--negative-argument)
-                      (kp-9 . hydra--digit-argument)
-                      (kp-8 . hydra--digit-argument)
-                      (kp-7 . hydra--digit-argument)
-                      (kp-6 . hydra--digit-argument)
-                      (kp-5 . hydra--digit-argument)
-                      (kp-4 . hydra--digit-argument)
-                      (kp-3 . hydra--digit-argument)
-                      (kp-2 . hydra--digit-argument)
-                      (kp-1 . hydra--digit-argument)
-                      (kp-0 . hydra--digit-argument)
-                      (57 . hydra--digit-argument)
-                      (56 . hydra--digit-argument)
-                      (55 . hydra--digit-argument)
-                      (54 . hydra--digit-argument)
-                      (53 . hydra--digit-argument)
-                      (52 . hydra--digit-argument)
-                      (51 . hydra--digit-argument)
-                      (50 . hydra--digit-argument)
-                      (49 . hydra--digit-argument)
-                      (48 . hydra--digit-argument)
-                      (45 . hydra--negative-argument)
-                      (21 . hydra--universal-argument))))
+       (quote
+        (keymap
+         (113 . hydra-toggle/nil)
+         (97 . hydra-toggle/abbrev-mode-and-exit)
+         (102 . hydra-toggle/auto-fill-mode-and-exit)
+         (116 . hydra-toggle/toggle-truncate-lines-and-exit)
+         (kp-subtract . hydra--negative-argument)
+         (kp-9 . hydra--digit-argument)
+         (kp-8 . hydra--digit-argument)
+         (kp-7 . hydra--digit-argument)
+         (kp-6 . hydra--digit-argument)
+         (kp-5 . hydra--digit-argument)
+         (kp-4 . hydra--digit-argument)
+         (kp-3 . hydra--digit-argument)
+         (kp-2 . hydra--digit-argument)
+         (kp-1 . hydra--digit-argument)
+         (kp-0 . hydra--digit-argument)
+         (57 . hydra--digit-argument)
+         (56 . hydra--digit-argument)
+         (55 . hydra--digit-argument)
+         (54 . hydra--digit-argument)
+         (53 . hydra--digit-argument)
+         (52 . hydra--digit-argument)
+         (51 . hydra--digit-argument)
+         (50 . hydra--digit-argument)
+         (49 . hydra--digit-argument)
+         (48 . hydra--digit-argument)
+         (45 . hydra--negative-argument)
+         (21 . hydra--universal-argument))))
       (defun hydra-toggle/toggle-truncate-lines-and-exit nil
         "Create a hydra with no body and the heads:
 
@@ -307,22 +321,16 @@ Call the head: `nil'."
         (hydra-default-pre)
         (hydra-keyboard-quit)
         nil)
-      (defun hydra-toggle/hint nil
-        (if hydra-lv
-            (lv-message
-             (format
-              #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel."
-                9 10 (face hydra-face-blue)
-                24 25 (face hydra-face-blue)
-                35 36 (face hydra-face-blue)
-                48 49 (face hydra-face-blue))))
-          (message
-           (format
-            #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel."
-              9 10 (face hydra-face-blue)
-              24 25 (face hydra-face-blue)
-              35 36 (face hydra-face-blue)
-              48 49 (face hydra-face-blue))))))
+      (set
+       (defvar hydra-toggle/hint nil
+         "Dynamic hint for hydra-toggle.")
+       (quote
+        (format
+         #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel."
+           9 10 (face hydra-face-blue)
+           24 25 (face hydra-face-blue)
+           35 36 (face hydra-face-blue)
+           48 49 (face hydra-face-blue)))))
       (defun hydra-toggle/body nil
         "Create a hydra with no body and the heads:
 
@@ -335,7 +343,11 @@ The body can be accessed via `hydra-toggle/body'."
         (interactive)
         (hydra-default-pre)
         (when hydra-is-helpful
-          (hydra-toggle/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-toggle/hint))
+            (message
+             (eval hydra-toggle/hint))))
         (hydra-set-transient-map
          hydra-toggle/keymap
          (lambda nil
@@ -363,32 +375,34 @@ The body can be accessed via `hydra-toggle/body'."
       (set
        (defvar hydra-vi/keymap nil
          "Keymap for hydra-vi.")
-       (quote (keymap (113 . hydra-vi/nil)
-                      (107 . hydra-vi/previous-line)
-                      (106 . hydra-vi/next-line)
-                      (kp-subtract . hydra--negative-argument)
-                      (kp-9 . hydra--digit-argument)
-                      (kp-8 . hydra--digit-argument)
-                      (kp-7 . hydra--digit-argument)
-                      (kp-6 . hydra--digit-argument)
-                      (kp-5 . hydra--digit-argument)
-                      (kp-4 . hydra--digit-argument)
-                      (kp-3 . hydra--digit-argument)
-                      (kp-2 . hydra--digit-argument)
-                      (kp-1 . hydra--digit-argument)
-                      (kp-0 . hydra--digit-argument)
-                      (57 . hydra--digit-argument)
-                      (56 . hydra--digit-argument)
-                      (55 . hydra--digit-argument)
-                      (54 . hydra--digit-argument)
-                      (53 . hydra--digit-argument)
-                      (52 . hydra--digit-argument)
-                      (51 . hydra--digit-argument)
-                      (50 . hydra--digit-argument)
-                      (49 . hydra--digit-argument)
-                      (48 . hydra--digit-argument)
-                      (45 . hydra--negative-argument)
-                      (21 . hydra--universal-argument))))
+       (quote
+        (keymap
+         (113 . hydra-vi/nil)
+         (107 . hydra-vi/previous-line)
+         (106 . hydra-vi/next-line)
+         (kp-subtract . hydra--negative-argument)
+         (kp-9 . hydra--digit-argument)
+         (kp-8 . hydra--digit-argument)
+         (kp-7 . hydra--digit-argument)
+         (kp-6 . hydra--digit-argument)
+         (kp-5 . hydra--digit-argument)
+         (kp-4 . hydra--digit-argument)
+         (kp-3 . hydra--digit-argument)
+         (kp-2 . hydra--digit-argument)
+         (kp-1 . hydra--digit-argument)
+         (kp-0 . hydra--digit-argument)
+         (57 . hydra--digit-argument)
+         (56 . hydra--digit-argument)
+         (55 . hydra--digit-argument)
+         (54 . hydra--digit-argument)
+         (53 . hydra--digit-argument)
+         (52 . hydra--digit-argument)
+         (51 . hydra--digit-argument)
+         (50 . hydra--digit-argument)
+         (49 . hydra--digit-argument)
+         (48 . hydra--digit-argument)
+         (45 . hydra--negative-argument)
+         (21 . hydra--universal-argument))))
       (defun hydra-vi/next-line nil
         "Create a hydra with no body and the heads:
 
@@ -409,7 +423,10 @@ Call the head: `next-line'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (when hydra-is-helpful
-          (hydra-vi/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-vi/hint))
+            (message (eval hydra-vi/hint))))
         (hydra-set-transient-map
          hydra-vi/keymap
          (lambda nil
@@ -436,7 +453,10 @@ Call the head: `previous-line'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (when hydra-is-helpful
-          (hydra-vi/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-vi/hint))
+            (message (eval hydra-vi/hint))))
         (hydra-set-transient-map
          hydra-vi/keymap
          (lambda nil
@@ -458,20 +478,15 @@ Call the head: `nil'."
         (set-cursor-color "#e52b50")
         (hydra-keyboard-quit)
         nil)
-      (defun hydra-vi/hint nil
-        (if hydra-lv
-            (lv-message
-             (format
-              #("vi: j, k, [q]: quit."
-                4 5 (face hydra-face-amaranth)
-                7 8 (face hydra-face-amaranth)
-                11 12 (face hydra-face-blue))))
-          (message
-           (format
-            #("vi: j, k, [q]: quit."
-              4 5 (face hydra-face-amaranth)
-              7 8 (face hydra-face-amaranth)
-              11 12 (face hydra-face-blue))))))
+      (set
+       (defvar hydra-vi/hint nil
+         "Dynamic hint for hydra-vi.")
+       (quote
+        (format
+         #("vi: j, k, [q]: quit."
+           4 5 (face hydra-face-amaranth)
+           7 8 (face hydra-face-amaranth)
+           11 12 (face hydra-face-blue)))))
       (defun hydra-vi/body nil
         "Create a hydra with no body and the heads:
 
@@ -484,7 +499,10 @@ The body can be accessed via `hydra-vi/body'."
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (when hydra-is-helpful
-          (hydra-vi/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-vi/hint))
+            (message (eval hydra-vi/hint))))
         (hydra-set-transient-map
          hydra-vi/keymap
          (lambda nil
@@ -507,30 +525,32 @@ The body can be accessed via `hydra-vi/body'."
       (set
        (defvar hydra-zoom/keymap nil
          "Keymap for hydra-zoom.")
-       (quote (keymap (114 . hydra-zoom/lambda-r)
-                      (kp-subtract . hydra--negative-argument)
-                      (kp-9 . hydra--digit-argument)
-                      (kp-8 . hydra--digit-argument)
-                      (kp-7 . hydra--digit-argument)
-                      (kp-6 . hydra--digit-argument)
-                      (kp-5 . hydra--digit-argument)
-                      (kp-4 . hydra--digit-argument)
-                      (kp-3 . hydra--digit-argument)
-                      (kp-2 . hydra--digit-argument)
-                      (kp-1 . hydra--digit-argument)
-                      (kp-0 . hydra--digit-argument)
-                      (57 . hydra--digit-argument)
-                      (56 . hydra--digit-argument)
-                      (55 . hydra--digit-argument)
-                      (54 . hydra--digit-argument)
-                      (53 . hydra--digit-argument)
-                      (52 . hydra--digit-argument)
-                      (51 . hydra--digit-argument)
-                      (50 . hydra--digit-argument)
-                      (49 . hydra-zoom/lambda-0-and-exit)
-                      (48 . hydra-zoom/lambda-0-and-exit)
-                      (45 . hydra--negative-argument)
-                      (21 . hydra--universal-argument))))
+       (quote
+        (keymap
+         (114 . hydra-zoom/lambda-r)
+         (kp-subtract . hydra--negative-argument)
+         (kp-9 . hydra--digit-argument)
+         (kp-8 . hydra--digit-argument)
+         (kp-7 . hydra--digit-argument)
+         (kp-6 . hydra--digit-argument)
+         (kp-5 . hydra--digit-argument)
+         (kp-4 . hydra--digit-argument)
+         (kp-3 . hydra--digit-argument)
+         (kp-2 . hydra--digit-argument)
+         (kp-1 . hydra--digit-argument)
+         (kp-0 . hydra--digit-argument)
+         (57 . hydra--digit-argument)
+         (56 . hydra--digit-argument)
+         (55 . hydra--digit-argument)
+         (54 . hydra--digit-argument)
+         (53 . hydra--digit-argument)
+         (52 . hydra--digit-argument)
+         (51 . hydra--digit-argument)
+         (50 . hydra--digit-argument)
+         (49 . hydra-zoom/lambda-0-and-exit)
+         (48 . hydra-zoom/lambda-0-and-exit)
+         (45 . hydra--negative-argument)
+         (21 . hydra--universal-argument))))
       (defun hydra-zoom/lambda-r nil
         "Create a hydra with no body and the heads:
 
@@ -553,7 +573,11 @@ Call the head: `(text-scale-set 0)'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (when hydra-is-helpful
-          (hydra-zoom/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-zoom/hint))
+            (message
+             (eval hydra-zoom/hint))))
         (hydra-set-transient-map
          hydra-zoom/keymap
          (lambda nil
@@ -578,18 +602,14 @@ Call the head: `(text-scale-set 0)'."
           (lambda nil
            (interactive)
            (text-scale-set 0)))))
-      (defun hydra-zoom/hint nil
-        (if hydra-lv
-            (lv-message
-             (format
-              #("zoom: [r 0]: reset."
-                7 8 (face hydra-face-red)
-                9 10 (face hydra-face-blue))))
-          (message
-           (format
-            #("zoom: [r 0]: reset."
-              7 8 (face hydra-face-red)
-              9 10 (face hydra-face-blue))))))
+      (set
+       (defvar hydra-zoom/hint nil
+         "Dynamic hint for hydra-zoom.")
+       (quote
+        (format
+         #("zoom: [r 0]: reset."
+           7 8 (face hydra-face-red)
+           9 10 (face hydra-face-blue)))))
       (defun hydra-zoom/body nil
         "Create a hydra with no body and the heads:
 
@@ -601,7 +621,11 @@ The body can be accessed via `hydra-zoom/body'."
         (interactive)
         (hydra-default-pre)
         (when hydra-is-helpful
-          (hydra-zoom/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-zoom/hint))
+            (message
+             (eval hydra-zoom/hint))))
         (hydra-set-transient-map
          hydra-zoom/keymap
          (lambda nil
@@ -624,30 +648,32 @@ The body can be accessed via `hydra-zoom/body'."
       (set
        (defvar hydra-zoom/keymap nil
          "Keymap for hydra-zoom.")
-       (quote (keymap (114 . hydra-zoom/lambda-r)
-                      (kp-subtract . hydra--negative-argument)
-                      (kp-9 . hydra--digit-argument)
-                      (kp-8 . hydra--digit-argument)
-                      (kp-7 . hydra--digit-argument)
-                      (kp-6 . hydra--digit-argument)
-                      (kp-5 . hydra--digit-argument)
-                      (kp-4 . hydra--digit-argument)
-                      (kp-3 . hydra--digit-argument)
-                      (kp-2 . hydra--digit-argument)
-                      (kp-1 . hydra--digit-argument)
-                      (kp-0 . hydra--digit-argument)
-                      (57 . hydra--digit-argument)
-                      (56 . hydra--digit-argument)
-                      (55 . hydra--digit-argument)
-                      (54 . hydra--digit-argument)
-                      (53 . hydra--digit-argument)
-                      (52 . hydra--digit-argument)
-                      (51 . hydra--digit-argument)
-                      (50 . hydra--digit-argument)
-                      (49 . hydra-zoom/lambda-r)
-                      (48 . hydra-zoom/lambda-0-and-exit)
-                      (45 . hydra--negative-argument)
-                      (21 . hydra--universal-argument))))
+       (quote
+        (keymap
+         (114 . hydra-zoom/lambda-r)
+         (kp-subtract . hydra--negative-argument)
+         (kp-9 . hydra--digit-argument)
+         (kp-8 . hydra--digit-argument)
+         (kp-7 . hydra--digit-argument)
+         (kp-6 . hydra--digit-argument)
+         (kp-5 . hydra--digit-argument)
+         (kp-4 . hydra--digit-argument)
+         (kp-3 . hydra--digit-argument)
+         (kp-2 . hydra--digit-argument)
+         (kp-1 . hydra--digit-argument)
+         (kp-0 . hydra--digit-argument)
+         (57 . hydra--digit-argument)
+         (56 . hydra--digit-argument)
+         (55 . hydra--digit-argument)
+         (54 . hydra--digit-argument)
+         (53 . hydra--digit-argument)
+         (52 . hydra--digit-argument)
+         (51 . hydra--digit-argument)
+         (50 . hydra--digit-argument)
+         (49 . hydra-zoom/lambda-r)
+         (48 . hydra-zoom/lambda-0-and-exit)
+         (45 . hydra--negative-argument)
+         (21 . hydra--universal-argument))))
       (defun hydra-zoom/lambda-r nil
         "Create a hydra with no body and the heads:
 
@@ -670,7 +696,11 @@ Call the head: `(text-scale-set 0)'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (when hydra-is-helpful
-          (hydra-zoom/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-zoom/hint))
+            (message
+             (eval hydra-zoom/hint))))
         (hydra-set-transient-map
          hydra-zoom/keymap
          (lambda nil
@@ -695,18 +725,14 @@ Call the head: `(text-scale-set 0)'."
           (lambda nil
            (interactive)
            (text-scale-set 0)))))
-      (defun hydra-zoom/hint nil
-        (if hydra-lv
-            (lv-message
-             (format
-              #("zoom: [r 0]: reset."
-                7 8 (face hydra-face-red)
-                9 10 (face hydra-face-blue))))
-          (message
-           (format
-            #("zoom: [r 0]: reset."
-              7 8 (face hydra-face-red)
-              9 10 (face hydra-face-blue))))))
+      (set
+       (defvar hydra-zoom/hint nil
+         "Dynamic hint for hydra-zoom.")
+       (quote
+        (format
+         #("zoom: [r 0]: reset."
+           7 8 (face hydra-face-red)
+           9 10 (face hydra-face-blue)))))
       (defun hydra-zoom/body nil
         "Create a hydra with no body and the heads:
 
@@ -718,7 +744,11 @@ The body can be accessed via `hydra-zoom/body'."
         (interactive)
         (hydra-default-pre)
         (when hydra-is-helpful
-          (hydra-zoom/hint))
+          (if hydra-lv
+              (lv-message
+               (eval hydra-zoom/hint))
+            (message
+             (eval hydra-zoom/hint))))
         (hydra-set-transient-map
          hydra-zoom/keymap
          (lambda nil
