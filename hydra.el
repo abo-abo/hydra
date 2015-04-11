@@ -551,13 +551,15 @@ HEADS is a list of heads."
    (format "The body can be accessed via `%S'." body-name)))
 
 (defun hydra--make-defun (name body doc head
-                          keymap body-pre body-post &optional other-post)
+                          keymap body-pre body-before-exit
+                          &optional body-after-exit)
   "Make a defun wrapper, using NAME, BODY, DOC, HEAD, and KEYMAP.
 NAME and BODY are the arguments to `defhydra'.
 DOC was generated with `hydra--doc'.
 HEAD is one of the HEADS passed to `defhydra'.
-BODY-PRE and BODY-POST are pre-processed in `defhydra'.
-OTHER-POST is an optional extension to the :post key of BODY."
+BODY-PRE is added to the start of the wrapper.
+BODY-BEFORE-EXIT will be called before the hydra quits.
+BODY-AFTER-EXIT is added to the end of the wrapper."
   (let ((name (hydra--head-name head name body))
         (cmd (when (car head)
                (hydra--make-callable
@@ -577,7 +579,8 @@ OTHER-POST is an optional extension to the :post key of BODY."
        ,@(when body-pre (list body-pre))
        ,@(if (memq color '(blue teal))
              `((hydra-keyboard-quit)
-               ,(when cmd `(call-interactively #',cmd)))
+               ,(when cmd `(call-interactively #',cmd))
+               ,@(when body-after-exit (list body-after-exit)))
              (delq
               nil
               `(,(when cmd
@@ -591,7 +594,7 @@ OTHER-POST is an optional extension to the :post key of BODY."
                    (,hint))
                  (hydra-set-transient-map
                   ,keymap
-                  (lambda () (hydra-keyboard-quit) ,body-post)
+                  (lambda () (hydra-keyboard-quit) ,body-before-exit)
                   ,(cond
                     ((memq body-color '(amaranth teal))
                      ''warn)
@@ -599,12 +602,12 @@ OTHER-POST is an optional extension to the :post key of BODY."
                      ''run)
                     (t
                      nil)))
-                 ,(or other-post
-                      (when body-timeout
-                        `(hydra-timeout ,body-timeout)))))))))
+                 ,body-after-exit
+                 ,(when body-timeout
+                        `(hydra-timeout ,body-timeout))))))))
 
 (defmacro hydra--make-funcall (sym)
-  "Transform SYM into a `funcall' that calls it."
+  "Transform SYM into a `funcall' to call it."
   `(when (and ,sym (symbolp ,sym))
      (setq ,sym `(funcall #',,sym))))
 
@@ -762,7 +765,7 @@ BODY-MAP is a keymap; `global-map' is used quite often.  Each
 function generated from HEADS will be bound in BODY-MAP to
 BODY-KEY + KEY (both are strings passed to `kbd'), and will set
 the transient map so that all following heads can be called
-though KEY only. BODY-KEY can be an empty string.
+though KEY only.  BODY-KEY can be an empty string.
 
 CMD is a callable expression: either an interactive function
 name, or an interactive lambda, or a single sexp (it will be
@@ -807,9 +810,12 @@ result of `defhydra'."
                        (plist-get body-plist :bind)))
          (body-pre (plist-get body-plist :pre))
          (body-body-pre (plist-get body-plist :body-pre))
-         (body-post (plist-get body-plist :post))
+         (body-before-exit (or (plist-get body-plist :post)
+                               (plist-get body-plist :before-exit)))
+         (body-after-exit (plist-get body-plist :after-exit))
          (body-color (hydra--body-color body)))
-    (hydra--make-funcall body-post)
+    (hydra--make-funcall body-before-exit)
+    (hydra--make-funcall body-after-exit)
     (dolist (h heads)
       (let ((len (length h)))
         (cond ((< len 2)
@@ -862,7 +868,9 @@ result of `defhydra'."
          ,@(mapcar
             (lambda (head)
               (hydra--make-defun name body doc head keymap-name
-                                 body-pre body-post))
+                                 body-pre
+                                 body-before-exit
+                                 body-after-exit))
             heads-nodup)
          ;; free up keymap prefix
          ,@(unless (or (null body-key)
@@ -891,14 +899,14 @@ result of `defhydra'."
                                         t))
                                  `(define-key ,bind ,final-key (function ,name)))
                                 (t
-                                 (error "Invalid :bind property `%S' for head %S" bind  head)))))))
+                                 (error "Invalid :bind property `%S' for head %S" bind head)))))))
                   heads))
          (defun ,(intern (format "%S/hint" name)) ()
            ,(hydra--message name body docstring heads))
          ,(hydra--make-defun
            name body doc '(nil body)
            keymap-name
-           (or body-body-pre body-pre) body-post
+           (or body-body-pre body-pre) body-before-exit
            '(setq prefix-arg current-prefix-arg))))))
 
 (defmacro defhydradio (name _body &rest heads)
