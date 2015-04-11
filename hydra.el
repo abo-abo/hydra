@@ -579,8 +579,11 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
        ,@(when body-pre (list body-pre))
        ,@(if (memq color '(blue teal))
              `((hydra-keyboard-quit)
-               ,(when cmd `(call-interactively #',cmd))
-               ,@(when body-after-exit (list body-after-exit)))
+               ,(if body-after-exit
+                    `(unwind-protect
+                          ,(when cmd `(call-interactively #',cmd))
+                       ,body-after-exit)
+                    (when cmd `(call-interactively #',cmd))))
              (delq
               nil
               `(,(when cmd
