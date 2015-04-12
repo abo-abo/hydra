@@ -385,16 +385,6 @@ BODY is the second argument to `defhydra'"
           (color color)
           (t 'red))))
 
-(defun hydra--face (h body)
-  "Return the face for a Hydra head H with BODY."
-  (cl-case (hydra--head-color h body)
-    (blue 'hydra-face-blue)
-    (red 'hydra-face-red)
-    (amaranth 'hydra-face-amaranth)
-    (pink 'hydra-face-pink)
-    (teal 'hydra-face-teal)
-    (t (error "Unknown color for %S" h))))
-
 (defvar hydra--input-method-function nil
   "Store overridden `input-method-function' here.")
 
@@ -452,7 +442,14 @@ BODY, and HEADS are parameters to `defhydra'."
 (defun hydra-fontify-head-default (head body)
   "Produce a pretty string from HEAD and BODY.
 HEAD's binding is returned as a string with a colored face."
-  (propertize (car head) 'face (hydra--face head body)))
+  (propertize (car head) 'face
+              (cl-case (hydra--head-color head body)
+                (blue 'hydra-face-blue)
+                (red 'hydra-face-red)
+                (amaranth 'hydra-face-amaranth)
+                (pink 'hydra-face-pink)
+                (teal 'hydra-face-teal)
+                (t (error "Unknown color for %S" head)))))
 
 (defun hydra-fontify-head-greyscale (head body)
   "Produce a pretty string from HEAD and BODY.
