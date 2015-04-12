@@ -319,37 +319,45 @@ Return DEFAULT if PROP is not in H."
 
 (defun hydra--head-color (h body)
   "Return the color of a Hydra head H with BODY."
-  (let* ((exit (hydra--head-property h :exit 'default))
-         (color (hydra--head-property h :color))
+  (let* ((head-exit (hydra--head-property h :exit 'default))
          (foreign-keys (hydra--body-foreign-keys body))
+         (head-color (hydra--head-property h :color))
          (head-color
-          (cond ((eq exit 'default)
-                 (cl-case color
+          (cond ((eq head-exit 'default)
+                 (cl-case head-color
                    (blue 'blue)
                    (red 'red)
                    (t
-                    (unless (null color)
+                    (unless (null head-color)
                       (error "Use only :blue or :red for heads: %S" h)))))
-                ((null exit)
-                 (if color
+                ((null head-exit)
+                 (if head-color
                      (error "Don't mix :color and :exit - they are aliases: %S" h)
                    (cl-case foreign-keys
                      (run 'pink)
                      (warn 'amaranth)
                      (t 'red))))
-                ((eq exit t)
-                 (if color
+                ((eq head-exit t)
+                 (if head-color
                      (error "Don't mix :color and :exit - they are aliases: %S" h)
                    'blue))
                 (t
-                 (error "Unknown :exit %S" exit)))))
+                 (error "Unknown :exit %S" head-exit)))))
     (cond ((null (cadr h))
            (when head-color
              (hydra--complain
               "Doubly specified blue head - nil cmd is already blue: %S" h))
            'blue)
           ((null head-color)
-           (hydra--body-color body))
+           (let ((color (plist-get (cddr body) :color))
+                 (exit (plist-get (cddr body) :exit))
+                 (foreign-keys (plist-get (cddr body) :foreign-keys)))
+             (cond ((eq foreign-keys 'warn)
+                    (if exit 'teal 'amaranth))
+                   ((eq foreign-keys 'run) 'pink)
+                   (exit 'blue)
+                   (color color)
+                   (t 'red))))
           ((null foreign-keys)
            head-color)
           ((eq foreign-keys 'run)
@@ -371,19 +379,6 @@ Return DEFAULT if PROP is not in H."
      (cl-case color
        ((amaranth teal) 'warn)
        (pink 'run)))))
-
-(defun hydra--body-color (body)
-  "Return the color of BODY.
-BODY is the second argument to `defhydra'"
-  (let ((color (plist-get (cddr body) :color))
-        (exit (plist-get (cddr body) :exit))
-        (foreign-keys (plist-get (cddr body) :foreign-keys)))
-    (cond ((eq foreign-keys 'warn)
-           (if exit 'teal 'amaranth))
-          ((eq foreign-keys 'run) 'pink)
-          (exit 'blue)
-          (color color)
-          (t 'red))))
 
 (defvar hydra--input-method-function nil
   "Store overridden `input-method-function' here.")
@@ -558,7 +553,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                  (format "%s\n\nCall the head: `%S'." doc (cadr head))
                doc))
         (hint (intern (format "%S/hint" name)))
-        (body-color (hydra--body-color body))
+        (body-foreign-keys (hydra--body-foreign-keys body))
         (body-timeout (plist-get body :timeout)))
     `(defun ,name ()
        ,doc
@@ -588,13 +583,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                  (hydra-set-transient-map
                   ,keymap
                   (lambda () (hydra-keyboard-quit) ,body-before-exit)
-                  ,(cond
-                    ((memq body-color '(amaranth teal))
-                     ''warn)
-                    ((eq body-color 'pink)
-                     ''run)
-                    (t
-                     nil)))
+                  ,(when body-foreign-keys
+                         (list 'quote body-foreign-keys)))
                  ,body-after-exit
                  ,(when body-timeout
                         `(hydra-timeout ,body-timeout))))))))
@@ -807,9 +797,12 @@ result of `defhydra'."
              (body-before-exit (or (plist-get body-plist :post)
                                    (plist-get body-plist :before-exit)))
              (body-after-exit (plist-get body-plist :after-exit))
-             (body-color (hydra--body-color body)))
+             (body-inherit (plist-get body-plist :inherit))
+             (body-foreign-keys (hydra--body-foreign-keys body)))
         (hydra--make-funcall body-before-exit)
         (hydra--make-funcall body-after-exit)
+        (dolist (base body-inherit)
+          (setq heads (append heads (eval base))))
         (dolist (h heads)
           (let ((len (length h)))
             (cond ((< len 2)
@@ -844,20 +837,29 @@ result of `defhydra'."
            heads)
           (hydra--make-funcall body-pre)
           (hydra--make-funcall body-body-pre)
-          (when (memq body-color '(amaranth pink))
+          (when (memq body-foreign-keys '(run warn))
             (unless (cl-some
                      (lambda (h)
                        (memq (hydra--head-color h body) '(blue teal)))
                      heads)
               (error
                "An %S Hydra must have at least one blue head in order to exit"
-               body-color)))
+               body-foreign-keys)))
           `(progn
              ;; create keymap
              (set (defvar ,keymap-name
                     nil
                     ,(format "Keymap for %S." name))
                   ',keymap)
+             ;; declare heads
+             ;; (set (defvar ,(intern (format "%S/heads" name))
+             ;;        nil
+             ;;        ,(format "Heads for %S." name))
+             ;;      ',(mapcar (lambda (h)
+             ;;                  (let ((j (copy-sequence h)))
+             ;;                    (cl-remf (cl-cdddr j) :cmd-name)
+             ;;                    j))
+             ;;                heads))
              ;; create defuns
              ,@(mapcar
                 (lambda (head)
