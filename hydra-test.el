@@ -70,6 +70,27 @@
          (48 . hydra--digit-argument)
          (45 . hydra--negative-argument)
          (21 . hydra--universal-argument))))
+      (set
+       (defvar hydra-error/heads nil
+         "Heads for hydra-error.")
+       (quote
+        (("h"
+          first-error
+          "first"
+          :exit nil)
+         ("j"
+          next-error
+          "next"
+          :exit nil)
+         ("k"
+          previous-error
+          "prev"
+          :exit nil)
+         ("SPC"
+          hydra-repeat
+          "rep"
+          :bind nil
+          :exit nil))))
       (defun hydra-error/first-error nil
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -257,6 +278,23 @@ The body can be accessed via `hydra-error/body'."
          (48 . hydra--digit-argument)
          (45 . hydra--negative-argument)
          (21 . hydra--universal-argument))))
+      (set
+       (defvar hydra-toggle/heads nil
+         "Heads for hydra-toggle.")
+       (quote
+        (("t"
+          toggle-truncate-lines
+          "truncate"
+          :exit t)
+         ("f"
+          auto-fill-mode
+          "fill"
+          :exit t)
+         ("a"
+          abbrev-mode
+          "abbrev"
+          :exit t)
+         ("q" nil "cancel" :exit t))))
       (defun hydra-toggle/toggle-truncate-lines-and-exit nil
         "Create a hydra with no body and the heads:
 
@@ -403,6 +441,16 @@ The body can be accessed via `hydra-toggle/body'."
          (48 . hydra--digit-argument)
          (45 . hydra--negative-argument)
          (21 . hydra--universal-argument))))
+      (set
+       (defvar hydra-vi/heads nil
+         "Heads for hydra-vi.")
+       (quote
+        (("j" next-line "" :exit nil)
+         ("k"
+          previous-line
+          ""
+          :exit nil)
+         ("q" nil "quit" :exit nil))))
       (defun hydra-vi/next-line nil
         "Create a hydra with no body and the heads:
 
@@ -551,6 +599,24 @@ The body can be accessed via `hydra-vi/body'."
          (48 . hydra-zoom/lambda-0-and-exit)
          (45 . hydra--negative-argument)
          (21 . hydra--universal-argument))))
+      (set
+       (defvar hydra-zoom/heads nil
+         "Heads for hydra-zoom.")
+       (quote
+        (("r"
+          (text-scale-set 0)
+          "reset"
+          :exit nil)
+         ("0"
+          (text-scale-set 0)
+          ""
+          :bind nil
+          :exit t)
+         ("1"
+          (text-scale-set 0)
+          nil
+          :bind nil
+          :exit t))))
       (defun hydra-zoom/lambda-r nil
         "Create a hydra with no body and the heads:
 
@@ -674,6 +740,24 @@ The body can be accessed via `hydra-zoom/body'."
          (48 . hydra-zoom/lambda-0-and-exit)
          (45 . hydra--negative-argument)
          (21 . hydra--universal-argument))))
+      (set
+       (defvar hydra-zoom/heads nil
+         "Heads for hydra-zoom.")
+       (quote
+        (("r"
+          (text-scale-set 0)
+          "reset"
+          :exit nil)
+         ("0"
+          (text-scale-set 0)
+          ""
+          :bind nil
+          :exit t)
+         ("1"
+          (text-scale-set 0)
+          nil
+          :bind nil
+          :exit nil))))
       (defun hydra-zoom/lambda-r nil
         "Create a hydra with no body and the heads:
 

@@ -380,6 +380,15 @@ Return DEFAULT if PROP is not in H."
        ((amaranth teal) 'warn)
        (pink 'run)))))
 
+(defun hydra--body-exit (body)
+  "Return the exit behavior of BODY."
+  (or
+   (plist-get (cddr body) :exit)
+   (let ((color (plist-get (cddr body) :color)))
+     (cl-case color
+       ((blue teal) t)
+       (t nil)))))
+
 (defvar hydra--input-method-function nil
   "Store overridden `input-method-function' here.")
 
@@ -798,7 +807,8 @@ result of `defhydra'."
                                    (plist-get body-plist :before-exit)))
              (body-after-exit (plist-get body-plist :after-exit))
              (body-inherit (plist-get body-plist :inherit))
-             (body-foreign-keys (hydra--body-foreign-keys body)))
+             (body-foreign-keys (hydra--body-foreign-keys body))
+             (body-exit (hydra--body-exit body)))
         (hydra--make-funcall body-before-exit)
         (hydra--make-funcall body-after-exit)
         (dolist (base body-inherit)
@@ -812,22 +822,35 @@ result of `defhydra'."
                            (list
                             (hydra-plist-get-default body-plist :hint "")))
                    (setcdr (nthcdr 2 h)
-                           (list :cmd-name (hydra--head-name h name body))))
+                           (list :cmd-name (hydra--head-name h name body)
+                                 :exit body-exit)))
                   (t
                    (let ((hint (cl-caddr h)))
                      (unless (or (null hint)
                                  (stringp hint))
                        (setcdr (cdr h) (cons
                                         (hydra-plist-get-default body-plist :hint "")
-                                        (cddr h))))
-                     (let ((hint-and-plist (cddr h)))
-                       (if (null (cdr hint-and-plist))
-                           (setcdr hint-and-plist
-                                   (list :cmd-name
-                                         (hydra--head-name h name body)))
-                         (plist-put (cdr hint-and-plist)
-                                    :cmd-name
-                                    (hydra--head-name h name body)))))))))
+                                        (cddr h)))))
+                   (let ((hint-and-plist (cddr h)))
+                     (if (null (cdr hint-and-plist))
+                         (setcdr hint-and-plist
+                                 (list :cmd-name (hydra--head-name h name body)
+                                       :exit body-exit))
+                       (let* ((plist (cl-cdddr h))
+                              (h-color (plist-get plist :color)))
+                         (if h-color
+                             (progn
+                               (plist-put plist :exit
+                                          (cl-case h-color
+                                            ((blue teal) t)
+                                            (t nil)))
+                               (cl-remf (cl-cdddr h) :color))
+                           (let ((h-exit (hydra-plist-get-default plist :exit 'default)))
+                             (plist-put plist :exit
+                                        (if (eq h-exit 'default)
+                                            body-exit
+                                          h-exit))))
+                         (plist-put plist :cmd-name (hydra--head-name h name body)))))))))
         (let ((doc (hydra--doc body-key body-name heads))
               (heads-nodup (hydra--delete-duplicates heads)))
           (mapc
@@ -852,14 +875,14 @@ result of `defhydra'."
                     ,(format "Keymap for %S." name))
                   ',keymap)
              ;; declare heads
-             ;; (set (defvar ,(intern (format "%S/heads" name))
-             ;;        nil
-             ;;        ,(format "Heads for %S." name))
-             ;;      ',(mapcar (lambda (h)
-             ;;                  (let ((j (copy-sequence h)))
-             ;;                    (cl-remf (cl-cdddr j) :cmd-name)
-             ;;                    j))
-             ;;                heads))
+             (set (defvar ,(intern (format "%S/heads" name))
+                    nil
+                    ,(format "Heads for %S." name))
+                  ',(mapcar (lambda (h)
+                              (let ((j (copy-sequence h)))
+                                (cl-remf (cl-cdddr j) :cmd-name)
+                                j))
+                            heads))
              ;; create defuns
              ,@(mapcar
                 (lambda (head)
