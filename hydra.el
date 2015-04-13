@@ -514,6 +514,16 @@ HEADS is a list of heads."
     heads ",\n")
    (format "The body can be accessed via `%S'." body-name)))
 
+(defun hydra--call-interactively (cmd name)
+  "Generate a `call-interactively' statement for CMD.
+Set `this-command' to NAME."
+  (if (and (symbolp name)
+           (not (memq name '(nil body))))
+      `(progn
+         (setq this-command ',name)
+         (call-interactively #',cmd))
+    `(call-interactively #',cmd)))
+
 (defun hydra--make-defun (name body doc head
                           keymap body-pre body-before-exit
                           &optional body-after-exit)
@@ -541,16 +551,18 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
        ,@(when body-pre (list body-pre))
        ,@(if (hydra--head-property head :exit)
              `((hydra-keyboard-quit)
-               ,(if body-after-exit
-                    `(unwind-protect
-                          ,(when cmd `(call-interactively #',cmd))
-                       ,body-after-exit)
-                    (when cmd `(call-interactively #',cmd))))
+               ,@(if body-after-exit
+                     `((unwind-protect
+                            ,(when cmd
+                                   (hydra--call-interactively cmd (cadr head)))
+                         ,body-after-exit))
+                     (when cmd
+                       `(,(hydra--call-interactively cmd (cadr head))))))
              (delq
               nil
               `(,(when cmd
                        `(condition-case err
-                            (call-interactively #',cmd)
+                            ,(hydra--call-interactively cmd (cadr head))
                           ((quit error)
                            (message "%S" err)
                            (unless hydra-lv
@@ -566,10 +578,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                          (list 'quote body-foreign-keys)))
                  ,body-after-exit
                  ,(when body-timeout
-                        `(hydra-timeout ,body-timeout)))))
-       ,@(when (and (symbolp (cadr head))
-                    (not (memq (cadr head) '(nil body))))
-               `((setq this-command ',(cadr head)))))))
+                        `(hydra-timeout ,body-timeout))))))))
 
 (defmacro hydra--make-funcall (sym)
   "Transform SYM into a `funcall' to call it."

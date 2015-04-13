@@ -105,8 +105,11 @@ Call the head: `first-error'."
         (interactive)
         (hydra-default-pre)
         (condition-case err
-            (call-interactively
-             (function first-error))
+            (progn
+              (setq this-command
+                    (quote first-error))
+              (call-interactively
+               (function first-error)))
           ((quit error)
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
@@ -121,9 +124,7 @@ Call the head: `first-error'."
          (lambda nil
            (hydra-keyboard-quit)
            nil)
-         nil)
-        (setq this-command
-              (quote first-error)))
+         nil))
       (defun hydra-error/next-error nil
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -138,8 +139,11 @@ Call the head: `next-error'."
         (interactive)
         (hydra-default-pre)
         (condition-case err
-            (call-interactively
-             (function next-error))
+            (progn
+              (setq this-command
+                    (quote next-error))
+              (call-interactively
+               (function next-error)))
           ((quit error)
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
@@ -154,9 +158,7 @@ Call the head: `next-error'."
          (lambda nil
            (hydra-keyboard-quit)
            nil)
-         nil)
-        (setq this-command
-              (quote next-error)))
+         nil))
       (defun hydra-error/previous-error nil
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -171,8 +173,11 @@ Call the head: `previous-error'."
         (interactive)
         (hydra-default-pre)
         (condition-case err
-            (call-interactively
-             (function previous-error))
+            (progn
+              (setq this-command
+                    (quote previous-error))
+              (call-interactively
+               (function previous-error)))
           ((quit error)
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
@@ -187,9 +192,7 @@ Call the head: `previous-error'."
          (lambda nil
            (hydra-keyboard-quit)
            nil)
-         nil)
-        (setq this-command
-              (quote previous-error)))
+         nil))
       (unless (keymapp
                (lookup-key
                 global-map
@@ -315,11 +318,12 @@ Call the head: `toggle-truncate-lines'."
         (interactive)
         (hydra-default-pre)
         (hydra-keyboard-quit)
-        (call-interactively
-         (function
-          toggle-truncate-lines))
-        (setq this-command
-              (quote toggle-truncate-lines)))
+        (progn
+          (setq this-command
+                (quote toggle-truncate-lines))
+          (call-interactively
+           (function
+            toggle-truncate-lines))))
       (defun hydra-toggle/auto-fill-mode-and-exit nil
         "Create a hydra with no body and the heads:
 
@@ -334,10 +338,11 @@ Call the head: `auto-fill-mode'."
         (interactive)
         (hydra-default-pre)
         (hydra-keyboard-quit)
-        (call-interactively
-         (function auto-fill-mode))
-        (setq this-command
-              (quote auto-fill-mode)))
+        (progn
+          (setq this-command
+                (quote auto-fill-mode))
+          (call-interactively
+           (function auto-fill-mode))))
       (defun hydra-toggle/abbrev-mode-and-exit nil
         "Create a hydra with no body and the heads:
 
@@ -352,10 +357,11 @@ Call the head: `abbrev-mode'."
         (interactive)
         (hydra-default-pre)
         (hydra-keyboard-quit)
-        (call-interactively
-         (function abbrev-mode))
-        (setq this-command
-              (quote abbrev-mode)))
+        (progn
+          (setq this-command
+                (quote abbrev-mode))
+          (call-interactively
+           (function abbrev-mode))))
       (defun hydra-toggle/nil nil
         "Create a hydra with no body and the heads:
 
@@ -369,8 +375,7 @@ The body can be accessed via `hydra-toggle/body'.
 Call the head: `nil'."
         (interactive)
         (hydra-default-pre)
-        (hydra-keyboard-quit)
-        nil)
+        (hydra-keyboard-quit))
       (set
        (defvar hydra-toggle/hint nil
          "Dynamic hint for hydra-toggle.")
@@ -477,8 +482,11 @@ Call the head: `next-line'."
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (condition-case err
-            (call-interactively
-             (function next-line))
+            (progn
+              (setq this-command
+                    (quote next-line))
+              (call-interactively
+               (function next-line)))
           ((quit error)
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
@@ -492,9 +500,7 @@ Call the head: `next-line'."
          (lambda nil
            (hydra-keyboard-quit)
            (set-cursor-color "#ffffff"))
-         (quote warn))
-        (setq this-command
-              (quote next-line)))
+         (quote warn)))
       (defun hydra-vi/previous-line nil
         "Create a hydra with no body and the heads:
 
@@ -509,8 +515,11 @@ Call the head: `previous-line'."
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (condition-case err
-            (call-interactively
-             (function previous-line))
+            (progn
+              (setq this-command
+                    (quote previous-line))
+              (call-interactively
+               (function previous-line)))
           ((quit error)
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
@@ -524,9 +533,7 @@ Call the head: `previous-line'."
          (lambda nil
            (hydra-keyboard-quit)
            (set-cursor-color "#ffffff"))
-         (quote warn))
-        (setq this-command
-              (quote previous-line)))
+         (quote warn)))
       (defun hydra-vi/nil nil
         "Create a hydra with no body and the heads:
 
@@ -540,8 +547,7 @@ Call the head: `nil'."
         (interactive)
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
-        (hydra-keyboard-quit)
-        nil)
+        (hydra-keyboard-quit))
       (set
        (defvar hydra-vi/hint nil
          "Dynamic hint for hydra-vi.")
