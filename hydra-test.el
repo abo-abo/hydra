@@ -1172,9 +1172,14 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
                    body-pre)
                  '(funcall (function foo)))))
 
-(defhydra hydra-simple (global-map "C-c")
+(defhydra hydra-simple-1 (global-map "C-c")
   ("a" (insert "j"))
   ("b" (insert "k"))
+  ("q" nil))
+
+(defhydra hydra-simple-2 (global-map "C-c" :color amaranth)
+  ("c" self-insert-command)
+  ("d" self-insert-command)
   ("q" nil))
 
 (defmacro hydra-with (in &rest body)
@@ -1216,6 +1221,16 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
                                  (quit nil))
                                (execute-kbd-macro "aaqaabbaa"))
                    "jjkkaaqaabbaa|")))
+
+(ert-deftest hydra-integration-2 ()
+  (should (string= (hydra-with "|"
+                               (execute-kbd-macro
+                                (kbd "C-c c 1 c 2 d 4 c q")))
+                   "ccddcccc|"))
+  (should (string= (hydra-with "|"
+                               (execute-kbd-macro
+                                (kbd "C-c c 1 c C-u d C-u 10 c q")))
+                   "ccddddcccccccccc|")))
 
 (provide 'hydra-test)
 
