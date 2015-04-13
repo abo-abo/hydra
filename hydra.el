@@ -178,27 +178,29 @@ When nil, you can specify your own at each location like this: _ 5a_.")
 
 (defface hydra-face-red
     '((t (:foreground "#FF0000" :bold t)))
-  "Red Hydra heads will persist indefinitely."
+  "Red Hydra heads don't exit the Hydra.
+Every other command exits the Hydra."
   :group 'hydra)
 
 (defface hydra-face-blue
     '((t (:foreground "#0000FF" :bold t)))
-  "Blue Hydra heads will vanquish the Hydra.")
+  "Blue Hydra heads exit the Hydra.
+Every other command exits as well.")
 
 (defface hydra-face-amaranth
     '((t (:foreground "#E52B50" :bold t)))
   "Amaranth body has red heads and warns on intercepting non-heads.
-Vanquishable only through a blue head.")
+Exitable only through a blue head.")
 
 (defface hydra-face-pink
     '((t (:foreground "#FF6EB4" :bold t)))
-  "Pink body has red heads and on intercepting non-heads calls them without quitting.
-Vanquishable only through a blue head.")
+  "Pink body has red heads and runs intercepted non-heads.
+Exitable only through a blue head.")
 
 (defface hydra-face-teal
     '((t (:foreground "#367588" :bold t)))
   "Teal body has blue heads an warns on intercepting non-heads.
-Vanquishable only through a blue head.")
+Exitable only through a blue head.")
 
 ;;* Fontification
 (defun hydra-add-font-lock ()
@@ -330,57 +332,21 @@ Return DEFAULT if PROP is not in H."
 
 (defun hydra--head-color (h body)
   "Return the color of a Hydra head H with BODY."
-  (let* ((head-exit (hydra--head-property h :exit 'default))
-         (foreign-keys (hydra--body-foreign-keys body))
-         (head-color (hydra--head-property h :color))
+  (let* ((foreign-keys (hydra--body-foreign-keys body))
+         (head-exit (hydra--head-property h :exit))
          (head-color
-          (cond ((eq head-exit 'default)
-                 (cl-case head-color
-                   (blue 'blue)
-                   (red 'red)
-                   (t
-                    (unless (null head-color)
-                      (error "Use only :blue or :red for heads: %S" h)))))
-                ((null head-exit)
-                 (if head-color
-                     (error "Don't mix :color and :exit - they are aliases: %S" h)
-                   (cl-case foreign-keys
-                     (run 'pink)
-                     (warn 'amaranth)
-                     (t 'red))))
-                ((eq head-exit t)
-                 (if head-color
-                     (error "Don't mix :color and :exit - they are aliases: %S" h)
-                   'blue))
-                (t
-                 (error "Unknown :exit %S" head-exit)))))
-    (cond ((null (cadr h))
-           (when head-color
-             (hydra--complain
-              "Doubly specified blue head - nil cmd is already blue: %S" h))
-           'blue)
-          ((null head-color)
-           (let ((color (plist-get (cddr body) :color))
-                 (exit (plist-get (cddr body) :exit))
-                 (foreign-keys (plist-get (cddr body) :foreign-keys)))
-             (cond ((eq foreign-keys 'warn)
-                    (if exit 'teal 'amaranth))
-                   ((eq foreign-keys 'run) 'pink)
-                   (exit 'blue)
-                   (color color)
-                   (t 'red))))
-          ((null foreign-keys)
-           head-color)
-          ((eq foreign-keys 'run)
-           (if (eq head-color 'red)
-               'pink
-             'blue))
-          ((eq foreign-keys 'warn)
-           (if (memq head-color '(red amaranth))
-               'amaranth
-             'teal))
-          (t
-           (error "Unexpected %S %S" h body)))))
+          (if head-exit
+              (if (eq foreign-keys 'warn)
+                  'teal
+                'blue)
+            (cl-case foreign-keys
+              (warn 'amaranth)
+              (run 'pink)
+              (t 'red)))))
+    (when (and (null (cadr h))
+               (not (eq head-color 'blue)))
+      (hydra--complain "nil cmd can only be blue"))
+    head-color))
 
 (defun hydra--body-foreign-keys (body)
   "Return what BODY does with a non-head binding."
@@ -823,7 +789,7 @@ result of `defhydra'."
         (hydra--make-funcall body-before-exit)
         (hydra--make-funcall body-after-exit)
         (dolist (base body-inherit)
-          (setq heads (append heads (eval base))))
+          (setq heads (append heads (copy-sequence (eval base)))))
         (dolist (h heads)
           (let ((len (length h)))
             (cond ((< len 2)
@@ -832,9 +798,7 @@ result of `defhydra'."
                    (setcdr (cdr h)
                            (list
                             (hydra-plist-get-default body-plist :hint "")))
-                   (setcdr (nthcdr 2 h)
-                           (list :cmd-name (hydra--head-name h name body)
-                                 :exit body-exit)))
+                   (setcdr (nthcdr 2 h) (list :exit body-exit)))
                   (t
                    (let ((hint (cl-caddr h)))
                      (unless (or (null hint)
@@ -844,9 +808,7 @@ result of `defhydra'."
                                         (cddr h)))))
                    (let ((hint-and-plist (cddr h)))
                      (if (null (cdr hint-and-plist))
-                         (setcdr hint-and-plist
-                                 (list :cmd-name (hydra--head-name h name body)
-                                       :exit body-exit))
+                         (setcdr hint-and-plist (list :exit body-exit))
                        (let* ((plist (cl-cdddr h))
                               (h-color (plist-get plist :color)))
                          (if h-color
@@ -860,8 +822,9 @@ result of `defhydra'."
                              (plist-put plist :exit
                                         (if (eq h-exit 'default)
                                             body-exit
-                                          h-exit))))
-                         (plist-put plist :cmd-name (hydra--head-name h name body)))))))))
+                                          h-exit))))))))))
+          (plist-put (cl-cdddr h) :cmd-name (hydra--head-name h name body))
+          (when (null (cadr h)) (plist-put (cl-cdddr h) :exit t)))
         (let ((doc (hydra--doc body-key body-name heads))
               (heads-nodup (hydra--delete-duplicates heads)))
           (mapc

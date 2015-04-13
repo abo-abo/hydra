@@ -450,7 +450,7 @@ The body can be accessed via `hydra-toggle/body'."
           previous-line
           ""
           :exit nil)
-         ("q" nil "quit" :exit nil))))
+         ("q" nil "quit" :exit t))))
       (defun hydra-vi/next-line nil
         "Create a hydra with no body and the heads:
 
@@ -534,7 +534,7 @@ Call the head: `nil'."
          #("vi: j, k, [q]: quit."
            4 5 (face hydra-face-amaranth)
            7 8 (face hydra-face-amaranth)
-           11 12 (face hydra-face-blue)))))
+           11 12 (face hydra-face-teal)))))
       (defun hydra-vi/body nil
         "Create a hydra with no body and the heads:
 
@@ -963,7 +963,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
            '(concat (format "%s abbrev-mode:       %S
 %s debug-on-error:    %S
 %s auto-fill-mode:    %S
-" "{a}" abbrev-mode "{d}" debug-on-error "{f}" auto-fill-function) "[[q]]: quit"))))
+" "{a}" abbrev-mode "{d}" debug-on-error "{f}" auto-fill-function) "[{q}]: quit"))))
 
 (ert-deftest hydra-format-2 ()
   (should (equal
@@ -973,8 +973,8 @@ _f_ auto-fill-mode:    %`auto-fill-function
               'bar
               nil
               "\n  bar %s`foo\n"
-              '(("a" (quote t) "" :cmd-name bar/lambda-a)
-                ("q" nil "" :cmd-name bar/nil))))
+              '(("a" (quote t) "" :cmd-name bar/lambda-a :exit nil)
+                ("q" nil "" :cmd-name bar/nil :exit t))))
            '(concat (format "  bar %s\n" foo) "{a}, [q]"))))
 
 (ert-deftest hydra-format-3 ()
@@ -1006,7 +1006,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
              (hydra--format
               'hydra-toggle nil
               "\n_n_ narrow-or-widen-dwim %(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
-              '(("n" narrow-to-region nil) ("q" nil "cancel"))))
+              '(("n" narrow-to-region nil) ("q" nil "cancel" :exit t))))
            '(concat (format "%s narrow-or-widen-dwim %Sasdf\n"
                      "{n}"
                      (progn
@@ -1021,7 +1021,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
              (hydra--format
               'hydra-toggle nil
               "\n_n_ narrow-or-widen-dwim %s(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
-              '(("n" narrow-to-region nil) ("q" nil "cancel"))))
+              '(("n" narrow-to-region nil) ("q" nil "cancel" :exit t))))
            '(concat (format "%s narrow-or-widen-dwim %sasdf\n"
                      "{n}"
                      (progn
@@ -1031,17 +1031,13 @@ _f_ auto-fill-mode:    %`auto-fill-function
 
 (ert-deftest hydra-compat-colors-1 ()
   (should (equal (hydra--head-color
-                  '("e" (message "Exiting now") "blue")
+                  '("e" (message "Exiting now") "blue" :exit t)
                   '(nil nil :color blue))
                  'blue))
   (should (equal (hydra--head-color
                   '("c" (message "Continuing") "red" :color red)
                   '(nil nil :color blue))
                  'red))
-  (should (equal (hydra--head-color
-                  '("e" (message "Exiting now") "blue")
-                  '(nil nil :exit t))
-                 'blue))
   (should (equal (hydra--head-color
                   '("j" next-line "" :exit t)
                   '(nil nil))
@@ -1051,7 +1047,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
                   '(nil nil :exit t))
                  'red))
   (equal (hydra--head-color
-          '("a" abbrev-mode nil)
+          '("a" abbrev-mode nil :exit t)
           '(nil nil :color teal))
          'teal)
   (equal (hydra--head-color
