@@ -111,7 +111,7 @@ warn: keep KEYMAP and issue a warning instead of running the command."
                            keyboard-quit))
       (hydra-disable)
     (unless (eq this-command
-                (lookup-key hydra-curr-map (this-command-keys-vector)))
+                (lookup-key hydra-curr-map (this-single-command-keys)))
       (unless (cl-case hydra-curr-foreign-keys
                 (warn
                  (setq this-command 'hydra-amaranth-warn))
