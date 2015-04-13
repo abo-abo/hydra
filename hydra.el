@@ -330,24 +330,6 @@ one of the properties on the list."
 Return DEFAULT if PROP is not in H."
   (hydra-plist-get-default (cl-cdddr h) prop default))
 
-(defun hydra--head-color (h body)
-  "Return the color of a Hydra head H with BODY."
-  (let* ((foreign-keys (hydra--body-foreign-keys body))
-         (head-exit (hydra--head-property h :exit))
-         (head-color
-          (if head-exit
-              (if (eq foreign-keys 'warn)
-                  'teal
-                'blue)
-            (cl-case foreign-keys
-              (warn 'amaranth)
-              (run 'pink)
-              (t 'red)))))
-    (when (and (null (cadr h))
-               (not (eq head-color 'blue)))
-      (hydra--complain "nil cmd can only be blue"))
-    head-color))
-
 (defun hydra--body-foreign-keys (body)
   "Return what BODY does with a non-head binding."
   (or
@@ -423,23 +405,36 @@ BODY, and HEADS are parameters to `defhydra'."
 (defun hydra-fontify-head-default (head body)
   "Produce a pretty string from HEAD and BODY.
 HEAD's binding is returned as a string with a colored face."
-  (propertize (car head) 'face
-              (cl-case (hydra--head-color head body)
-                (blue 'hydra-face-blue)
-                (red 'hydra-face-red)
-                (amaranth 'hydra-face-amaranth)
-                (pink 'hydra-face-pink)
-                (teal 'hydra-face-teal)
-                (t (error "Unknown color for %S" head)))))
+  (let* ((foreign-keys (hydra--body-foreign-keys body))
+         (head-exit (hydra--head-property head :exit))
+         (head-color
+          (if head-exit
+              (if (eq foreign-keys 'warn)
+                  'teal
+                'blue)
+            (cl-case foreign-keys
+              (warn 'amaranth)
+              (run 'pink)
+              (t 'red)))))
+    (when (and (null (cadr head))
+               (not (eq head-color 'blue)))
+      (hydra--complain "nil cmd can only be blue"))
+    (propertize (car head) 'face
+                (cl-case head-color
+                  (blue 'hydra-face-blue)
+                  (red 'hydra-face-red)
+                  (amaranth 'hydra-face-amaranth)
+                  (pink 'hydra-face-pink)
+                  (teal 'hydra-face-teal)
+                  (t (error "Unknown color for %S" head))))))
 
 (defun hydra-fontify-head-greyscale (head body)
   "Produce a pretty string from HEAD and BODY.
 HEAD's binding is returned as a string wrapped with [] or {}."
-  (let ((color (hydra--head-color head body)))
-    (format
-     (if (eq color 'blue)
-         "[%s]"
-       "{%s}") (car head))))
+  (format
+   (if (hydra--head-property head :exit)
+       "[%s]"
+     "{%s}") (car head)))
 
 (defun hydra-fontify-head (head body)
   "Produce a pretty string from HEAD and BODY."
@@ -533,8 +528,6 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
         (cmd (when (car head)
                (hydra--make-callable
                 (cadr head))))
-        (color (when (car head)
-                 (hydra--head-color head body)))
         (doc (if (car head)
                  (format "%s\n\nCall the head: `%S'." doc (cadr head))
                doc))
@@ -546,7 +539,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
        (interactive)
        (hydra-default-pre)
        ,@(when body-pre (list body-pre))
-       ,@(if (memq color '(blue teal))
+       ,@(if (hydra--head-property head :exit)
              `((hydra-keyboard-quit)
                ,(if body-after-exit
                     `(unwind-protect
@@ -586,7 +579,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                      (if (symbolp (cadr h))
                          (cadr h)
                        (concat "lambda-" (car h))))))
-    (when (and (memq (hydra--head-color h body) '(blue teal))
+    (when (and (hydra--head-property h :exit)
                (not (memq (cadr h) '(body nil))))
       (setq str (concat str "-and-exit")))
     (intern str)))
@@ -594,15 +587,15 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
 (defun hydra--delete-duplicates (heads)
   "Return HEADS without entries that have the same CMD part.
 In duplicate HEADS, :cmd-name is modified to whatever they duplicate."
-  (let ((ali '(((hydra-repeat . red) . hydra-repeat)))
+  (let ((ali '(((hydra-repeat . nil) . hydra-repeat)))
         res entry)
     (dolist (h heads)
       (if (setq entry (assoc (cons (cadr h)
-                                   (hydra--head-color h '(nil nil)))
+                                   (hydra--head-property h :exit))
                              ali))
           (setf (cl-cdddr h) (plist-put (cl-cdddr h) :cmd-name (cdr entry)))
         (push (cons (cons (cadr h)
-                          (hydra--head-color h '(nil nil)))
+                          (hydra--head-property h :exit))
                     (plist-get (cl-cdddr h) :cmd-name))
               ali)
         (push h res)))
@@ -837,7 +830,7 @@ result of `defhydra'."
           (when (memq body-foreign-keys '(run warn))
             (unless (cl-some
                      (lambda (h)
-                       (memq (hydra--head-color h body) '(blue teal)))
+                       (hydra--head-property h :exit))
                      heads)
               (error
                "An %S Hydra must have at least one blue head in order to exit"

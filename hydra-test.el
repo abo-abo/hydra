@@ -1029,32 +1029,6 @@ _f_ auto-fill-mode:    %`auto-fill-function
                        (buffer-narrowed-p)))
              "[[q]]: cancel"))))
 
-(ert-deftest hydra-compat-colors-1 ()
-  (should (equal (hydra--head-color
-                  '("e" (message "Exiting now") "blue" :exit t)
-                  '(nil nil :color blue))
-                 'blue))
-  (should (equal (hydra--head-color
-                  '("c" (message "Continuing") "red" :color red)
-                  '(nil nil :color blue))
-                 'red))
-  (should (equal (hydra--head-color
-                  '("j" next-line "" :exit t)
-                  '(nil nil))
-                 'blue))
-  (should (equal (hydra--head-color
-                  '("c" (message "Continuing") "red" :exit nil)
-                  '(nil nil :exit t))
-                 'red))
-  (equal (hydra--head-color
-          '("a" abbrev-mode nil :exit t)
-          '(nil nil :color teal))
-         'teal)
-  (equal (hydra--head-color
-          '("a" abbrev-mode :exit nil)
-          '(nil nil :color teal))
-         'amaranth))
-
 (ert-deftest hydra-compat-colors-2 ()
   (should
    (equal
