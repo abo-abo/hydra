@@ -253,17 +253,28 @@ Vanquishable only through a blue head.")
 (defun hydra--digit-argument (arg)
   "Forward to (`digit-argument' ARG)."
   (interactive "P")
-  (let ((universal-argument-map
-         (if (fboundp 'universal-argument--mode)
-             hydra-curr-map
-           universal-argument-map)))
-    (digit-argument arg)))
+  (let* ((char (if (integerp last-command-event)
+                   last-command-event
+                 (get last-command-event 'ascii-character)))
+         (digit (- (logand char ?\177) ?0)))
+    (setq prefix-arg (cond ((integerp arg)
+                            (+ (* arg 10)
+                               (if (< arg 0)
+                                   (- digit)
+                                 digit)))
+                           ((eq arg '-)
+                            (if (zerop digit)
+                                '-
+                              (- digit)))
+                           (t
+                            digit)))))
 
 (defun hydra--negative-argument (arg)
   "Forward to (`negative-argument' ARG)."
   (interactive "P")
-  (let ((universal-argument-map hydra-curr-map))
-    (negative-argument arg)))
+  (setq prefix-arg (cond ((integerp arg) (- arg))
+                         ((eq arg '-) nil)
+                         (t '-))))
 
 ;;* Repeat
 (defvar hydra-repeat--prefix-arg nil
