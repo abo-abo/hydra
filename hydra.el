@@ -566,7 +566,10 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                          (list 'quote body-foreign-keys)))
                  ,body-after-exit
                  ,(when body-timeout
-                        `(hydra-timeout ,body-timeout))))))))
+                        `(hydra-timeout ,body-timeout)))))
+       ,@(when (and (symbolp (cadr head))
+                    (not (memq (cadr head) '(nil body))))
+               `((setq this-command ',(cadr head)))))))
 
 (defmacro hydra--make-funcall (sym)
   "Transform SYM into a `funcall' to call it."
@@ -779,8 +782,6 @@ result of `defhydra'."
              (body-inherit (plist-get body-plist :inherit))
              (body-foreign-keys (hydra--body-foreign-keys body))
              (body-exit (hydra--body-exit body)))
-        (hydra--make-funcall body-before-exit)
-        (hydra--make-funcall body-after-exit)
         (dolist (base body-inherit)
           (setq heads (append heads (copy-sequence (eval base)))))
         (dolist (h heads)
@@ -827,6 +828,8 @@ result of `defhydra'."
            heads)
           (hydra--make-funcall body-pre)
           (hydra--make-funcall body-body-pre)
+          (hydra--make-funcall body-before-exit)
+          (hydra--make-funcall body-after-exit)
           (when (memq body-foreign-keys '(run warn))
             (unless (cl-some
                      (lambda (h)

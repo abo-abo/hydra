@@ -121,7 +121,9 @@ Call the head: `first-error'."
          (lambda nil
            (hydra-keyboard-quit)
            nil)
-         nil))
+         nil)
+        (setq this-command
+              (quote first-error)))
       (defun hydra-error/next-error nil
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -152,7 +154,9 @@ Call the head: `next-error'."
          (lambda nil
            (hydra-keyboard-quit)
            nil)
-         nil))
+         nil)
+        (setq this-command
+              (quote next-error)))
       (defun hydra-error/previous-error nil
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -183,7 +187,9 @@ Call the head: `previous-error'."
          (lambda nil
            (hydra-keyboard-quit)
            nil)
-         nil))
+         nil)
+        (setq this-command
+              (quote previous-error)))
       (unless (keymapp
                (lookup-key
                 global-map
@@ -311,7 +317,9 @@ Call the head: `toggle-truncate-lines'."
         (hydra-keyboard-quit)
         (call-interactively
          (function
-          toggle-truncate-lines)))
+          toggle-truncate-lines))
+        (setq this-command
+              (quote toggle-truncate-lines)))
       (defun hydra-toggle/auto-fill-mode-and-exit nil
         "Create a hydra with no body and the heads:
 
@@ -327,7 +335,9 @@ Call the head: `auto-fill-mode'."
         (hydra-default-pre)
         (hydra-keyboard-quit)
         (call-interactively
-         (function auto-fill-mode)))
+         (function auto-fill-mode))
+        (setq this-command
+              (quote auto-fill-mode)))
       (defun hydra-toggle/abbrev-mode-and-exit nil
         "Create a hydra with no body and the heads:
 
@@ -343,7 +353,9 @@ Call the head: `abbrev-mode'."
         (hydra-default-pre)
         (hydra-keyboard-quit)
         (call-interactively
-         (function abbrev-mode)))
+         (function abbrev-mode))
+        (setq this-command
+              (quote abbrev-mode)))
       (defun hydra-toggle/nil nil
         "Create a hydra with no body and the heads:
 
@@ -480,7 +492,9 @@ Call the head: `next-line'."
          (lambda nil
            (hydra-keyboard-quit)
            (set-cursor-color "#ffffff"))
-         (quote warn)))
+         (quote warn))
+        (setq this-command
+              (quote next-line)))
       (defun hydra-vi/previous-line nil
         "Create a hydra with no body and the heads:
 
@@ -510,7 +524,9 @@ Call the head: `previous-line'."
          (lambda nil
            (hydra-keyboard-quit)
            (set-cursor-color "#ffffff"))
-         (quote warn)))
+         (quote warn))
+        (setq this-command
+              (quote previous-line)))
       (defun hydra-vi/nil nil
         "Create a hydra with no body and the heads:
 
