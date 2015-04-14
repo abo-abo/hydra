@@ -5,6 +5,8 @@ bindings with a common prefix - a Hydra.
 
 ![hydra](http://oremacs.com/download/Hydra.jpg)
 
+## Description for Poets
+
 Once you summon the Hydra through the prefixed binding (the body + any one head), all heads can be
 called in succession with only a short extension.
 
@@ -12,6 +14,20 @@ The Hydra is vanquished once Hercules, any binding that isn't the Hydra's head, 
 Hercules, besides vanquishing the Hydra, will still serve his original purpose, calling his proper
 command.  This makes the Hydra very seamless, it's like a minor mode that disables itself
 auto-magically.
+
+## Description for Pragmatics
+
+Imagine that you have bound <kbd>C-c j</kbd> and <kbd>C-c k</kbd> in your
+config.  You want to call <kbd>C-c j</kbd> and <kbd>C-c k</kbd> in some
+(arbitrary) sequence. Hydra allows you to:
+
+- Bind your functions in a way that pressing <kbd>C-c jjkk3j5k</kbd> is
+equivalent to pressing <kbd>C-c j C-c j C-c k C-c k M-3 C-c j M-5 C-c
+k</kbd>. Any key other than <kbd>j</kbd> or <kbd>k</kbd> exits this state.
+
+- Assign a custom hint to this group of functions, so that you know immediately
+after pressing <kbd>C-c</kbd> that you can follow up with <kbd>j</kbd> or
+<kbd>k</kbd>.
 
 If you want to quickly understand the concept, see [the video demo](https://www.youtube.com/watch?v=_qZliI1BKzI).
 
