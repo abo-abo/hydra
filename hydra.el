@@ -107,27 +107,30 @@ warn: keep KEYMAP and issue a warning instead of running the command."
 
 (defun hydra--clearfun ()
   "Disable the current Hydra unless `this-command' is a head."
-  (if (memq this-command '(handle-switch-frame
-                           keyboard-quit))
-      (hydra-disable)
-    (unless (eq this-command
-                (lookup-key hydra-curr-map (this-single-command-keys)))
-      (unless (cl-case hydra-curr-foreign-keys
-                (warn
-                 (setq this-command 'hydra-amaranth-warn))
-                (run
-                 t)
-                (t nil))
-        (hydra-disable)))))
+  (when (or
+         (memq this-command '(handle-switch-frame keyboard-quit))
+         (null overriding-terminal-local-map)
+         (not (or (eq this-command
+                      (lookup-key hydra-curr-map (this-single-command-keys)))
+                  (cl-case hydra-curr-foreign-keys
+                    (warn
+                     (setq this-command 'hydra-amaranth-warn))
+                    (run
+                     t)
+                    (t nil)))))
+    (hydra-disable)))
 
 (defun hydra-disable ()
   "Disable the current Hydra."
   (remove-hook 'pre-command-hook 'hydra--clearfun)
-  (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map)
-  (when hydra-curr-on-exit
-    (let ((on-exit hydra-curr-on-exit))
-      (setq hydra-curr-on-exit nil)
-      (funcall on-exit))))
+  (dolist (frame (frame-list))
+    (with-selected-frame frame
+      (when overriding-terminal-local-map
+        (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map)
+        (when hydra-curr-on-exit
+          (let ((on-exit hydra-curr-on-exit))
+            (setq hydra-curr-on-exit nil)
+            (funcall on-exit)))))))
 
 (unless (fboundp 'internal-push-keymap)
   (defun internal-push-keymap (keymap symbol)
