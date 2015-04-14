@@ -13,6 +13,8 @@ Hercules, besides vanquishing the Hydra, will still serve his original purpose, 
 command.  This makes the Hydra very seamless, it's like a minor mode that disables itself
 auto-magically.
 
+If you want to quickly understand the concept, see [the video demo](https://www.youtube.com/watch?v=_qZliI1BKzI).
+
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc/generate-toc again -->
 **Table of Contents**
 
