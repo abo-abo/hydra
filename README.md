@@ -176,41 +176,21 @@ Here's what `hydra-zoom/body` looks like, if you're interested:
 
 The body can be accessed via `hydra-zoom/body'."
   (interactive)
-  (hydra-disable)
-  (catch (quote hydra-disable)
-    (when hydra-is-helpful (hydra-zoom/hint))
-    (setq hydra-last
-          (hydra-set-transient-map
-           (setq hydra-curr-map
-                 (quote
-                  (keymap (7 . hydra-keyboard-quit)
-                          (108 . hydra-zoom/text-scale-decrease)
-                          (103 . hydra-zoom/text-scale-increase)
-                          (kp-subtract . hydra--negative-argument)
-                          (kp-9 . hydra--digit-argument)
-                          (kp-8 . hydra--digit-argument)
-                          (kp-7 . hydra--digit-argument)
-                          (kp-6 . hydra--digit-argument)
-                          (kp-5 . hydra--digit-argument)
-                          (kp-4 . hydra--digit-argument)
-                          (kp-3 . hydra--digit-argument)
-                          (kp-2 . hydra--digit-argument)
-                          (kp-1 . hydra--digit-argument)
-                          (kp-0 . hydra--digit-argument)
-                          (57 . hydra--digit-argument)
-                          (56 . hydra--digit-argument)
-                          (55 . hydra--digit-argument)
-                          (54 . hydra--digit-argument)
-                          (53 . hydra--digit-argument)
-                          (52 . hydra--digit-argument)
-                          (51 . hydra--digit-argument)
-                          (50 . hydra--digit-argument)
-                          (49 . hydra--digit-argument)
-                          (48 . hydra--digit-argument)
-                          (45 . hydra--negative-argument)
-                          (21 . hydra--universal-argument))))
-           t (lambda nil (hydra-cleanup))))
-    (setq prefix-arg current-prefix-arg)))
+  (hydra-default-pre)
+  (when hydra-is-helpful
+    (if hydra-lv
+        (lv-message
+         (eval hydra-zoom/hint))
+      (message
+       (eval hydra-zoom/hint))))
+  (hydra-set-transient-map
+   hydra-zoom/keymap
+   (lambda nil
+     (hydra-keyboard-quit)
+     nil)
+   nil)
+  (setq prefix-arg
+        current-prefix-arg))
 ```
 
 ## `awesome-map` and `awesome-binding`
