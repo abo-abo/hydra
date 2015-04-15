@@ -1198,6 +1198,11 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
   ("d" self-insert-command)
   ("q" nil))
 
+(defhydra hydra-simple-3 (global-map "C-c")
+  ("g" goto-line)
+  ("1" find-file)
+  ("q" nil))
+
 (defmacro hydra-with (in &rest body)
   `(let ((temp-buffer (generate-new-buffer " *temp*")))
      (save-window-excursion
@@ -1247,6 +1252,12 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
                                (execute-kbd-macro
                                 (kbd "C-c c 1 c C-u d C-u 10 c q")))
                    "ccddddcccccccccc|")))
+
+(ert-deftest hydra-integration-3 ()
+  (should (string= (hydra-with "foo\nbar|"
+                               (execute-kbd-macro
+                                (kbd "C-c g 1 RET q")))
+                   "|foo\nbar")))
 
 (provide 'hydra-test)
 
