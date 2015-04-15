@@ -941,7 +941,9 @@ result of `defhydra'."
                (or body-body-pre body-pre) body-before-exit
                '(setq prefix-arg current-prefix-arg)))))
     (error
-     (message "Error in defhydra %S: %s" name (cdr err))
+     (if debug-on-error
+         (signal (car err) (cdr err))
+       (message "Error in defhydra %S: %s" name (cdr err)))
      nil)))
 
 (defmacro defhydradio (name _body &rest heads)
