@@ -131,10 +131,13 @@ warn: keep KEYMAP and issue a warning instead of running the command."
       (when overriding-terminal-local-map
         (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map)
         (unless hydra--ignore
-         (when hydra-curr-on-exit
-           (let ((on-exit hydra-curr-on-exit))
-             (setq hydra-curr-on-exit nil)
-             (funcall on-exit))))))))
+          (when hydra--input-method-function
+            (setq input-method-function hydra--input-method-function)
+            (setq hydra--input-method-function nil))
+          (when hydra-curr-on-exit
+            (let ((on-exit hydra-curr-on-exit))
+              (setq hydra-curr-on-exit nil)
+              (funcall on-exit))))))))
 
 (unless (fboundp 'internal-push-keymap)
   (defun internal-push-keymap (keymap symbol)
@@ -371,9 +374,6 @@ Return DEFAULT if PROP is not in H."
   (hydra-disable)
   (cancel-timer hydra-timeout-timer)
   (cancel-timer hydra-message-timer)
-  (when hydra--input-method-function
-    (setq input-method-function hydra--input-method-function)
-    (setq hydra--input-method-function nil))
   (if hydra-lv
       (when (window-live-p lv-wnd)
         (let ((buf (window-buffer lv-wnd)))
