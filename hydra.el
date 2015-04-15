@@ -369,7 +369,8 @@ Return DEFAULT if PROP is not in H."
   "Quitting function similar to `keyboard-quit'."
   (interactive)
   (hydra-disable)
-  (cancel-timer hydra-timer)
+  (cancel-timer hydra-timeout-timer)
+  (cancel-timer hydra-message-timer)
   (when hydra--input-method-function
     (setq input-method-function hydra--input-method-function)
     (setq hydra--input-method-function nil))
@@ -550,7 +551,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                doc))
         (hint (intern (format "%S/hint" name)))
         (body-foreign-keys (hydra--body-foreign-keys body))
-        (body-timeout (plist-get body :timeout)))
+        (body-timeout (plist-get body :timeout))
+        (body-idle (plist-get body :idle)))
     `(defun ,name ()
        ,doc
        (interactive)
@@ -576,10 +578,12 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                            (message "%S" err)
                            (unless hydra-lv
                              (sit-for 0.8)))))
-                (when hydra-is-helpful
-                  (if hydra-lv
-                      (lv-message (eval ,hint))
-                    (message (eval ,hint))))
+                ,(if (and body-idle (eq (cadr head) 'body))
+                     `(hydra-idle-message ,body-idle ,hint)
+                     `(when hydra-is-helpful
+                        (if hydra-lv
+                            (lv-message (eval ,hint))
+                          (message (eval ,hint)))))
                 (hydra-set-transient-map
                  ,keymap
                  (lambda () (hydra-keyboard-quit) ,body-before-exit)
@@ -705,23 +709,42 @@ NAMES should be defined by `defhydradio' or similar."
   (dolist (n names)
     (set n (aref (get n 'range) 0))))
 
-(defvar hydra-timer (timer-create)
+(defvar hydra-timeout-timer (timer-create)
   "Timer for `hydra-timeout'.")
+
+(defvar hydra-message-timer (timer-create)
+  "Timer for the hint.")
+
+(defun hydra-idle-message (secs hint)
+  "In SECS seconds display HINT."
+  (cancel-timer hydra-message-timer)
+  (setq hydra-message-timer (timer-create))
+  (timer-set-time hydra-message-timer
+                  (timer-relative-time (current-time) secs))
+  (timer-set-function
+   hydra-message-timer
+   (lambda ()
+     (when hydra-is-helpful
+       (if hydra-lv
+           (lv-message (eval hint))
+         (message (eval hint))))
+     (cancel-timer hydra-message-timer)))
+  (timer-activate hydra-message-timer))
 
 (defun hydra-timeout (secs &optional function)
   "In SECS seconds call FUNCTION, then function `hydra-keyboard-quit'.
 Cancel the previous `hydra-timeout'."
-  (cancel-timer hydra-timer)
-  (setq hydra-timer (timer-create))
-  (timer-set-time hydra-timer
+  (cancel-timer hydra-timeout-timer)
+  (setq hydra-timeout-timer (timer-create))
+  (timer-set-time hydra-timeout-timer
                   (timer-relative-time (current-time) secs))
   (timer-set-function
-   hydra-timer
+   hydra-timeout-timer
    `(lambda ()
       ,(when function
              `(funcall ,function))
       (hydra-keyboard-quit)))
-  (timer-activate hydra-timer))
+  (timer-activate hydra-timeout-timer))
 
 ;;* Macros
 ;;;###autoload
