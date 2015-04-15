@@ -104,6 +104,8 @@ The body can be accessed via `hydra-error/body'.
 Call the head: `first-error'."
         (interactive)
         (hydra-default-pre)
+        (let ((hydra--ignore t))
+          (hydra-keyboard-quit))
         (condition-case err
             (progn
               (setq this-command
@@ -138,6 +140,8 @@ The body can be accessed via `hydra-error/body'.
 Call the head: `next-error'."
         (interactive)
         (hydra-default-pre)
+        (let ((hydra--ignore t))
+          (hydra-keyboard-quit))
         (condition-case err
             (progn
               (setq this-command
@@ -172,6 +176,8 @@ The body can be accessed via `hydra-error/body'.
 Call the head: `previous-error'."
         (interactive)
         (hydra-default-pre)
+        (let ((hydra--ignore t))
+          (hydra-keyboard-quit))
         (condition-case err
             (progn
               (setq this-command
@@ -229,6 +235,8 @@ Call the head: `previous-error'."
 The body can be accessed via `hydra-error/body'."
         (interactive)
         (hydra-default-pre)
+        (let ((hydra--ignore nil))
+          (hydra-keyboard-quit))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -397,6 +405,8 @@ Call the head: `nil'."
 The body can be accessed via `hydra-toggle/body'."
         (interactive)
         (hydra-default-pre)
+        (let ((hydra--ignore nil))
+          (hydra-keyboard-quit))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -481,6 +491,8 @@ Call the head: `next-line'."
         (interactive)
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
+        (let ((hydra--ignore t))
+          (hydra-keyboard-quit))
         (condition-case err
             (progn
               (setq this-command
@@ -514,6 +526,8 @@ Call the head: `previous-line'."
         (interactive)
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
+        (let ((hydra--ignore t))
+          (hydra-keyboard-quit))
         (condition-case err
             (progn
               (setq this-command
@@ -568,6 +582,8 @@ The body can be accessed via `hydra-vi/body'."
         (interactive)
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
+        (let ((hydra--ignore nil))
+          (hydra-keyboard-quit))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -651,6 +667,8 @@ The body can be accessed via `hydra-zoom/body'.
 Call the head: `(text-scale-set 0)'."
         (interactive)
         (hydra-default-pre)
+        (let ((hydra--ignore t))
+          (hydra-keyboard-quit))
         (condition-case err
             (call-interactively
              (function
@@ -708,6 +726,8 @@ Call the head: `(text-scale-set 0)'."
 The body can be accessed via `hydra-zoom/body'."
         (interactive)
         (hydra-default-pre)
+        (let ((hydra--ignore nil))
+          (hydra-keyboard-quit))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -792,6 +812,8 @@ The body can be accessed via `hydra-zoom/body'.
 Call the head: `(text-scale-set 0)'."
         (interactive)
         (hydra-default-pre)
+        (let ((hydra--ignore t))
+          (hydra-keyboard-quit))
         (condition-case err
             (call-interactively
              (function
@@ -849,6 +871,8 @@ Call the head: `(text-scale-set 0)'."
 The body can be accessed via `hydra-zoom/body'."
         (interactive)
         (hydra-default-pre)
+        (let ((hydra--ignore nil))
+          (hydra-keyboard-quit))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message

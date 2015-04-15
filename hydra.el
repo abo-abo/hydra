@@ -120,6 +120,9 @@ warn: keep KEYMAP and issue a warning instead of running the command."
                     (t nil)))))
     (hydra-disable)))
 
+(defvar hydra--ignore nil
+  "When non-nil, don't call `hydra-curr-on-exit'")
+
 (defun hydra-disable ()
   "Disable the current Hydra."
   (remove-hook 'pre-command-hook 'hydra--clearfun)
@@ -127,10 +130,11 @@ warn: keep KEYMAP and issue a warning instead of running the command."
     (with-selected-frame frame
       (when overriding-terminal-local-map
         (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map)
-        (when hydra-curr-on-exit
-          (let ((on-exit hydra-curr-on-exit))
-            (setq hydra-curr-on-exit nil)
-            (funcall on-exit)))))))
+        (unless hydra--ignore
+         (when hydra-curr-on-exit
+           (let ((on-exit hydra-curr-on-exit))
+             (setq hydra-curr-on-exit nil)
+             (funcall on-exit))))))))
 
 (unless (fboundp 'internal-push-keymap)
   (defun internal-push-keymap (keymap symbol)
@@ -563,25 +567,27 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                        `(,(hydra--call-interactively cmd (cadr head))))))
              (delq
               nil
-              `(,(when cmd
+              `((let ((hydra--ignore ,(not (eq (cadr head) 'body))))
+                  (hydra-keyboard-quit))
+                ,(when cmd
                        `(condition-case err
                             ,(hydra--call-interactively cmd (cadr head))
                           ((quit error)
                            (message "%S" err)
                            (unless hydra-lv
                              (sit-for 0.8)))))
-                 (when hydra-is-helpful
-                   (if hydra-lv
-                       (lv-message (eval ,hint))
-                     (message (eval ,hint))))
-                 (hydra-set-transient-map
-                  ,keymap
-                  (lambda () (hydra-keyboard-quit) ,body-before-exit)
-                  ,(when body-foreign-keys
-                         (list 'quote body-foreign-keys)))
-                 ,body-after-exit
-                 ,(when body-timeout
-                        `(hydra-timeout ,body-timeout))))))))
+                (when hydra-is-helpful
+                  (if hydra-lv
+                      (lv-message (eval ,hint))
+                    (message (eval ,hint))))
+                (hydra-set-transient-map
+                 ,keymap
+                 (lambda () (hydra-keyboard-quit) ,body-before-exit)
+                 ,(when body-foreign-keys
+                        (list 'quote body-foreign-keys)))
+                ,body-after-exit
+                ,(when body-timeout
+                       `(hydra-timeout ,body-timeout))))))))
 
 (defmacro hydra--make-funcall (sym)
   "Transform SYM into a `funcall' to call it."
