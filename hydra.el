@@ -5,7 +5,7 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.12.1
+;; Version: 0.13.0
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -368,6 +368,12 @@ Return DEFAULT if PROP is not in H."
       (setq hydra--input-method-function input-method-function)
       (setq input-method-function nil))))
 
+(defvar hydra-timeout-timer (timer-create)
+  "Timer for `hydra-timeout'.")
+
+(defvar hydra-message-timer (timer-create)
+  "Timer for the hint.")
+
 (defun hydra-keyboard-quit ()
   "Quitting function similar to `keyboard-quit'."
   (interactive)
@@ -633,6 +639,16 @@ In duplicate HEADS, :cmd-name is modified to whatever they duplicate."
         lst
       (append lst (make-list (- n len) nil)))))
 
+(defmacro hydra-multipop (lst n)
+  "Return LST's first N elements while removing them."
+  `(if (<= (length ,lst) ,n)
+       (prog1 ,lst
+         (setq ,lst nil))
+     (prog1 ,lst
+       (setcdr
+        (nthcdr (1- ,n) (prog1 ,lst (setq ,lst (nthcdr ,n ,lst))))
+        nil))))
+
 (defun hydra--matrix (lst rows cols)
   "Create a matrix from elements of LST.
 The matrix size is ROWS times COLS."
@@ -708,12 +724,6 @@ If CELL-FORMATS is nil, `hydra-cell-format' is used for all columns."
 NAMES should be defined by `defhydradio' or similar."
   (dolist (n names)
     (set n (aref (get n 'range) 0))))
-
-(defvar hydra-timeout-timer (timer-create)
-  "Timer for `hydra-timeout'.")
-
-(defvar hydra-message-timer (timer-create)
-  "Timer for the hint.")
 
 (defun hydra-idle-message (secs hint)
   "In SECS seconds display HINT."
@@ -968,16 +978,6 @@ DOC defaults to TOGGLE-NAME split and capitalized."
      (defvar ,(intern (format "%S/names" name))
        ',(mapcar (lambda (h) (intern (format "%S/%S" name (car h))))
                  heads))))
-
-(defmacro hydra-multipop (lst n)
-  "Return LST's first N elements while removing them."
-  `(if (<= (length ,lst) ,n)
-       (prog1 ,lst
-         (setq ,lst nil))
-     (prog1 ,lst
-       (setcdr
-        (nthcdr (1- ,n) (prog1 ,lst (setq ,lst (nthcdr ,n ,lst))))
-        nil))))
 
 (defun hydra--radio (parent head)
   "Generate a hydradio with PARENT from HEAD."
