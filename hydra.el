@@ -817,7 +817,7 @@ result of `defhydra'."
          (setq docstring "hydra")))
   (when (keywordp (car body))
     (setq body (cons nil (cons nil body))))
-  (condition-case err
+  (condition-case-unless-debug err
       (let* ((keymap (copy-keymap hydra-base-map))
              (keymap-name (intern (format "%S/keymap" name)))
              (body-name (intern (format "%S/body" name)))
@@ -951,9 +951,7 @@ result of `defhydra'."
                (or body-body-pre body-pre) body-before-exit
                '(setq prefix-arg current-prefix-arg)))))
     (error
-     (if debug-on-error
-         (signal (car err) (cdr err))
-       (message "Error in defhydra %S: %s" name (cdr err)))
+     (message "Error in defhydra %S: %s" name (cdr err))
      nil)))
 
 (defmacro defhydradio (name _body &rest heads)
