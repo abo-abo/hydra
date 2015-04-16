@@ -91,6 +91,16 @@
           "rep"
           :bind nil
           :exit nil))))
+      (set
+       (defvar hydra-error/hint nil
+         "Dynamic hint for hydra-error.")
+       (quote
+        (format
+         #("error: [h]: first, [j]: next, [k]: prev, [SPC]: rep."
+           8 9 (face hydra-face-red)
+           20 21 (face hydra-face-red)
+           31 32 (face hydra-face-red)
+           42 45 (face hydra-face-red)))))
       (defun hydra-error/first-error nil
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -214,16 +224,6 @@ Call the head: `previous-error'."
       (define-key global-map [134217831 107]
        (function
         hydra-error/previous-error))
-      (set
-       (defvar hydra-error/hint nil
-         "Dynamic hint for hydra-error.")
-       (quote
-        (format
-         #("error: [h]: first, [j]: next, [k]: prev, [SPC]: rep."
-           8 9 (face hydra-face-red)
-           20 21 (face hydra-face-red)
-           31 32 (face hydra-face-red)
-           42 45 (face hydra-face-red)))))
       (defun hydra-error/body nil
         "Create a hydra with a \"M-g\" body and the heads:
 
@@ -312,6 +312,16 @@ The body can be accessed via `hydra-error/body'."
           "abbrev"
           :exit t)
          ("q" nil "cancel" :exit t))))
+      (set
+       (defvar hydra-toggle/hint nil
+         "Dynamic hint for hydra-toggle.")
+       (quote
+        (format
+         #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel."
+           9 10 (face hydra-face-blue)
+           24 25 (face hydra-face-blue)
+           35 36 (face hydra-face-blue)
+           48 49 (face hydra-face-blue)))))
       (defun hydra-toggle/toggle-truncate-lines-and-exit nil
         "Create a hydra with no body and the heads:
 
@@ -384,16 +394,6 @@ Call the head: `nil'."
         (interactive)
         (hydra-default-pre)
         (hydra-keyboard-quit))
-      (set
-       (defvar hydra-toggle/hint nil
-         "Dynamic hint for hydra-toggle.")
-       (quote
-        (format
-         #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel."
-           9 10 (face hydra-face-blue)
-           24 25 (face hydra-face-blue)
-           35 36 (face hydra-face-blue)
-           48 49 (face hydra-face-blue)))))
       (defun hydra-toggle/body nil
         "Create a hydra with no body and the heads:
 
@@ -478,6 +478,15 @@ The body can be accessed via `hydra-toggle/body'."
           ""
           :exit nil)
          ("q" nil "quit" :exit t))))
+      (set
+       (defvar hydra-vi/hint nil
+         "Dynamic hint for hydra-vi.")
+       (quote
+        (format
+         #("vi: j, k, [q]: quit."
+           4 5 (face hydra-face-amaranth)
+           7 8 (face hydra-face-amaranth)
+           11 12 (face hydra-face-teal)))))
       (defun hydra-vi/next-line nil
         "Create a hydra with no body and the heads:
 
@@ -562,15 +571,6 @@ Call the head: `nil'."
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (hydra-keyboard-quit))
-      (set
-       (defvar hydra-vi/hint nil
-         "Dynamic hint for hydra-vi.")
-       (quote
-        (format
-         #("vi: j, k, [q]: quit."
-           4 5 (face hydra-face-amaranth)
-           7 8 (face hydra-face-amaranth)
-           11 12 (face hydra-face-teal)))))
       (defun hydra-vi/body nil
         "Create a hydra with no body and the heads:
 
@@ -655,6 +655,14 @@ The body can be accessed via `hydra-vi/body'."
           nil
           :bind nil
           :exit t))))
+      (set
+       (defvar hydra-zoom/hint nil
+         "Dynamic hint for hydra-zoom.")
+       (quote
+        (format
+         #("zoom: [r 0]: reset."
+           7 8 (face hydra-face-red)
+           9 10 (face hydra-face-blue)))))
       (defun hydra-zoom/lambda-r nil
         "Create a hydra with no body and the heads:
 
@@ -708,14 +716,6 @@ Call the head: `(text-scale-set 0)'."
           (lambda nil
            (interactive)
            (text-scale-set 0)))))
-      (set
-       (defvar hydra-zoom/hint nil
-         "Dynamic hint for hydra-zoom.")
-       (quote
-        (format
-         #("zoom: [r 0]: reset."
-           7 8 (face hydra-face-red)
-           9 10 (face hydra-face-blue)))))
       (defun hydra-zoom/body nil
         "Create a hydra with no body and the heads:
 
@@ -800,6 +800,14 @@ The body can be accessed via `hydra-zoom/body'."
           nil
           :bind nil
           :exit nil))))
+      (set
+       (defvar hydra-zoom/hint nil
+         "Dynamic hint for hydra-zoom.")
+       (quote
+        (format
+         #("zoom: [r 0]: reset."
+           7 8 (face hydra-face-red)
+           9 10 (face hydra-face-blue)))))
       (defun hydra-zoom/lambda-r nil
         "Create a hydra with no body and the heads:
 
@@ -853,14 +861,6 @@ Call the head: `(text-scale-set 0)'."
           (lambda nil
            (interactive)
            (text-scale-set 0)))))
-      (set
-       (defvar hydra-zoom/hint nil
-         "Dynamic hint for hydra-zoom.")
-       (quote
-        (format
-         #("zoom: [r 0]: reset."
-           7 8 (face hydra-face-red)
-           9 10 (face hydra-face-blue)))))
       (defun hydra-zoom/body nil
         "Create a hydra with no body and the heads:
 

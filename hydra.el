@@ -5,7 +5,7 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.13.0
+;; Version: 0.13.1
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5"))
 
@@ -442,7 +442,7 @@ HEAD's binding is returned as a string with a colored face."
                   (teal 'hydra-face-teal)
                   (t (error "Unknown color for %S" head))))))
 
-(defun hydra-fontify-head-greyscale (head body)
+(defun hydra-fontify-head-greyscale (head _body)
   "Produce a pretty string from HEAD and BODY.
 HEAD's binding is returned as a string wrapped with [] or {}."
   (format
@@ -548,7 +548,7 @@ HEAD is one of the HEADS passed to `defhydra'.
 BODY-PRE is added to the start of the wrapper.
 BODY-BEFORE-EXIT will be called before the hydra quits.
 BODY-AFTER-EXIT is added to the end of the wrapper."
-  (let ((name (hydra--head-name head name body))
+  (let ((name (hydra--head-name head name))
         (cmd (when (car head)
                (hydra--make-callable
                 (cadr head))))
@@ -604,8 +604,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
   `(when (and ,sym (symbolp ,sym))
      (setq ,sym `(funcall #',,sym))))
 
-(defun hydra--head-name (h name body)
-  "Return the symbol for head H of hydra with NAME and BODY."
+(defun hydra--head-name (h name)
+  "Return the symbol for head H of hydra with NAME."
   (let ((str (format "%S/%s" name
                      (if (symbolp (cadr h))
                          (cadr h)
@@ -868,7 +868,7 @@ result of `defhydra'."
                                         (if (eq h-exit 'default)
                                             body-exit
                                           h-exit))))))))))
-          (plist-put (cl-cdddr h) :cmd-name (hydra--head-name h name body))
+          (plist-put (cl-cdddr h) :cmd-name (hydra--head-name h name))
           (when (null (cadr h)) (plist-put (cl-cdddr h) :exit t)))
         (let ((doc (hydra--doc body-key body-name heads))
               (heads-nodup (hydra--delete-duplicates heads)))
@@ -904,6 +904,10 @@ result of `defhydra'."
                                 (cl-remf (cl-cdddr j) :cmd-name)
                                 j))
                             heads))
+             (set
+              (defvar ,(intern (format "%S/hint" name)) nil
+                ,(format "Dynamic hint for %S." name))
+              ',(hydra--format name body docstring heads))
              ;; create defuns
              ,@(mapcar
                 (lambda (head)
@@ -941,10 +945,6 @@ result of `defhydra'."
                                     (t
                                      (error "Invalid :bind property `%S' for head %S" bind head)))))))
                       heads))
-             (set
-              (defvar ,(intern (format "%S/hint" name)) nil
-                ,(format "Dynamic hint for %S." name))
-              ',(hydra--format name body docstring heads))
              ,(hydra--make-defun
                name body doc '(nil body)
                keymap-name

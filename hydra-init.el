@@ -24,6 +24,4 @@
 (setq hydra-examples-verbatim t)
 (require 'hydra-examples)
 (require 'hydra-test)
-(mapc #'byte-compile-file '("hydra.el"))
-(switch-to-buffer "*Compile-Log*")
-(ert t)
+(mapc #'byte-compile-file '("hydra.el" "hydra-examples.el" "hydra-ox.el" "hydra-test.el" "lv.el"))
