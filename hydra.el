@@ -123,6 +123,9 @@ warn: keep KEYMAP and issue a warning instead of running the command."
 (defvar hydra--ignore nil
   "When non-nil, don't call `hydra-curr-on-exit'")
 
+(defvar hydra--input-method-function nil
+  "Store overridden `input-method-function' here.")
+
 (defun hydra-disable ()
   "Disable the current Hydra."
   (remove-hook 'pre-command-hook 'hydra--clearfun)
@@ -357,9 +360,6 @@ Return DEFAULT if PROP is not in H."
      (cl-case color
        ((blue teal) t)
        (t nil)))))
-
-(defvar hydra--input-method-function nil
-  "Store overridden `input-method-function' here.")
 
 (defun hydra-default-pre ()
   "Default setup that happens in each head before :pre."
