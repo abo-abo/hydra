@@ -224,6 +224,7 @@ _~_: modified      ^ ^                ^ ^                ^^                     
 
 ;;** Example 9: s-expressions in the docstring
 ;; You can inline s-expresssions into the docstring like this:
+(defvar dired-mode-map)
 (when (bound-and-true-p hydra-examples-verbatim)
   (require 'dired)
   (defhydra hydra-marked-items (dired-mode-map "")
