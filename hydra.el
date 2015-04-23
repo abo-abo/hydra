@@ -219,7 +219,7 @@ Exitable only through a blue head.")
 
 (defface hydra-face-teal
     '((t (:foreground "#367588" :bold t)))
-  "Teal body has blue heads an warns on intercepting non-heads.
+  "Teal body has blue heads and warns on intercepting non-heads.
 Exitable only through a blue head.")
 
 ;;* Fontification
