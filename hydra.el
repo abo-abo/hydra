@@ -88,6 +88,10 @@
 (defvar hydra-curr-foreign-keys nil
   "The current :foreign-keys behavior.")
 
+(defvar hydra-deactivate nil
+  "If a Hydra head sets this to t, exit the Hydra even if the
+  head wasn't designated for exiting.")
+
 (defun hydra-set-transient-map (keymap on-exit &optional foreign-keys)
   "Set KEYMAP to the highest priority.
 
@@ -99,11 +103,13 @@ that isn't in KEYMAP is called:
 nil: deactivate KEYMAP and run the command.
 run: keep KEYMAP and run the command.
 warn: keep KEYMAP and issue a warning instead of running the command."
-  (setq hydra-curr-map keymap)
-  (setq hydra-curr-on-exit on-exit)
-  (setq hydra-curr-foreign-keys foreign-keys)
-  (add-hook 'pre-command-hook 'hydra--clearfun)
-  (internal-push-keymap keymap 'overriding-terminal-local-map))
+  (if hydra-deactivate
+      (hydra-keyboard-quit)
+    (setq hydra-curr-map keymap)
+    (setq hydra-curr-on-exit on-exit)
+    (setq hydra-curr-foreign-keys foreign-keys)
+    (add-hook 'pre-command-hook 'hydra--clearfun)
+    (internal-push-keymap keymap 'overriding-terminal-local-map)))
 
 (defun hydra--clearfun ()
   "Disable the current Hydra unless `this-command' is a head."
@@ -128,6 +134,7 @@ warn: keep KEYMAP and issue a warning instead of running the command."
 
 (defun hydra-disable ()
   "Disable the current Hydra."
+  (setq hydra-deactivate nil)
   (remove-hook 'pre-command-hook 'hydra--clearfun)
   (dolist (frame (frame-list))
     (with-selected-frame frame
