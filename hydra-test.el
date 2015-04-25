@@ -1045,6 +1045,19 @@ _f_ auto-fill-mode:    %`auto-fill-function
                     #("j" 0 1 (face hydra-face-blue))
                     #("k" 0 1 (face hydra-face-blue))) ""))))
 
+(ert-deftest hydra-format-5 ()
+  (should
+   (equal (hydra--format
+           nil nil "\n_-_: mark          _u_: unmark\n"
+           '(("-" Buffer-menu-mark)
+             ("u" Buffer-menu-unmark)))
+          '(concat
+           (format
+            "%s: mark          %s: unmark\n"
+            #("-" 0 1 (face hydra-face-red))
+            #("u" 0 1 (face hydra-face-red)))
+            ""))))
+
 (ert-deftest hydra-format-with-sexp-1 ()
   (should (equal
            (let ((hydra-fontify-head-function
