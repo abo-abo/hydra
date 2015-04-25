@@ -388,10 +388,7 @@ Return DEFAULT if PROP is not in H."
   (cancel-timer hydra-timeout-timer)
   (cancel-timer hydra-message-timer)
   (if hydra-lv
-      (when (window-live-p lv-wnd)
-        (let ((buf (window-buffer lv-wnd)))
-          (delete-window lv-wnd)
-          (kill-buffer buf)))
+      (lv-delete-window)
     (message ""))
   nil)
 

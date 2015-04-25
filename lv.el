@@ -73,6 +73,13 @@
     (goto-char (point-min))
     (select-window ori)))
 
+(defun lv-delete-window ()
+  "Delete LV window and kill its buffer."
+  (when (window-live-p lv-wnd)
+    (let ((buf (window-buffer lv-wnd)))
+      (delete-window lv-wnd)
+      (kill-buffer buf))))
+
 (provide 'lv)
 
 ;;; lv.el ends here
