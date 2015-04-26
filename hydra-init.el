@@ -25,3 +25,9 @@
 (require 'hydra-examples)
 (require 'hydra-test)
 (mapc #'byte-compile-file '("hydra.el" "hydra-examples.el" "hydra-ox.el" "hydra-test.el" "lv.el"))
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
+
+;;; hydra-init.el ends here

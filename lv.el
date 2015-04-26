@@ -84,4 +84,7 @@
 
 (provide 'lv)
 
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
 ;;; lv.el ends here

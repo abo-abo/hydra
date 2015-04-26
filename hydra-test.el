@@ -1274,4 +1274,8 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
 
 (provide 'hydra-test)
 
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
+
 ;;; hydra-test.el ends here
