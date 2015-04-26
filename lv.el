@@ -56,22 +56,24 @@
           (set-window-parameter lv-wnd 'no-other-window t))
         (select-window ori)))))
 
+(defvar lv-force-update t
+  "When non-nil, `lv-message' will refresh even for the same string.")
+
 (defun lv-message (format-string &rest args)
   "Set LV window contents to (`format' FORMAT-STRING ARGS)."
-  (let* ((ori (selected-window))
-         (str (apply #'format format-string args))
+  (let* ((str (apply #'format format-string args))
          (n-lines (cl-count ?\n str))
          deactivate-mark
          golden-ratio-mode)
-    (select-window (lv-window))
-    (unless (string= (buffer-string) str)
-      (delete-region (point-min) (point-max))
-      (insert str)
-      (setq-local window-min-height n-lines)
-      (setq truncate-lines (> n-lines 1))
-      (fit-window-to-buffer nil nil 1))
-    (goto-char (point-min))
-    (select-window ori)))
+    (with-selected-window (lv-window)
+      (unless (and (string= (buffer-string) str)
+                   (null lv-force-update))
+        (delete-region (point-min) (point-max))
+        (insert str)
+        (setq-local window-min-height n-lines)
+        (setq truncate-lines (> n-lines 1))
+        (fit-window-to-buffer nil nil 1))
+      (goto-char (point-min)))))
 
 (defun lv-delete-window ()
   "Delete LV window and kill its buffer."

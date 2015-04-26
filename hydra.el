@@ -387,9 +387,10 @@ Return DEFAULT if PROP is not in H."
   (hydra-disable)
   (cancel-timer hydra-timeout-timer)
   (cancel-timer hydra-message-timer)
-  (if hydra-lv
-      (lv-delete-window)
-    (message ""))
+  (unless hydra--ignore
+   (if hydra-lv
+       (lv-delete-window)
+     (message "")))
   nil)
 
 (defun hydra--hint (body heads)
