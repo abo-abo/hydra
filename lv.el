@@ -33,6 +33,24 @@
 
 ;;; Code:
 
+(defgroup lv nil
+  "The other echo area."
+  :group 'minibuffer
+  :group 'hydra)
+
+(defcustom lv-use-separator nil
+  "Whether to draw a line between the lv window and the echo area."
+  :group 'lv
+  :type 'boolean)
+
+(defface lv-separator
+  '((((class color) (background light)) :background "grey80")
+    (((class color) (background  dark)) :background "grey30"))
+  "Face used to draw line between the lv window and the echo area.
+This is only used if option `lv-use-separator' is non-nil.
+Only the background color is significant."
+  :group 'lv)
+
 (defvar lv-wnd nil
   "Holds the current LV window.")
 
@@ -70,9 +88,16 @@
                    (null lv-force-update))
         (delete-region (point-min) (point-max))
         (insert str)
+        (when (window-system)
+          (unless (string-match-p "\n$" str)
+            (insert "\n"))
+          (insert
+           (propertize "__" 'face 'lv-separator 'display '(space :height (1)))
+           (propertize "\n" 'face 'lv-separator 'line-height t)))
         (setq-local window-min-height n-lines)
         (setq truncate-lines (> n-lines 1))
-        (fit-window-to-buffer nil nil 1))
+        (let ((window-resize-pixelwise t))
+          (fit-window-to-buffer nil nil 1)))
       (goto-char (point-min)))))
 
 (defun lv-delete-window ()
