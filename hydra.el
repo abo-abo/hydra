@@ -1026,5 +1026,4 @@ DOC defaults to TOGGLE-NAME split and capitalized."
 ;; outline-regexp: ";;\\([;*]+ [^\s\t\n]\\|###autoload\\)\\|("
 ;; indent-tabs-mode: nil
 ;; End:
-
 ;;; hydra.el ends here

@@ -115,4 +115,8 @@ _C-a_ Async export: %`hydra-ox/async-export
 
 (provide 'hydra-ox)
 
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
+
 ;;; hydra-ox.el ends here

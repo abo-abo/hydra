@@ -334,4 +334,9 @@ _h_   _l_   _o_k        _y_ank
       (goto-char mk))))
 
 (provide 'hydra-examples)
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
+
 ;;; hydra-examples.el ends here

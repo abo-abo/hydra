@@ -109,4 +109,7 @@ Only the background color is significant."
 
 (provide 'lv)
 
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
 ;;; lv.el ends here
