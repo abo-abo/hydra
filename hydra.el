@@ -381,13 +381,18 @@ Return DEFAULT if PROP is not in H."
 (defvar hydra-message-timer (timer-create)
   "Timer for the hint.")
 
+(defvar hydra--work-around-dedicated t
+  "When non-nil, assume there's no bug in `pop-to-buffer'
+  selecting a dedicated window.")
+
 (defun hydra-keyboard-quit ()
   "Quitting function similar to `keyboard-quit'."
   (interactive)
   (hydra-disable)
   (cancel-timer hydra-timeout-timer)
   (cancel-timer hydra-message-timer)
-  (unless hydra--ignore
+  (unless (and hydra--ignore
+               (null hydra--work-around-dedicated))
    (if hydra-lv
        (lv-delete-window)
      (message "")))
