@@ -74,7 +74,7 @@ Only the background color is significant."
           (set-window-parameter lv-wnd 'no-other-window t))
         (select-window ori)))))
 
-(defvar lv-force-update t
+(defvar lv-force-update nil
   "When non-nil, `lv-message' will refresh even for the same string.")
 
 (defun lv-message (format-string &rest args)
