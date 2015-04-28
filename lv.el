@@ -88,8 +88,8 @@ Only the background color is significant."
                    (null lv-force-update))
         (delete-region (point-min) (point-max))
         (insert str)
-        (when (window-system)
-          (unless (string-match-p "\n$" str)
+        (when (and (window-system) lv-use-separator)
+          (unless (looking-back "\n" nil)
             (insert "\n"))
           (insert
            (propertize "__" 'face 'lv-separator 'display '(space :height (1)))
