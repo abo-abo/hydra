@@ -196,6 +196,11 @@ warn: keep KEYMAP and issue a warning instead of running the command."
   "Default `format'-style specifier for _a_  syntax in docstrings.
 When nil, you can specify your own at each location like this: _ 5a_.")
 
+(make-obsolete-variable
+ 'hydra-key-format-spec
+ "Since the docstrings are aligned by hand anyway, this isn't very useful."
+ "0.13.1")
+
 (defface hydra-face-red
     '((t (:foreground "#FF0000" :bold t)))
   "Red Hydra heads don't exit the Hydra.
