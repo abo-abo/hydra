@@ -441,7 +441,7 @@ HEAD's binding is returned as a string with a colored face."
               (run 'pink)
               (t 'red)))))
     (when (and (null (cadr head))
-               (not (eq head-color 'blue)))
+               (not head-exit))
       (hydra--complain "nil cmd can only be blue"))
     (propertize (car head) 'face
                 (cl-case head-color

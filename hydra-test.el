@@ -1040,7 +1040,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
            nil
            '(nil nil :hint nil)
            "\n_j_,_k_"
-           '(("j" nil) ("k" nil)))
+           '(("j" nil nil :exit t) ("k" nil nil :exit t)))
           '(concat (format "%s,%s"
                     #("j" 0 1 (face hydra-face-blue))
                     #("k" 0 1 (face hydra-face-blue))) ""))))
