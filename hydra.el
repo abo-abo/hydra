@@ -519,8 +519,9 @@ The expressions can be auto-expanded according to NAME."
 
 (defun hydra--complain (format-string &rest args)
   "Forward to (`message' FORMAT-STRING ARGS) unless `hydra-verbose' is nil."
-  (when hydra-verbose
-    (apply #'warn format-string args)))
+  (if hydra-verbose
+      (apply #'error format-string args)
+    (apply #'message format-string args)))
 
 (defun hydra--doc (body-key body-name heads)
   "Generate a part of Hydra docstring.
@@ -961,7 +962,7 @@ result of `defhydra'."
                (or body-body-pre body-pre) body-before-exit
                '(setq prefix-arg current-prefix-arg)))))
     (error
-     (message "Error in defhydra %S: %s" name (cdr err))
+     (hydra--complain "Error in defhydra %S: %s" name (cdr err))
      nil)))
 
 (defmacro defhydradio (name _body &rest heads)

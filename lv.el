@@ -39,7 +39,7 @@
   :group 'hydra)
 
 (defcustom lv-use-separator nil
-  "Whether to draw a line between the lv window and the echo area."
+  "Whether to draw a line between the LV window and the Echo Area."
   :group 'lv
   :type 'boolean)
 
