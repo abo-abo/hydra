@@ -710,9 +710,8 @@ JOINER is a function similar to `concat'."
            strs))
    "\n"))
 
-(defcustom hydra-cell-format "% -20s %% -8`%s"
-  "The default format for docstring cells."
-  :type 'string)
+(defvar hydra-cell-format "% -20s %% -8`%s"
+  "The default format for docstring cells.")
 
 (defun hydra--table (names rows cols &optional cell-formats)
   "Format a `format'-style table from variables in NAMES.
