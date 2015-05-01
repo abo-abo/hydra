@@ -75,6 +75,8 @@ Only the background color is significant."
           (set-window-parameter lv-wnd 'no-other-window t))
         (select-window ori)))))
 
+(defvar golden-ratio-mode)
+
 (defvar lv-force-update nil
   "When non-nil, `lv-message' will refresh even for the same string.")
 
