@@ -89,8 +89,8 @@
   "The current :foreign-keys behavior.")
 
 (defvar hydra-deactivate nil
-  "If a Hydra head sets this to t, exit the Hydra even if the
-  head wasn't designated for exiting.")
+  "If a Hydra head sets this to t, exit the Hydra.
+This will be done even if the head wasn't designated for exiting.")
 
 (defun hydra-set-transient-map (keymap on-exit &optional foreign-keys)
   "Set KEYMAP to the highest priority.
@@ -127,7 +127,7 @@ warn: keep KEYMAP and issue a warning instead of running the command."
     (hydra-disable)))
 
 (defvar hydra--ignore nil
-  "When non-nil, don't call `hydra-curr-on-exit'")
+  "When non-nil, don't call `hydra-curr-on-exit'.")
 
 (defvar hydra--input-method-function nil
   "Store overridden `input-method-function' here.")
@@ -172,6 +172,7 @@ warn: keep KEYMAP and issue a warning instead of running the command."
              (set symbol tail))))))
 
 (defun hydra-amaranth-warn ()
+  "Issue a warning that the current input was ignored."
   (interactive)
   (message "An amaranth Hydra can only exit through a blue head"))
 
@@ -393,8 +394,8 @@ Return DEFAULT if PROP is not in H."
   "Timer for the hint.")
 
 (defvar hydra--work-around-dedicated t
-  "When non-nil, assume there's no bug in `pop-to-buffer'
-  selecting a dedicated window.")
+  "When non-nil, assume there's no bug in `pop-to-buffer'.
+`pop-to-buffer' should not select a dedicated window.")
 
 (defun hydra-keyboard-quit ()
   "Quitting function similar to `keyboard-quit'."
@@ -430,7 +431,9 @@ BODY, and HEADS are parameters to `defhydra'."
         (if (> (length (cdr x)) 0)
             (concat "[%s]: " (cdr x))
           "%s")
-        (car x)))
+        (if (equal (car x) "%")
+            "%%"
+          (car x))))
      (nreverse (mapcar #'cdr alist))
      ", ")))
 
@@ -476,12 +479,23 @@ HEAD's binding is returned as a string wrapped with [] or {}."
   (funcall (or hydra-fontify-head-function 'hydra-fontify-head-default)
            head body))
 
+(defun hydra--strip-align-markers (str)
+  "Remove ^ from STR, unless they're escaped: \\^."
+  (let ((start 0))
+    (while (setq start (string-match "\\\\?\\^" str start))
+      (if (eq (- (match-end 0) (match-beginning 0)) 2)
+          (progn
+            (setq str (replace-match "^" nil nil str))
+            (cl-incf start))
+        (setq str (replace-match "" nil nil str))))
+    str))
+
 (defun hydra--format (_name body docstring heads)
   "Generate a `format' statement from STR.
 \"%`...\" expressions are extracted into \"%S\".
 _NAME, BODY, DOCSTRING and HEADS are parameters of `defhydra'.
 The expressions can be auto-expanded according to NAME."
-  (setq docstring (replace-regexp-in-string "\\^" "" docstring))
+  (setq docstring (hydra--strip-align-markers docstring))
   (let ((rest (hydra--hint body heads))
         (start 0)
         varlist
