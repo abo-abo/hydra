@@ -425,17 +425,16 @@ BODY, and HEADS are parameters to `defhydra'."
              (cons (cadr h)
                    (cons pstr (cl-caddr h)))
              alist)))))
-    (mapconcat
-     (lambda (x)
-       (format
-        (if (> (length (cdr x)) 0)
-            (concat "[%s]: " (cdr x))
-          "%s")
-        (if (equal (car x) "%")
-            "%%"
-          (car x))))
-     (nreverse (mapcar #'cdr alist))
-     ", ")))
+    (let ((keys (nreverse (mapcar #'cdr alist))))
+      (mapconcat
+       (lambda (x)
+         (format
+          (if (> (length (cdr x)) 0)
+              (concat "[%s]: " (cdr x))
+            "%s")
+          (car x)))
+       keys
+       ", "))))
 
 (defvar hydra-fontify-head-function nil
   "Possible replacement for `hydra-fontify-head-default'.")
@@ -457,7 +456,9 @@ HEAD's binding is returned as a string with a colored face."
     (when (and (null (cadr head))
                (not head-exit))
       (hydra--complain "nil cmd can only be blue"))
-    (propertize (car head) 'face
+    (propertize (if (string= (car head) "%")
+                    "%%"
+                  (car head)) 'face
                 (cl-case head-color
                   (blue 'hydra-face-blue)
                   (red 'hydra-face-red)
