@@ -62,8 +62,9 @@ Only the background color is significant."
           buf)
       (prog1 (setq lv-wnd
                    (select-window
-                    (split-window
-                     (frame-root-window) -1 'below)))
+                    (let ((ignore-window-parameters t))
+                      (split-window
+                       (frame-root-window) -1 'below))))
         (if (setq buf (get-buffer "*LV*"))
             (switch-to-buffer buf)
           (switch-to-buffer "*LV*")
