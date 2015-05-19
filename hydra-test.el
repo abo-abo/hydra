@@ -115,7 +115,9 @@ Call the head: `first-error'."
         (interactive)
         (hydra-default-pre)
         (let ((hydra--ignore t))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-error/body)))
         (condition-case err
             (progn
               (setq this-command
@@ -151,7 +153,9 @@ Call the head: `next-error'."
         (interactive)
         (hydra-default-pre)
         (let ((hydra--ignore t))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-error/body)))
         (condition-case err
             (progn
               (setq this-command
@@ -187,7 +191,9 @@ Call the head: `previous-error'."
         (interactive)
         (hydra-default-pre)
         (let ((hydra--ignore t))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-error/body)))
         (condition-case err
             (progn
               (setq this-command
@@ -236,7 +242,9 @@ The body can be accessed via `hydra-error/body'."
         (interactive)
         (hydra-default-pre)
         (let ((hydra--ignore nil))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-error/body)))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -336,6 +344,8 @@ Call the head: `toggle-truncate-lines'."
         (interactive)
         (hydra-default-pre)
         (hydra-keyboard-quit)
+        (setq hydra-curr-body-fn
+              (quote hydra-toggle/body))
         (progn
           (setq this-command
                 (quote toggle-truncate-lines))
@@ -356,6 +366,8 @@ Call the head: `auto-fill-mode'."
         (interactive)
         (hydra-default-pre)
         (hydra-keyboard-quit)
+        (setq hydra-curr-body-fn
+              (quote hydra-toggle/body))
         (progn
           (setq this-command
                 (quote auto-fill-mode))
@@ -375,6 +387,8 @@ Call the head: `abbrev-mode'."
         (interactive)
         (hydra-default-pre)
         (hydra-keyboard-quit)
+        (setq hydra-curr-body-fn
+              (quote hydra-toggle/body))
         (progn
           (setq this-command
                 (quote abbrev-mode))
@@ -393,7 +407,9 @@ The body can be accessed via `hydra-toggle/body'.
 Call the head: `nil'."
         (interactive)
         (hydra-default-pre)
-        (hydra-keyboard-quit))
+        (hydra-keyboard-quit)
+        (setq hydra-curr-body-fn
+              (quote hydra-toggle/body)))
       (defun hydra-toggle/body nil
         "Create a hydra with no body and the heads:
 
@@ -406,7 +422,9 @@ The body can be accessed via `hydra-toggle/body'."
         (interactive)
         (hydra-default-pre)
         (let ((hydra--ignore nil))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-toggle/body)))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -501,7 +519,9 @@ Call the head: `next-line'."
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (let ((hydra--ignore t))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-vi/body)))
         (condition-case err
             (progn
               (setq this-command
@@ -536,7 +556,9 @@ Call the head: `previous-line'."
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (let ((hydra--ignore t))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-vi/body)))
         (condition-case err
             (progn
               (setq this-command
@@ -570,7 +592,9 @@ Call the head: `nil'."
         (interactive)
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
-        (hydra-keyboard-quit))
+        (hydra-keyboard-quit)
+        (setq hydra-curr-body-fn
+              (quote hydra-vi/body)))
       (defun hydra-vi/body nil
         "Create a hydra with no body and the heads:
 
@@ -583,7 +607,9 @@ The body can be accessed via `hydra-vi/body'."
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (let ((hydra--ignore nil))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-vi/body)))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -676,7 +702,9 @@ Call the head: `(text-scale-set 0)'."
         (interactive)
         (hydra-default-pre)
         (let ((hydra--ignore t))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-zoom/body)))
         (condition-case err
             (call-interactively
              (function
@@ -711,6 +739,8 @@ Call the head: `(text-scale-set 0)'."
         (interactive)
         (hydra-default-pre)
         (hydra-keyboard-quit)
+        (setq hydra-curr-body-fn
+              (quote hydra-zoom/body))
         (call-interactively
          (function
           (lambda nil
@@ -727,7 +757,9 @@ The body can be accessed via `hydra-zoom/body'."
         (interactive)
         (hydra-default-pre)
         (let ((hydra--ignore nil))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-zoom/body)))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -821,7 +853,9 @@ Call the head: `(text-scale-set 0)'."
         (interactive)
         (hydra-default-pre)
         (let ((hydra--ignore t))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-zoom/body)))
         (condition-case err
             (call-interactively
              (function
@@ -856,6 +890,8 @@ Call the head: `(text-scale-set 0)'."
         (interactive)
         (hydra-default-pre)
         (hydra-keyboard-quit)
+        (setq hydra-curr-body-fn
+              (quote hydra-zoom/body))
         (call-interactively
          (function
           (lambda nil
@@ -872,7 +908,9 @@ The body can be accessed via `hydra-zoom/body'."
         (interactive)
         (hydra-default-pre)
         (let ((hydra--ignore nil))
-          (hydra-keyboard-quit))
+          (hydra-keyboard-quit)
+          (setq hydra-curr-body-fn
+                (quote hydra-zoom/body)))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
