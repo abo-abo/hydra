@@ -214,7 +214,10 @@ Every other command exits the Hydra."
   :group 'hydra)
 
 (defface hydra-face-blue
-  '((t (:foreground "#0000FF" :bold t)))
+  '((((class color) (background light))
+     :foreground "#0000FF" :bold t)
+    (((class color) (background dark))
+     :foreground "#8ac6f2" :bold t))
   "Blue Hydra heads exit the Hydra.
 Every other command exits as well.")
 
