@@ -116,18 +116,20 @@ warn: keep KEYMAP and issue a warning instead of running the command."
 
 (defun hydra--clearfun ()
   "Disable the current Hydra unless `this-command' is a head."
-  (when (or
-         (memq this-command '(handle-switch-frame keyboard-quit))
-         (null overriding-terminal-local-map)
-         (not (or (eq this-command
-                      (lookup-key hydra-curr-map (this-single-command-keys)))
-                  (cl-case hydra-curr-foreign-keys
-                    (warn
-                     (setq this-command 'hydra-amaranth-warn))
-                    (run
-                     t)
-                    (t nil)))))
-    (hydra-disable)))
+  (unless (eq this-command 'hydra-pause-resume)
+    (when (or
+           (memq this-command '(handle-switch-frame
+                                keyboard-quit))
+           (null overriding-terminal-local-map)
+           (not (or (eq this-command
+                        (lookup-key hydra-curr-map (this-single-command-keys)))
+                    (cl-case hydra-curr-foreign-keys
+                      (warn
+                       (setq this-command 'hydra-amaranth-warn))
+                      (run
+                       t)
+                      (t nil)))))
+      (hydra-disable))))
 
 (defvar hydra--ignore nil
   "When non-nil, don't call `hydra-curr-on-exit'.")
@@ -409,6 +411,7 @@ Return DEFAULT if PROP is not in H."
   (hydra-disable)
   (cancel-timer hydra-timeout-timer)
   (cancel-timer hydra-message-timer)
+  (setq hydra-curr-map nil)
   (unless (and hydra--ignore
                (null hydra--work-around-dedicated))
     (if hydra-lv
@@ -1059,6 +1062,22 @@ DOC defaults to TOGGLE-NAME split and capitalized."
                (if (>= i l)
                    0
                  i)))))
+
+(defvar hydra-pause-ring (make-ring 10)
+  "Ring for paused hydras.")
+
+(defun hydra-pause-resume ()
+  "Quit the current hydra and save it to the stack.
+If there's no active hydra, pop one from the stack and call its body.
+If the stack is empty, call the last hydra's body."
+  (interactive)
+  (cond (hydra-curr-map
+         (ring-insert hydra-pause-ring hydra-curr-body-fn)
+         (hydra-keyboard-quit))
+        ((zerop (ring-length hydra-pause-ring))
+         (funcall hydra-curr-body-fn))
+        (t
+         (funcall (ring-remove hydra-pause-ring 0)))))
 
 ;; Local Variables:
 ;; outline-regexp: ";;\\([;*]+ [^\s\t\n]\\|###autoload\\)\\|("
