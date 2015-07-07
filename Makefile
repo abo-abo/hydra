@@ -12,11 +12,11 @@ test:
 	$(emacs) -batch $(LOAD) -f ert-run-tests-batch-and-exit
 
 run:
-	$(emacs) -q $(LOAD) -l hydra-init.el
+	$(emacs) -q $(LOAD) -l targets/hydra-init.el
 	make clean
 
 compile:
-	$(emacs) -batch $(LOAD) -l hydra-init.el
+	$(emacs) -batch $(LOAD) -l targets/hydra-init.el
 
 clean:
 	rm -f *.elc
