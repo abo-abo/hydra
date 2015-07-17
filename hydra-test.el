@@ -1096,6 +1096,23 @@ _f_ auto-fill-mode:    %`auto-fill-function
             #("u" 0 1 (face hydra-face-red)))
             ""))))
 
+(ert-deftest hydra-format-6 ()
+  (should
+   (equal (hydra--format
+           nil nil "\n[_]_] forward [_[_] backward\n"
+           '(("]" forward-char)
+             ("[" backward-char)))
+          '(concat
+            (format
+             "[%s] forward [%s] backward\n"
+             #("]"
+               0 1 (face
+                    hydra-face-red))
+             #("["
+               0 1 (face
+                    hydra-face-red)))
+            ""))))
+
 (ert-deftest hydra-format-with-sexp-1 ()
   (should (equal
            (let ((hydra-fontify-head-function
