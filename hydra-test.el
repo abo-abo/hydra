@@ -1113,6 +1113,30 @@ _f_ auto-fill-mode:    %`auto-fill-function
                     hydra-face-red)))
             ""))))
 
+(ert-deftest hydra-format-7 ()
+  (should
+   (equal
+    (hydra--format nil nil "test"
+                   '(("%" forward-char "" :exit nil)
+                     ("b" backward-char "" :exit nil)))
+    '(format
+      #("test: %%%%, b."
+        6 7 (face hydra-face-red)
+        7 8 (face hydra-face-red)
+        8 9 (face hydra-face-red)
+        9 10 (face hydra-face-red)
+        12 13 (face hydra-face-red)))))
+  (should
+   (equal
+    (hydra--format nil nil "\n_%_ forward\n"
+                   '(("%" forward-char nil :exit nil)))
+    '(concat
+      (format
+       "%s forward\n"
+       #("%%"
+         0 2 (face hydra-face-red)))
+      ""))))
+
 (ert-deftest hydra-format-with-sexp-1 ()
   (should (equal
            (let ((hydra-fontify-head-function

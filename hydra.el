@@ -513,7 +513,7 @@ The expressions can be auto-expanded according to NAME."
         offset)
     (while (setq start
                  (string-match
-                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#]+?\\)_\\)"
+                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%]+?\\)_\\)"
                   docstring start))
       (cond ((eq ?_ (aref (match-string 0 docstring) 0))
              (let* ((key (match-string 4 docstring))
@@ -551,7 +551,8 @@ The expressions can be auto-expanded according to NAME."
     (if (eq ?\n (aref docstring 0))
         `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
                  ,rest)
-      `(format ,(concat docstring ": " rest ".")))))
+      `(format ,(concat docstring ": " (replace-regexp-in-string
+                                        "\\(%\\)" "\\1\\1" rest) ".")))))
 
 (defun hydra--complain (format-string &rest args)
   "Forward to (`message' FORMAT-STRING ARGS) unless `hydra-verbose' is nil."
