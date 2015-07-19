@@ -419,6 +419,9 @@ Return DEFAULT if PROP is not in H."
       (message "")))
   nil)
 
+(defvar hydra-head-format "[%s]: "
+  "The formatter for each head of a plain docstring.")
+
 (defun hydra--hint (body heads)
   "Generate a hint for the echo area.
 BODY, and HEADS are parameters to `defhydra'."
@@ -439,7 +442,7 @@ BODY, and HEADS are parameters to `defhydra'."
        (lambda (x)
          (format
           (if (> (length (cdr x)) 0)
-              (concat "[%s]: " (cdr x))
+              (concat hydra-head-format (cdr x))
             "%s")
           (car x)))
        keys
