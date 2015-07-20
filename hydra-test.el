@@ -1047,7 +1047,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
            '(concat (format "%s abbrev-mode:       %S
 %s debug-on-error:    %S
 %s auto-fill-mode:    %S
-" "{a}" abbrev-mode "{d}" debug-on-error "{f}" auto-fill-function) "[{q}]: quit"))))
+" "{a}" abbrev-mode "{d}" debug-on-error "{f}" auto-fill-function) "[{q}]: quit."))))
 
 (ert-deftest hydra-format-2 ()
   (should (equal
@@ -1059,7 +1059,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
               "\n  bar %s`foo\n"
               '(("a" (quote t) "" :cmd-name bar/lambda-a :exit nil)
                 ("q" nil "" :cmd-name bar/nil :exit t))))
-           '(concat (format "  bar %s\n" foo) "{a}, [q]"))))
+           '(concat (format "  bar %s\n" foo) "{a}, [q]."))))
 
 (ert-deftest hydra-format-3 ()
   (should (equal
@@ -1150,7 +1150,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
                      (progn
                        (message "checking")
                        (buffer-narrowed-p)))
-             "[[q]]: cancel"))))
+             "[[q]]: cancel."))))
 
 (ert-deftest hydra-format-with-sexp-2 ()
   (should (equal
@@ -1165,7 +1165,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
                      (progn
                        (message "checking")
                        (buffer-narrowed-p)))
-             "[[q]]: cancel"))))
+             "[[q]]: cancel."))))
 
 (ert-deftest hydra-compat-colors-2 ()
   (should
@@ -1350,6 +1350,101 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
                                (execute-kbd-macro
                                 (kbd "C-c g 1 RET q")))
                    "|foo\nbar")))
+
+(ert-deftest hydra-columns-1 ()
+  (should (equal (eval
+                  (cadr
+                   (nth 2
+                        (nth 3
+                             (macroexpand
+                              '(defhydra hydra-info (:color blue
+                                                     :columns 3)
+                                "Info-mode"
+                                ("?" Info-summary "summary")
+                                ("]" Info-forward-node "forward")
+                                ("[" Info-backward-node "backward")
+                                ("<" Info-top-node "top node")
+                                (">" Info-final-node "final node")
+                                ("h" Info-help "help")
+                                ("d" Info-directory "info dir")
+                                ("f" Info-follow-reference "follow ref")
+                                ("g" Info-goto-node "goto node")
+                                ("l" Info-history-back "hist back")
+                                ("r" Info-history-forward "hist forward")
+                                ("i" Info-index "index")
+                                ("I" Info-virtual-index "virtual index")
+                                ("L" Info-history "hist")
+                                ("n" Info-next "next")
+                                ("p" Info-prev "previous")
+                                ("s" Info-search "search")
+                                ("S" Info-search-case-sensitively "case-search")
+                                ("T" Info-toc "TOC")
+                                ("u" Info-up "up")
+                                ("m" Info-menu "menu")
+                                ("t" hydra-info-to/body "info-to"))))))
+                  (format
+                   #("Info-mode: 
+?: summary       ]: forward       [: backward      
+<: top node      >: final node    h: help          
+d: info dir      f: follow ref    g: goto node     
+l: hist back     r: hist forward  i: index         
+I: virtual index L: hist          n: next          
+p: previous      s: search        S: case-search   
+T: TOC           u: up            m: menu          
+t: info-to       "
+                     12 13 (face hydra-face-blue)
+                     29 30 (face hydra-face-blue)
+                     46 47 (face hydra-face-blue)
+                     64 65 (face hydra-face-blue)
+                     81 82 (face hydra-face-blue)
+                     98 99 (face hydra-face-blue)
+                     116 117 (face hydra-face-blue)
+                     133 134 (face hydra-face-blue)
+                     150 151 (face hydra-face-blue)
+                     168 169 (face hydra-face-blue)
+                     185 186 (face hydra-face-blue)
+                     202 203 (face hydra-face-blue)
+                     220 221 (face hydra-face-blue)
+                     237 238 (face hydra-face-blue)
+                     254 255 (face hydra-face-blue)
+                     272 273 (face hydra-face-blue)
+                     289 290 (face hydra-face-blue)
+                     306 307 (face hydra-face-blue)
+                     324 325 (face hydra-face-blue)
+                     341 342 (face hydra-face-blue)
+                     358 359 (face hydra-face-blue)
+                     376 377 (face hydra-face-blue))))
+                 #("Info-mode: 
+?: summary       ]: forward       [: backward      
+<: top node      >: final node    h: help          
+d: info dir      f: follow ref    g: goto node     
+l: hist back     r: hist forward  i: index         
+I: virtual index L: hist          n: next          
+p: previous      s: search        S: case-search   
+T: TOC           u: up            m: menu          
+t: info-to       "
+                   12 13 (face hydra-face-blue)
+                   29 30 (face hydra-face-blue)
+                   46 47 (face hydra-face-blue)
+                   64 65 (face hydra-face-blue)
+                   81 82 (face hydra-face-blue)
+                   98 99 (face hydra-face-blue)
+                   116 117 (face hydra-face-blue)
+                   133 134 (face hydra-face-blue)
+                   150 151 (face hydra-face-blue)
+                   168 169 (face hydra-face-blue)
+                   185 186 (face hydra-face-blue)
+                   202 203 (face hydra-face-blue)
+                   220 221 (face hydra-face-blue)
+                   237 238 (face hydra-face-blue)
+                   254 255 (face hydra-face-blue)
+                   272 273 (face hydra-face-blue)
+                   289 290 (face hydra-face-blue)
+                   306 307 (face hydra-face-blue)
+                   324 325 (face hydra-face-blue)
+                   341 342 (face hydra-face-blue)
+                   358 359 (face hydra-face-blue)
+                   376 377 (face hydra-face-blue)))))
 
 (provide 'hydra-test)
 

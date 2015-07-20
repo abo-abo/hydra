@@ -422,6 +422,14 @@ Return DEFAULT if PROP is not in H."
 (defvar hydra-head-format "[%s]: "
   "The formatter for each head of a plain docstring.")
 
+(defvar hydra-key-doc-function 'hydra-key-doc-function-default
+  "The function for formatting key-doc pairs.")
+
+(defun hydra-key-doc-function-default (key key-width doc doc-width)
+  "Doc"
+  (format (format "%%%ds: %%%ds" key-width (- -1 doc-width))
+          key doc))
+
 (defun hydra--hint (body heads)
   "Generate a hint for the echo area.
 BODY, and HEADS are parameters to `defhydra'."
@@ -437,16 +445,41 @@ BODY, and HEADS are parameters to `defhydra'."
              (cons (cadr h)
                    (cons pstr (cl-caddr h)))
              alist)))))
-    (let ((keys (nreverse (mapcar #'cdr alist))))
-      (mapconcat
-       (lambda (x)
-         (format
-          (if (> (length (cdr x)) 0)
-              (concat hydra-head-format (cdr x))
-            "%s")
-          (car x)))
-       keys
-       ", "))))
+
+    (let ((keys (nreverse (mapcar #'cdr alist)))
+          (n-cols (plist-get (cddr body) :columns)))
+      (if n-cols
+          (let ((n-rows (1+ (/ (length keys) n-cols)))
+                (max-key-len (apply #'max (mapcar (lambda (x) (length (car x))) keys)))
+                (max-doc-len (apply #'max (mapcar (lambda (x) (length (cdr x))) keys))))
+            (concat
+             "\n"
+             (mapconcat #'identity
+                        (mapcar
+                         (lambda (x)
+                           (mapconcat
+                            (lambda (y)
+                              (and y
+                                   (funcall hydra-key-doc-function
+                                            (car y)
+                                            max-key-len
+                                            (cdr y)
+                                            max-doc-len))) x ""))
+                         (hydra--matrix keys n-cols n-rows))
+                        "\n")))
+
+
+        (concat
+         (mapconcat
+          (lambda (x)
+            (format
+             (if (> (length (cdr x)) 0)
+                 (concat hydra-head-format (cdr x))
+               "%s")
+             (car x)))
+          keys
+          ", ")
+         (if keys "." ""))))))
 
 (defvar hydra-fontify-head-function nil
   "Possible replacement for `hydra-fontify-head-default'.")
@@ -555,7 +588,7 @@ The expressions can be auto-expanded according to NAME."
         `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
                  ,rest)
       `(format ,(concat docstring ": " (replace-regexp-in-string
-                                        "\\(%\\)" "\\1\\1" rest) ".")))))
+                                        "\\(%\\)" "\\1\\1" rest))))))
 
 (defun hydra--complain (format-string &rest args)
   "Forward to (`message' FORMAT-STRING ARGS) unless `hydra-verbose' is nil."
