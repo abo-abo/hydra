@@ -587,8 +587,11 @@ The expressions can be auto-expanded according to NAME."
     (if (eq ?\n (aref docstring 0))
         `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
                  ,rest)
-      `(format ,(concat docstring ": " (replace-regexp-in-string
-                                        "\\(%\\)" "\\1\\1" rest))))))
+      `(format ,(replace-regexp-in-string
+                 " +$" ""
+                 (concat docstring ": "
+                         (replace-regexp-in-string
+                          "\\(%\\)" "\\1\\1" rest)))))))
 
 (defun hydra--complain (format-string &rest args)
   "Forward to (`message' FORMAT-STRING ARGS) unless `hydra-verbose' is nil."

@@ -1381,70 +1381,38 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
                                 ("T" Info-toc "TOC")
                                 ("u" Info-up "up")
                                 ("m" Info-menu "menu")
-                                ("t" hydra-info-to/body "info-to"))))))
-                  (format
-                   #("Info-mode: 
-?: summary       ]: forward       [: backward      
-<: top node      >: final node    h: help          
-d: info dir      f: follow ref    g: goto node     
-l: hist back     r: hist forward  i: index         
-I: virtual index L: hist          n: next          
-p: previous      s: search        S: case-search   
-T: TOC           u: up            m: menu          
-t: info-to       "
-                     12 13 (face hydra-face-blue)
-                     29 30 (face hydra-face-blue)
-                     46 47 (face hydra-face-blue)
-                     64 65 (face hydra-face-blue)
-                     81 82 (face hydra-face-blue)
-                     98 99 (face hydra-face-blue)
-                     116 117 (face hydra-face-blue)
-                     133 134 (face hydra-face-blue)
-                     150 151 (face hydra-face-blue)
-                     168 169 (face hydra-face-blue)
-                     185 186 (face hydra-face-blue)
-                     202 203 (face hydra-face-blue)
-                     220 221 (face hydra-face-blue)
-                     237 238 (face hydra-face-blue)
-                     254 255 (face hydra-face-blue)
-                     272 273 (face hydra-face-blue)
-                     289 290 (face hydra-face-blue)
-                     306 307 (face hydra-face-blue)
-                     324 325 (face hydra-face-blue)
-                     341 342 (face hydra-face-blue)
-                     358 359 (face hydra-face-blue)
-                     376 377 (face hydra-face-blue))))
-                 #("Info-mode: 
-?: summary       ]: forward       [: backward      
-<: top node      >: final node    h: help          
-d: info dir      f: follow ref    g: goto node     
-l: hist back     r: hist forward  i: index         
-I: virtual index L: hist          n: next          
-p: previous      s: search        S: case-search   
-T: TOC           u: up            m: menu          
-t: info-to       "
-                   12 13 (face hydra-face-blue)
-                   29 30 (face hydra-face-blue)
-                   46 47 (face hydra-face-blue)
-                   64 65 (face hydra-face-blue)
-                   81 82 (face hydra-face-blue)
-                   98 99 (face hydra-face-blue)
+                                ("t" hydra-info-to/body "info-to")))))))
+                 #("Info-mode:
+?: summary       ]: forward       [: backward
+<: top node      >: final node    h: help
+d: info dir      f: follow ref    g: goto node
+l: hist back     r: hist forward  i: index
+I: virtual index L: hist          n: next
+p: previous      s: search        S: case-search
+T: TOC           u: up            m: menu
+t: info-to"
+                   11 12 (face hydra-face-blue)
+                   28 29 (face hydra-face-blue)
+                   45 46 (face hydra-face-blue)
+                   57 58 (face hydra-face-blue)
+                   74 75 (face hydra-face-blue)
+                   91 92 (face hydra-face-blue)
+                   99 100 (face hydra-face-blue)
                    116 117 (face hydra-face-blue)
                    133 134 (face hydra-face-blue)
-                   150 151 (face hydra-face-blue)
-                   168 169 (face hydra-face-blue)
-                   185 186 (face hydra-face-blue)
-                   202 203 (face hydra-face-blue)
-                   220 221 (face hydra-face-blue)
-                   237 238 (face hydra-face-blue)
-                   254 255 (face hydra-face-blue)
-                   272 273 (face hydra-face-blue)
-                   289 290 (face hydra-face-blue)
-                   306 307 (face hydra-face-blue)
-                   324 325 (face hydra-face-blue)
-                   341 342 (face hydra-face-blue)
-                   358 359 (face hydra-face-blue)
-                   376 377 (face hydra-face-blue)))))
+                   146 147 (face hydra-face-blue)
+                   163 164 (face hydra-face-blue)
+                   180 181 (face hydra-face-blue)
+                   189 190 (face hydra-face-blue)
+                   206 207 (face hydra-face-blue)
+                   223 224 (face hydra-face-blue)
+                   231 232 (face hydra-face-blue)
+                   248 249 (face hydra-face-blue)
+                   265 266 (face hydra-face-blue)
+                   280 281 (face hydra-face-blue)
+                   297 298 (face hydra-face-blue)
+                   314 315 (face hydra-face-blue)
+                   322 323 (face hydra-face-blue)))))
 
 (provide 'hydra-test)
 
