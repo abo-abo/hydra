@@ -505,13 +505,14 @@ HEAD's binding is returned as a string with a colored face."
                     "%%"
                   (car head))
                 'face
-                (cl-case head-color
-                  (blue 'hydra-face-blue)
-                  (red 'hydra-face-red)
-                  (amaranth 'hydra-face-amaranth)
-                  (pink 'hydra-face-pink)
-                  (teal 'hydra-face-teal)
-                  (t (error "Unknown color for %S" head))))))
+                (or (hydra--head-property head :face)
+                    (cl-case head-color
+                      (blue 'hydra-face-blue)
+                      (red 'hydra-face-red)
+                      (amaranth 'hydra-face-amaranth)
+                      (pink 'hydra-face-pink)
+                      (teal 'hydra-face-teal)
+                      (t (error "Unknown color for %S" head)))))))
 
 (defun hydra-fontify-head-greyscale (head _body)
   "Produce a pretty string from HEAD and BODY.
