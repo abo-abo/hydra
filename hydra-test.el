@@ -119,14 +119,14 @@ Call the head: `first-error'."
           (setq hydra-curr-body-fn
                 (quote hydra-error/body)))
         (condition-case err
-            (progn
-              (setq this-command
-                    (quote first-error))
-              (call-interactively
-               (function first-error)))
-          ((quit error)
-           (message "%S" err)
-           (unless hydra-lv (sit-for 0.8))))
+                        (progn
+                          (setq this-command
+                                (quote first-error))
+                          (call-interactively
+                           (function first-error)))
+                        ((quit error)
+                         (message "%S" err)
+                         (unless hydra-lv (sit-for 0.8))))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -157,14 +157,14 @@ Call the head: `next-error'."
           (setq hydra-curr-body-fn
                 (quote hydra-error/body)))
         (condition-case err
-            (progn
-              (setq this-command
-                    (quote next-error))
-              (call-interactively
-               (function next-error)))
-          ((quit error)
-           (message "%S" err)
-           (unless hydra-lv (sit-for 0.8))))
+                        (progn
+                          (setq this-command
+                                (quote next-error))
+                          (call-interactively
+                           (function next-error)))
+                        ((quit error)
+                         (message "%S" err)
+                         (unless hydra-lv (sit-for 0.8))))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -195,14 +195,14 @@ Call the head: `previous-error'."
           (setq hydra-curr-body-fn
                 (quote hydra-error/body)))
         (condition-case err
-            (progn
-              (setq this-command
-                    (quote previous-error))
-              (call-interactively
-               (function previous-error)))
-          ((quit error)
-           (message "%S" err)
-           (unless hydra-lv (sit-for 0.8))))
+                        (progn
+                          (setq this-command
+                                (quote previous-error))
+                          (call-interactively
+                           (function previous-error)))
+                        ((quit error)
+                         (message "%S" err)
+                         (unless hydra-lv (sit-for 0.8))))
         (when hydra-is-helpful
           (if hydra-lv
               (lv-message
@@ -222,14 +222,12 @@ Call the head: `previous-error'."
         (define-key global-map (kbd "M-g")
           nil))
       (define-key global-map [134217831 104]
-       (function
-        hydra-error/first-error))
+        (quote hydra-error/first-error))
       (define-key global-map [134217831 106]
-       (function
-        hydra-error/next-error))
+        (quote hydra-error/next-error))
       (define-key global-map [134217831 107]
-       (function
-        hydra-error/previous-error))
+        (quote
+         hydra-error/previous-error))
       (defun hydra-error/body nil
         "Create a hydra with a \"M-g\" body and the heads:
 

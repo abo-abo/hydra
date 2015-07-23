@@ -1030,7 +1030,7 @@ result of `defhydra'."
                                           (if (boundp bind)
                                               (keymapp (symbol-value bind))
                                             t))
-                                     `(define-key ,bind ,final-key (function ,name)))
+                                     `(define-key ,bind ,final-key (quote ,name)))
                                     (t
                                      (error "Invalid :bind property `%S' for head %S" bind head)))))))
                       heads))
