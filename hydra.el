@@ -363,11 +363,14 @@ When ARG is non-nil, use that instead."
   "Generate a callable symbol from X.
 If X is a function symbol or a lambda, return it.  Otherwise, it
 should be a single statement.  Wrap it in an interactive lambda."
-  (if (or (symbolp x) (functionp x))
-      x
-    `(lambda ()
-       (interactive)
-       ,x)))
+  (cond ((or (symbolp x) (functionp x))
+         x)
+        ((and (consp x) (eq (car x) 'function))
+         (cadr x))
+        (t
+         `(lambda ()
+            (interactive)
+            ,x))))
 
 (defun hydra-plist-get-default (plist prop default)
   "Extract a value from a property list.
@@ -716,9 +719,13 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
 (defun hydra--head-name (h name)
   "Return the symbol for head H of hydra with NAME."
   (let ((str (format "%S/%s" name
-                     (if (symbolp (cadr h))
-                         (cadr h)
-                       (concat "lambda-" (car h))))))
+                     (cond ((symbolp (cadr h))
+                            (cadr h))
+                           ((and (consp (cadr h))
+                                 (eq (cl-caadr h) 'function))
+                            (cadr (cadr h)))
+                           (t
+                            (concat "lambda-" (car h)))))))
     (when (and (hydra--head-property h :exit)
                (not (memq (cadr h) '(body nil))))
       (setq str (concat str "-and-exit")))
