@@ -566,16 +566,18 @@ HEAD's binding is returned as a string wrapped with [] or {}."
 _NAME, BODY, DOCSTRING and HEADS are parameters of `defhydra'.
 The expressions can be auto-expanded according to NAME."
   (setq docstring (hydra--strip-align-markers docstring))
+  (setq docstring (replace-regexp-in-string "___" "_β_" docstring))
   (let ((rest (hydra--hint body heads))
         (start 0)
         varlist
         offset)
     (while (setq start
                  (string-match
-                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@]+?\\)_\\)"
+                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&]+?\\)_\\)"
                   docstring start))
       (cond ((eq ?_ (aref (match-string 0 docstring) 0))
              (let* ((key (match-string 4 docstring))
+                    (key (if (equal key "β") "_" key))
                     (head (assoc key heads)))
                (if head
                    (progn
