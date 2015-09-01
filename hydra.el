@@ -141,16 +141,16 @@ warn: keep KEYMAP and issue a warning instead of running the command."
   "Disable the current Hydra."
   (setq hydra-deactivate nil)
   (remove-hook 'pre-command-hook 'hydra--clearfun)
+  (if (fboundp 'remove-function)
+      (remove-function input-method-function #'hydra--imf)
+    (when hydra--input-method-function
+      (setq input-method-function hydra--input-method-function)
+      (setq hydra--input-method-function nil)))
   (dolist (frame (frame-list))
     (with-selected-frame frame
       (when overriding-terminal-local-map
         (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map)
         (unless hydra--ignore
-          (if (fboundp 'remove-function)
-              (remove-function input-method-function #'hydra--imf)
-            (when hydra--input-method-function
-              (setq input-method-function hydra--input-method-function)
-              (setq hydra--input-method-function nil)))
           (when hydra-curr-on-exit
             (let ((on-exit hydra-curr-on-exit))
               (setq hydra-curr-on-exit nil)
