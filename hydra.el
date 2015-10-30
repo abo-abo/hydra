@@ -149,12 +149,12 @@ warn: keep KEYMAP and issue a warning instead of running the command."
   (dolist (frame (frame-list))
     (with-selected-frame frame
       (when overriding-terminal-local-map
-        (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map)
-        (unless hydra--ignore
-          (when hydra-curr-on-exit
-            (let ((on-exit hydra-curr-on-exit))
-              (setq hydra-curr-on-exit nil)
-              (funcall on-exit))))))))
+        (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map))))
+  (unless hydra--ignore
+    (when hydra-curr-on-exit
+      (let ((on-exit hydra-curr-on-exit))
+        (setq hydra-curr-on-exit nil)
+        (funcall on-exit)))))
 
 (unless (fboundp 'internal-push-keymap)
   (defun internal-push-keymap (keymap symbol)
