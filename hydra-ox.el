@@ -24,6 +24,8 @@
 ;; This shows how a complex dispatch menu can be built with Hydra.
 
 ;;; Code:
+
+(require 'hydra)
 (require 'org)
 
 (defhydradio hydra-ox ()
