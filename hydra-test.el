@@ -1310,7 +1310,7 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
               (goto-char (point-max))
               (search-backward "|")
               (delete-char 1)
-              (setq current-prefix-arg)
+              (setq current-prefix-arg nil)
               ,@body
               (insert "|")
               (when (region-active-p)
