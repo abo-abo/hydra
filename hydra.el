@@ -586,7 +586,7 @@ The expressions can be auto-expanded according to NAME."
         offset)
     (while (setq start
                  (string-match
-                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&]+?\\)_\\)"
+                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&^]+?\\)_\\)"
                   docstring start))
       (cond ((eq ?_ (aref (match-string 0 docstring) 0))
              (let* ((key (match-string 4 docstring))
@@ -601,7 +601,7 @@ The expressions can be auto-expanded according to NAME."
                              hydra-key-format-spec
                              (concat "%" (match-string 3 docstring) "s"))
                             t nil docstring)))
-                 (error "Unrecognized key: _%s_" key))))
+                 (warn "Unrecognized key: _%s_" key))))
 
             (t
              (let* ((varp (if (eq ?` (aref (match-string 2 docstring) 0)) 1 0))
