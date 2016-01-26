@@ -260,6 +260,7 @@ _v_ariable       _u_ser-option
 ;; (global-set-key (kbd "C-c h") 'hydra-apropos/body)
 
 ;;** Example 11: rectangle-mark-mode
+(require 'rect)
 (defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
                            :color pink
                            :post (deactivate-mark))
