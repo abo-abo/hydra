@@ -98,7 +98,7 @@ Only the background color is significant."
           (insert
            (propertize "__" 'face 'lv-separator 'display '(space :height (1)))
            (propertize "\n" 'face 'lv-separator 'line-height t)))
-        (setq-local window-min-height n-lines)
+        (set (make-local-variable 'window-min-height) n-lines)
         (setq truncate-lines (> n-lines 1))
         (let ((window-resize-pixelwise t)
               (window-size-fixed nil))
