@@ -1,0 +1,6 @@
+targets/
+.travis.yml
+.dir-locals.el
+Makefile
+README.md
+hydra-test.el
