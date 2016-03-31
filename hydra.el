@@ -193,6 +193,12 @@ warn: keep KEYMAP and issue a warning instead of running the command."
   :type 'boolean
   :group 'hydra)
 
+(defcustom hydra-default-hint ""
+  "Default :hint property to use for heads when not specified in
+the body or the head."
+  :type 'sexp
+  :group 'hydra)
+
 (defcustom hydra-lv t
   "When non-nil, `lv-message' (not `message') will be used to display hints."
   :type 'boolean)
@@ -975,7 +981,8 @@ result of `defhydra'."
                   ((= len 2)
                    (setcdr (cdr h)
                            (list
-                            (hydra-plist-get-default body-plist :hint "")))
+                            (hydra-plist-get-default
+                             body-plist :hint hydra-default-hint)))
                    (setcdr (nthcdr 2 h) (list :exit body-exit)))
                   (t
                    (let ((hint (cl-caddr h)))
@@ -983,7 +990,8 @@ result of `defhydra'."
                                  (stringp hint)
                                  (stringp (eval hint)))
                        (setcdr (cdr h) (cons
-                                        (hydra-plist-get-default body-plist :hint "")
+                                        (hydra-plist-get-default
+                                         body-plist :hint hydra-default-hint)
                                         (cddr h)))))
                    (let ((hint-and-plist (cddr h)))
                      (if (null (cdr hint-and-plist))
