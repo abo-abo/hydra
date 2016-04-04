@@ -467,60 +467,62 @@ Return DEFAULT if PROP is not in H."
 (defun hydra--hint (body heads)
   "Generate a hint for the echo area.
 BODY, and HEADS are parameters to `defhydra'."
-  (let (alist)
-    (dolist (h heads)
-      (let ((val (assoc (cadr h) alist))
-            (pstr (hydra-fontify-head h body)))
-        (unless (null (cl-caddr h))
-          (if val
-              (setf (cadr val)
-                    (concat (cadr val) " " pstr))
-            (push
-             (cons (cadr h)
-                   (cons pstr (cl-caddr h)))
-             alist)))))
-    (let ((keys (nreverse (mapcar #'cdr alist)))
-          (n-cols (plist-get (cddr body) :columns))
-          res)
-      (setq res
-            (if n-cols
-                (let ((n-rows (1+ (/ (length keys) n-cols)))
-                      (max-key-len (apply #'max (mapcar (lambda (x) (length (car x))) keys)))
-                      (max-doc-len (apply #'max (mapcar (lambda (x)
-                                                          (length (hydra--to-string (cdr x)))) keys))))
-                  `(concat
-                    "\n"
-                    (mapconcat #'identity
-                               (mapcar
-                                (lambda (x)
-                                  (mapconcat
-                                   (lambda (y)
-                                     (and y
-                                          (funcall hydra-key-doc-function
-                                                   (car y)
-                                                   ,max-key-len
-                                                   (hydra--to-string (cdr y))
-                                                   ,max-doc-len))) x ""))
-                                ',(hydra--matrix keys n-cols n-rows))
-                               "\n")))
+  (if (null (hydra-plist-get-default (cddr body) :hint 1))
+      ""
+    (let (alist)
+      (dolist (h heads)
+        (let ((val (assoc (cadr h) alist))
+              (pstr (hydra-fontify-head h body)))
+          (unless (null (cl-caddr h))
+            (if val
+                (setf (cadr val)
+                      (concat (cadr val) " " pstr))
+              (push
+               (cons (cadr h)
+                     (cons pstr (cl-caddr h)))
+               alist)))))
+      (let ((keys (nreverse (mapcar #'cdr alist)))
+            (n-cols (plist-get (cddr body) :columns))
+            res)
+        (setq res
+              (if n-cols
+                  (let ((n-rows (1+ (/ (length keys) n-cols)))
+                        (max-key-len (apply #'max (mapcar (lambda (x) (length (car x))) keys)))
+                        (max-doc-len (apply #'max (mapcar (lambda (x)
+                                                            (length (hydra--to-string (cdr x)))) keys))))
+                    `(concat
+                      "\n"
+                      (mapconcat #'identity
+                                 (mapcar
+                                  (lambda (x)
+                                    (mapconcat
+                                     (lambda (y)
+                                       (and y
+                                            (funcall hydra-key-doc-function
+                                                     (car y)
+                                                     ,max-key-len
+                                                     (hydra--to-string (cdr y))
+                                                     ,max-doc-len))) x ""))
+                                  ',(hydra--matrix keys n-cols n-rows))
+                                 "\n")))
 
 
-              `(concat
-                (mapconcat
-                 (lambda (x)
-                   (let ((str (hydra--to-string (cdr x))))
-                     (format
-                      (if (> (length str) 0)
-                          (concat hydra-head-format str)
-                        "%s")
-                      (car x))))
-                 ',keys
-                 ", ")
-                ,(if keys "." ""))))
-      (if (cl-every #'stringp
-                    (mapcar 'cddr alist))
-          (eval res)
-        res))))
+                `(concat
+                  (mapconcat
+                   (lambda (x)
+                     (let ((str (hydra--to-string (cdr x))))
+                       (format
+                        (if (> (length str) 0)
+                            (concat hydra-head-format str)
+                          "%s")
+                        (car x))))
+                   ',keys
+                   ", ")
+                  ,(if keys "." ""))))
+        (if (cl-every #'stringp
+                      (mapcar 'cddr alist))
+            (eval res)
+          res)))))
 
 (defvar hydra-fontify-head-function nil
   "Possible replacement for `hydra-fontify-head-default'.")
@@ -592,9 +594,22 @@ The expressions can be auto-expanded according to NAME."
         offset)
     (while (setq start
                  (string-match
-                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&^]+?\\)_\\)"
+                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:[_?]\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&^]+?\\)[_?]\\)"
                   docstring start))
-      (cond ((eq ?_ (aref (match-string 0 docstring) 0))
+      (cond ((eq ?? (aref (match-string 0 docstring) 0))
+             (let* ((key (match-string 4 docstring))
+                    (head (assoc key heads)))
+               (if head
+                   (progn
+                     (push (nth 2 head) varlist)
+                     (setq docstring
+                           (replace-match
+                            (or
+                             hydra-key-format-spec
+                             (concat "%" (match-string 3 docstring) "s"))
+                            t nil docstring)))
+                 (warn "Unrecognized key: ?%s?" key))))
+            ((eq ?_ (aref (match-string 0 docstring) 0))
              (let* ((key (match-string 4 docstring))
                     (key (if (equal key "β") "_" key))
                     (head (assoc key heads)))
