@@ -581,6 +581,9 @@ HEAD's binding is returned as a string wrapped with [] or {}."
         (setq str (replace-match "" nil nil str))))
     str))
 
+(defvar hydra-docstring-keys-translate-alist
+  '(("↑" . "<up>")))
+
 (defun hydra--format (_name body docstring heads)
   "Generate a `format' statement from STR.
 \"%`...\" expressions are extracted into \"%S\".
@@ -594,7 +597,7 @@ The expressions can be auto-expanded according to NAME."
         offset)
     (while (setq start
                  (string-match
-                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:[_?]\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&^]+?\\)[_?]\\)"
+                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:[_?]\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&^↑]+?\\)[_?]\\)"
                   docstring start))
       (cond ((eq ?? (aref (match-string 0 docstring) 0))
              (let* ((key (match-string 4 docstring))
@@ -612,10 +615,19 @@ The expressions can be auto-expanded according to NAME."
             ((eq ?_ (aref (match-string 0 docstring) 0))
              (let* ((key (match-string 4 docstring))
                     (key (if (equal key "β") "_" key))
-                    (head (assoc key heads)))
+                    normal-key
+                    (head (or (assoc key heads)
+                              (when (setq normal-key
+                                          (cdr (assoc
+                                                key hydra-docstring-keys-translate-alist)))
+                                (assoc normal-key heads)))))
                (if head
                    (progn
-                     (push (hydra-fontify-head head body) varlist)
+                     (push (hydra-fontify-head (if normal-key
+                                                   (cons key (cdr head))
+                                                 head)
+                                               body)
+                           varlist)
                      (setq docstring
                            (replace-match
                             (or
