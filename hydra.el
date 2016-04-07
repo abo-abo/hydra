@@ -590,7 +590,7 @@ HEAD's binding is returned as a string wrapped with [] or {}."
     ("⌦" . "<deletechar>")
     ("⏎" . "RET")))
 
-(defconst hydra-width-spec-regex " ?-?[0-9]*s?"
+(defconst hydra-width-spec-regex " ?-?[0-9]*?"
   "Regex for the width spec in keys and %` quoted sexps.")
 
 (defvar hydra-key-regex "\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&^↑↓←→⌫⌦⏎'`()\"]+?"
@@ -610,8 +610,7 @@ The expressions can be auto-expanded according to NAME."
     (while (setq start
                  (string-match
                   (format
-                   "\\(?:%%\\(%s\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:[_?]\\(%s\\)\\(%s\\)[_?]\\)"
-                   hydra-width-spec-regex
+                   "\\(?:%%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:[_?]\\(%s\\)\\(%s\\)[_?]\\)"
                    hydra-width-spec-regex
                    hydra-key-regex)
                   docstring start))
