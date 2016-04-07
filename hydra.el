@@ -582,7 +582,13 @@ HEAD's binding is returned as a string wrapped with [] or {}."
     str))
 
 (defvar hydra-docstring-keys-translate-alist
-  '(("↑" . "<up>")))
+  '(("↑" . "<up>")
+    ("↓" . "<down>")
+    ("→" . "<right>")
+    ("←" . "<left>")
+    ("⌫" . "DEL")
+    ("⌦" . "<deletechar>")
+    ("⏎" . "RET")))
 
 (defconst hydra-width-spec-regex " ?-?[0-9]*s?"
   "Regex for the width spec in keys and %` quoted sexps.")
