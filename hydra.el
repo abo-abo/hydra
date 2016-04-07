@@ -584,6 +584,12 @@ HEAD's binding is returned as a string wrapped with [] or {}."
 (defvar hydra-docstring-keys-translate-alist
   '(("↑" . "<up>")))
 
+(defconst hydra-width-spec-regex " ?-?[0-9]*s?"
+  "Regex for the width spec in keys and %` quoted sexps.")
+
+(defvar hydra-key-regex "\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&^↑'`()\"]+?"
+  "Regex for the key quoted in the docstring.")
+
 (defun hydra--format (_name body docstring heads)
   "Generate a `format' statement from STR.
 \"%`...\" expressions are extracted into \"%S\".
@@ -597,7 +603,11 @@ The expressions can be auto-expanded according to NAME."
         offset)
     (while (setq start
                  (string-match
-                  "\\(?:%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:[_?]\\( ?-?[0-9]*?\\)\\(\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&^↑]+?\\)[_?]\\)"
+                  (format
+                   "\\(?:%%\\(%s\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:[_?]\\(%s\\)\\(%s\\)[_?]\\)"
+                   hydra-width-spec-regex
+                   hydra-width-spec-regex
+                   hydra-key-regex)
                   docstring start))
       (cond ((eq ?? (aref (match-string 0 docstring) 0))
              (let* ((key (match-string 4 docstring))
