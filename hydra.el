@@ -629,6 +629,7 @@ The expressions can be auto-expanded according to NAME."
                              hydra-doc-format-spec
                              (concat "%" (match-string 3 docstring) "s"))
                             t nil docstring)))
+                 (setq start (match-end 0))
                  (warn "Unrecognized key: ?%s?" key))))
             ((eq ?_ (aref (match-string 0 docstring) 0))
              (let* ((key (match-string 4 docstring))
@@ -652,6 +653,7 @@ The expressions can be auto-expanded according to NAME."
                              hydra-key-format-spec
                              (concat "%" (match-string 3 docstring) "s"))
                             t nil docstring)))
+                 (setq start (match-end 0))
                  (warn "Unrecognized key: _%s_" key))))
 
             (t
