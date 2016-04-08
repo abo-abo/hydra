@@ -211,6 +211,9 @@ the body or the head."
   "Default `format'-style specifier for _a_  syntax in docstrings.
 When nil, you can specify your own at each location like this: _ 5a_.")
 
+(defcustom hydra-doc-format-spec "%s"
+  "Default `format'-style specifier for ?a?  syntax in docstrings.")
+
 (make-obsolete-variable
  'hydra-key-format-spec
  "Since the docstrings are aligned by hand anyway, this isn't very useful."
@@ -623,7 +626,7 @@ The expressions can be auto-expanded according to NAME."
                      (setq docstring
                            (replace-match
                             (or
-                             hydra-key-format-spec
+                             hydra-doc-format-spec
                              (concat "%" (match-string 3 docstring) "s"))
                             t nil docstring)))
                  (warn "Unrecognized key: ?%s?" key))))
