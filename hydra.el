@@ -604,8 +604,7 @@ _NAME, BODY, DOCSTRING and HEADS are parameters of `defhydra'.
 The expressions can be auto-expanded according to NAME."
   (setq docstring (hydra--strip-align-markers docstring))
   (setq docstring (replace-regexp-in-string "___" "_β_" docstring))
-  (let ((rest (if (and (null (hydra-plist-get-default (cddr body) :hint 1))
-                       (string-match "\\`\n" docstring))
+  (let ((rest (if (eq (plist-get (cddr body) :hint) 'none)
                   ""
                 (hydra--hint body heads)))
         (start 0)
