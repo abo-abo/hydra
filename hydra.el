@@ -1035,11 +1035,15 @@ result of `defhydra'."
                    (let ((hint (cl-caddr h)))
                      (unless (or (null hint)
                                  (stringp hint)
-                                 (stringp (eval hint)))
-                       (setcdr (cdr h) (cons
-                                        (hydra-plist-get-default
-                                         body-plist :hint hydra-default-hint)
-                                        (cddr h)))))
+                                 (consp hint))
+                       (let ((inherited-hint
+                              (hydra-plist-get-default
+                               body-plist :hint hydra-default-hint)))
+                         (setcdr (cdr h) (cons
+                                          (if (eq 'none inherited-hint)
+                                              nil
+                                            inherited-hint)
+                                          (cddr h))))))
                    (let ((hint-and-plist (cddr h)))
                      (if (null (cdr hint-and-plist))
                          (setcdr hint-and-plist (list :exit body-exit))
