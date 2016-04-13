@@ -291,6 +291,13 @@ _h_   _l_   _o_k        _y_ank
 ;; (global-set-key (kbd "C-x SPC") 'hydra-rectangle/body)
 
 ;;** Example 12: org-agenda-view
+(defun org-agenda-cts ()
+  (and (eq major-mode 'org-agenda-mode)
+       (let ((args (get-text-property
+                    (min (1- (point-max)) (point))
+                    'org-last-args)))
+         (nth 2 args))))
+
 (defhydra hydra-org-agenda-view (:hint none)
   "
 _d_: ?d? day        _g_: time grid=?g?  _a_: arch-trees
