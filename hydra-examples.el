@@ -378,4 +378,8 @@ _y_: ?y? year       _q_: quit           _L__l__c_: log = ?l?"
       (goto-char mk))))
 
 (provide 'hydra-examples)
+
+;; Local Variables:
+;; no-byte-compile: t
+;; End:
 ;;; hydra-examples.el ends here
