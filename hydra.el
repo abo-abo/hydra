@@ -768,8 +768,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                      (unless hydra-lv
                        (sit-for 0.8)))))
               ,(if (and body-idle (eq (cadr head) 'body))
-                   `(hydra-idle-message ,body-idle ,hint)
-                 `(hydra-show-hint ,hint))
+                   `(hydra-idle-message ,body-idle ,hint ',name)
+                 `(hydra-show-hint ,hint ',name))
               (hydra-set-transient-map
                ,keymap
                (lambda () (hydra-keyboard-quit) ,body-before-exit)
@@ -779,11 +779,28 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
               ,(when body-timeout
                  `(hydra-timeout ,body-timeout))))))))
 
-(defun hydra-show-hint (hint)
-  (when hydra-is-helpful
-    (if hydra-lv
-        (lv-message (eval hint))
-      (message (eval hint)))))
+(defvar hydra-props-alist nil)
+
+(defun hydra-set-property (name key val)
+  (let ((entry (assoc name hydra-props-alist))
+        plist)
+    (when (null entry)
+      (add-to-list 'hydra-props-alist (list name))
+      (setq entry (assoc name hydra-props-alist)))
+    (setq plist (cdr entry))
+    (setcdr entry (plist-put plist key val))))
+
+(defun hydra-show-hint (hint caller)
+  (let ((verbosity (plist-get (cdr (assoc caller hydra-props-alist))
+                              :verbosity)))
+    (cond ((eq verbosity 0))
+          ((eq verbosity 1)
+           (message (eval hint)))
+          (t
+           (when hydra-is-helpful
+             (if hydra-lv
+                 (lv-message (eval hint))
+               (message (eval hint))))))))
 
 (defmacro hydra--make-funcall (sym)
   "Transform SYM into a `funcall' to call it."
@@ -914,7 +931,7 @@ NAMES should be defined by `defhydradio' or similar."
   (dolist (n names)
     (set n (aref (get n 'range) 0))))
 
-(defun hydra-idle-message (secs hint)
+(defun hydra-idle-message (secs hint name)
   "In SECS seconds display HINT."
   (cancel-timer hydra-message-timer)
   (setq hydra-message-timer (timer-create))
@@ -923,7 +940,7 @@ NAMES should be defined by `defhydradio' or similar."
   (timer-set-function
    hydra-message-timer
    (lambda ()
-     (hydra-show-hint hint)
+     (hydra-show-hint hint name)
      (cancel-timer hydra-message-timer)))
   (timer-activate hydra-message-timer))
 

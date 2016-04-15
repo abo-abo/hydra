@@ -130,7 +130,8 @@ Call the head: `first-error'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
-         hydra-error/hint)
+         hydra-error/hint
+         (quote hydra-error))
         (hydra-set-transient-map
          hydra-error/keymap
          (lambda nil
@@ -164,7 +165,8 @@ Call the head: `next-error'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
-         hydra-error/hint)
+         hydra-error/hint
+         (quote hydra-error))
         (hydra-set-transient-map
          hydra-error/keymap
          (lambda nil
@@ -198,7 +200,8 @@ Call the head: `previous-error'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
-         hydra-error/hint)
+         hydra-error/hint
+         (quote hydra-error))
         (hydra-set-transient-map
          hydra-error/keymap
          (lambda nil
@@ -234,7 +237,8 @@ The body can be accessed via `hydra-error/body'."
           (setq hydra-curr-body-fn
                 (quote hydra-error/body)))
         (hydra-show-hint
-         hydra-error/hint)
+         hydra-error/hint
+         (quote hydra-error))
         (hydra-set-transient-map
          hydra-error/keymap
          (lambda nil
@@ -410,7 +414,8 @@ The body can be accessed via `hydra-toggle/body'."
           (setq hydra-curr-body-fn
                 (quote hydra-toggle/body)))
         (hydra-show-hint
-         hydra-toggle/hint)
+         hydra-toggle/hint
+         (quote hydra-toggle))
         (hydra-set-transient-map
          hydra-toggle/keymap
          (lambda nil
@@ -511,7 +516,9 @@ Call the head: `next-line'."
           ((quit error)
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
-        (hydra-show-hint hydra-vi/hint)
+        (hydra-show-hint
+         hydra-vi/hint
+         (quote hydra-vi))
         (hydra-set-transient-map
          hydra-vi/keymap
          (lambda nil
@@ -544,7 +551,9 @@ Call the head: `previous-line'."
           ((quit error)
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
-        (hydra-show-hint hydra-vi/hint)
+        (hydra-show-hint
+         hydra-vi/hint
+         (quote hydra-vi))
         (hydra-set-transient-map
          hydra-vi/keymap
          (lambda nil
@@ -582,7 +591,9 @@ The body can be accessed via `hydra-vi/body'."
           (hydra-keyboard-quit)
           (setq hydra-curr-body-fn
                 (quote hydra-vi/body)))
-        (hydra-show-hint hydra-vi/hint)
+        (hydra-show-hint
+         hydra-vi/hint
+         (quote hydra-vi))
         (hydra-set-transient-map
          hydra-vi/keymap
          (lambda nil
@@ -683,7 +694,8 @@ Call the head: `(text-scale-set 0)'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
-         hydra-zoom/hint)
+         hydra-zoom/hint
+         (quote hydra-zoom))
         (hydra-set-transient-map
          hydra-zoom/keymap
          (lambda nil
@@ -725,7 +737,8 @@ The body can be accessed via `hydra-zoom/body'."
           (setq hydra-curr-body-fn
                 (quote hydra-zoom/body)))
         (hydra-show-hint
-         hydra-zoom/hint)
+         hydra-zoom/hint
+         (quote hydra-zoom))
         (hydra-set-transient-map
          hydra-zoom/keymap
          (lambda nil
@@ -826,7 +839,8 @@ Call the head: `(text-scale-set 0)'."
            (message "%S" err)
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
-         hydra-zoom/hint)
+         hydra-zoom/hint
+         (quote hydra-zoom))
         (hydra-set-transient-map
          hydra-zoom/keymap
          (lambda nil
@@ -868,7 +882,8 @@ The body can be accessed via `hydra-zoom/body'."
           (setq hydra-curr-body-fn
                 (quote hydra-zoom/body)))
         (hydra-show-hint
-         hydra-zoom/hint)
+         hydra-zoom/hint
+         (quote hydra-zoom))
         (hydra-set-transient-map
          hydra-zoom/keymap
          (lambda nil
