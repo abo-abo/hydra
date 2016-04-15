@@ -769,10 +769,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                        (sit-for 0.8)))))
               ,(if (and body-idle (eq (cadr head) 'body))
                    `(hydra-idle-message ,body-idle ,hint)
-                 `(when hydra-is-helpful
-                    (if hydra-lv
-                        (lv-message (eval ,hint))
-                      (message (eval ,hint)))))
+                 `(hydra-show-hint ,hint))
               (hydra-set-transient-map
                ,keymap
                (lambda () (hydra-keyboard-quit) ,body-before-exit)
@@ -781,6 +778,12 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
               ,body-after-exit
               ,(when body-timeout
                  `(hydra-timeout ,body-timeout))))))))
+
+(defun hydra-show-hint (hint)
+  (when hydra-is-helpful
+    (if hydra-lv
+        (lv-message (eval hint))
+      (message (eval hint)))))
 
 (defmacro hydra--make-funcall (sym)
   "Transform SYM into a `funcall' to call it."
@@ -920,10 +923,7 @@ NAMES should be defined by `defhydradio' or similar."
   (timer-set-function
    hydra-message-timer
    (lambda ()
-     (when hydra-is-helpful
-       (if hydra-lv
-           (lv-message (eval hint))
-         (message (eval hint))))
+     (hydra-show-hint hint)
      (cancel-timer hydra-message-timer)))
   (timer-activate hydra-message-timer))
 
