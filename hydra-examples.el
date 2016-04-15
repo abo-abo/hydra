@@ -138,7 +138,8 @@
      ("e" move-end-of-line "end")
      ("d" delete-region "del" :color blue)
      ("y" kill-ring-save "yank" :color blue)
-     ("q" nil "quit"))))
+     ("q" nil "quit")))
+  (hydra-set-property 'hydra-vi :verbosity 1))
 
 ;; This example introduces :color amaranth. It's similar to red,
 ;; except while you can quit red with any binding which isn't a Hydra
