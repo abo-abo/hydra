@@ -69,10 +69,14 @@
 ;; you can nest Hydras if you wish, with `hydra-toggle/body' possibly
 ;; becoming a blue head of another Hydra.
 ;;
-;; Initially, Hydra shipped with a simplified `hydra-create' macro, to
-;; which you could hook up the examples from hydra-examples.el.  It's
-;; better to take the examples simply as templates and use `defhydra'
-;; instead of `hydra-create', since it's more flexible.
+;; If you want to learn all intricacies of using `defhydra' without
+;; having to figure it all out from this source code, check out the
+;; wiki: https://github.com/abo-abo/hydra/wiki. There's a wealth of
+;; information there. Everyone is welcome to bring the existing pages
+;; up to date and add new ones.
+;;
+;; Additionally, the file hydra-examples.el serves to demo most of the
+;; functionality.
 
 ;;; Code:
 ;;* Requires
