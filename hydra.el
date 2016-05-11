@@ -782,6 +782,9 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
 (defvar hydra-props-alist nil)
 
 (defun hydra-set-property (name key val)
+  "Set hydra property.
+NAME is the symbolic name of the hydra.
+KEY and VAL are forwarded to `plist-put'."
   (let ((entry (assoc name hydra-props-alist))
         plist)
     (when (null entry)
@@ -789,6 +792,14 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
       (setq entry (assoc name hydra-props-alist)))
     (setq plist (cdr entry))
     (setcdr entry (plist-put plist key val))))
+
+(defun hydra-get-property (name key)
+  "Get hydra property.
+NAME is the symbolic name of the hydra.
+KEY is forwarded to `plist-get'."
+  (let ((entry (assoc name hydra-props-alist)))
+    (when entry
+      (plist-get (cdr entry) key))))
 
 (defun hydra-show-hint (hint caller)
   (let ((verbosity (plist-get (cdr (assoc caller hydra-props-alist))
