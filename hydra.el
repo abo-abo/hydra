@@ -651,12 +651,13 @@ The expressions can be auto-expanded according to NAME."
                                                  head)
                                                body)
                            varlist)
-                     (setq docstring
-                           (replace-match
+                     (let ((replacement
                             (or
                              hydra-key-format-spec
-                             (concat "%" (match-string 3 docstring) "s"))
-                            t nil docstring)))
+                             (concat "%" (match-string 3 docstring) "s"))))
+                       (setq docstring
+                             (replace-match replacement t nil docstring))
+                       (setq start (+ start (length replacement)))))
                  (setq start (match-end 0))
                  (warn "Unrecognized key: _%s_" key))))
 
