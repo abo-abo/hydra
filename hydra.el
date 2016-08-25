@@ -213,10 +213,12 @@ the body or the head."
 
 (defcustom hydra-key-format-spec "%s"
   "Default `format'-style specifier for _a_  syntax in docstrings.
-When nil, you can specify your own at each location like this: _ 5a_.")
+When nil, you can specify your own at each location like this: _ 5a_."
+  :type 'string)
 
 (defcustom hydra-doc-format-spec "%s"
-  "Default `format'-style specifier for ?a?  syntax in docstrings.")
+  "Default `format'-style specifier for ?a?  syntax in docstrings."
+  :type 'string)
 
 (make-obsolete-variable
  'hydra-key-format-spec
