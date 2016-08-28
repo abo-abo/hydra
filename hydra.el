@@ -82,6 +82,7 @@
 ;;* Requires
 (require 'cl-lib)
 (require 'lv)
+(require 'ring)
 
 (defvar hydra-curr-map nil
   "The keymap of the current Hydra called.")

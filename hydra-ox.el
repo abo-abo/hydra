@@ -27,6 +27,13 @@
 
 (require 'hydra)
 (require 'org)
+(declare-function org-html-export-as-html 'ox-html)
+(declare-function org-html-export-to-html 'ox-html)
+(declare-function org-latex-export-as-latex 'ox-latex)
+(declare-function org-latex-export-to-latex 'ox-latex)
+(declare-function org-latex-export-to-pdf 'ox-latex)
+(declare-function org-ascii-export-as-ascii 'ox-ascii)
+(declare-function org-ascii-export-to-ascii 'ox-ascii)
 
 (defhydradio hydra-ox ()
   (body-only "Export only the body.")
