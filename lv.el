@@ -65,9 +65,9 @@ Only the background color is significant."
                     (let ((ignore-window-parameters t))
                       (split-window
                        (frame-root-window) -1 'below))))
-        (if (setq buf (get-buffer "*LV*"))
+        (if (setq buf (get-buffer " *LV*"))
             (switch-to-buffer buf)
-          (switch-to-buffer "*LV*")
+          (switch-to-buffer " *LV*")
           (set-window-hscroll lv-wnd 0)
           (setq window-size-fixed t)
           (setq mode-line-format nil)
