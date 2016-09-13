@@ -127,7 +127,8 @@ Call the head: `first-error'."
               (call-interactively
                (function first-error)))
           ((quit error)
-           (message "%S" err)
+           (message
+            (error-message-string err))
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
          hydra-error/hint
@@ -162,7 +163,8 @@ Call the head: `next-error'."
               (call-interactively
                (function next-error)))
           ((quit error)
-           (message "%S" err)
+           (message
+            (error-message-string err))
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
          hydra-error/hint
@@ -197,7 +199,8 @@ Call the head: `previous-error'."
               (call-interactively
                (function previous-error)))
           ((quit error)
-           (message "%S" err)
+           (message
+            (error-message-string err))
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
          hydra-error/hint
@@ -514,7 +517,8 @@ Call the head: `next-line'."
               (call-interactively
                (function next-line)))
           ((quit error)
-           (message "%S" err)
+           (message
+            (error-message-string err))
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
          hydra-vi/hint
@@ -549,7 +553,8 @@ Call the head: `previous-line'."
               (call-interactively
                (function previous-line)))
           ((quit error)
-           (message "%S" err)
+           (message
+            (error-message-string err))
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
          hydra-vi/hint
@@ -691,7 +696,8 @@ Call the head: `(text-scale-set 0)'."
                (interactive)
                (text-scale-set 0))))
           ((quit error)
-           (message "%S" err)
+           (message
+            (error-message-string err))
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
          hydra-zoom/hint
@@ -836,7 +842,8 @@ Call the head: `(text-scale-set 0)'."
                (interactive)
                (text-scale-set 0))))
           ((quit error)
-           (message "%S" err)
+           (message
+            (error-message-string err))
            (unless hydra-lv (sit-for 0.8))))
         (hydra-show-hint
          hydra-zoom/hint

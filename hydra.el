@@ -775,7 +775,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                  `(condition-case err
                       ,(hydra--call-interactively cmd (cadr head))
                     ((quit error)
-                     (message "%S" err)
+                     (message (error-message-string err))
                      (unless hydra-lv
                        (sit-for 0.8)))))
               ,(if (and body-idle (eq (cadr head) 'body))
