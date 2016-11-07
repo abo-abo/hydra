@@ -478,8 +478,8 @@ Return DEFAULT if PROP is not in H."
 (defun hydra-key-doc-function-default (key key-width doc doc-width)
   "Doc"
   (cond
-   ((equal key " ") (format (format "%%-%ds" (+ 2 key-width doc-width)) doc))
-   (t (format (format "%%%ds %%%ds" key-width (- -1 doc-width)) key doc))))
+   ((equal key " ") (format (format "%%-%ds" (+ 3 key-width doc-width)) doc))
+   (t (format (format "%%%ds: %%%ds" key-width (- -1 doc-width)) key doc))))
 
 (defun hydra--to-string (x)
   (if (stringp x)
@@ -546,16 +546,16 @@ this function is designed for heads without a property :column
           (eval res)
         res))))
 
-(defun hydra--hint (body heads)
-  "Generate a hint for the echo area.
+ (defun hydra--hint (body heads)
+   "Generate a hint for the echo area.
 BODY, and HEADS are parameters to `defhydra'."
-  (let* ((sorted-heads (hydra--sort-heads (hydra--normalize-heads heads)))
-         (heads-w-col (cl-remove-if-not (lambda (heads) (hydra--head-property (nth 0 heads) :column)) sorted-heads))
-         (heads-wo-col (cl-remove-if (lambda (heads) (hydra--head-property (nth 0 heads) :column)) sorted-heads)))
-    (concat "\n"
-            (hydra--hint-from-matrix body (hydra--generate-matrix heads-w-col))
-            (cond (heads-wo-col "\n" (hydra--hint-heads-wocol body (car heads-wo-col)))
-                  (t "")))))
+   (let* ((sorted-heads (hydra--sort-heads (hydra--normalize-heads heads)))
+          (heads-w-col (cl-remove-if-not (lambda (heads) (hydra--head-property (nth 0 heads) :column)) sorted-heads))
+          (heads-wo-col (cl-remove-if (lambda (heads) (hydra--head-property (nth 0 heads) :column)) sorted-heads)))
+     (concat (when heads-w-col
+               (concat "\n" (hydra--hint-from-matrix body (hydra--generate-matrix heads-w-col))))
+             (when heads-wo-col
+               (hydra--hint-heads-wocol body (car heads-wo-col))))))
 
 (defvar hydra-fontify-head-function nil
   "Possible replacement for `hydra-fontify-head-default'.")
@@ -1030,7 +1030,7 @@ every heads-group have equal length by adding padding heads where applicable
                                       (length column-name)
                                       (mapcar (lambda (x) (length (hydra--to-string (nth 2 x)))) heads-group))
              for header-virtual-head = `(" " nil ,column-name :column ,column-name :exit t)
-             for separator-virtual-head = `(" " nil ,(make-string (+ 1 max-doc-len max-key-len) ?-) :column ,column-name :exit t)
+             for separator-virtual-head = `(" " nil ,(make-string (+ 2 max-doc-len max-key-len) ?-) :column ,column-name :exit t)
              for decorated-heads = (copy-tree (apply 'list header-virtual-head separator-virtual-head heads-group))
              collect (mapcar (lambda (it)
                                (hydra--head-set-property it :max-key-len max-key-len)
