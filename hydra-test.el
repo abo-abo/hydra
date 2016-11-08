@@ -1409,6 +1409,78 @@ t: info-to"
                    314 315 (face hydra-face-blue)
                    322 323 (face hydra-face-blue)))))
 
+;; checked:
+;; basic rendering
+;; column compatibility with ruby style and no colum specified
+;; column declared several time
+;; nil column 
+(ert-deftest hydra-column-1 ()
+  (should (equal (eval
+                  (cadr
+                   (nth 2
+                        (nth 3
+                             (macroexpand
+                              '(defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
+                                                                    :color pink
+                                                                    :post (deactivate-mark))
+                                 "
+  ^_k_^         ()()
+_h_   _l_       (O)(o)
+  ^_j_^         (  O )
+^^^^            (’’)(’’)
+^^^^        
+"
+                                 ("h" backward-char nil)
+                                 ("l" forward-char nil)
+                                 ("k" previous-line nil)
+                                 ("j" next-line nil)
+                                 ("Of" 5x5 "outside of table 1")
+                                 ("e" exchange-point-and-mark "exchange" :column "firstcol")
+                                 ("n" copy-rectangle-as-kill "new-copy")
+                                 ("d" delete-rectangle "delete")
+                                 ("r" (if (region-active-p)
+                                          (deactivate-mark)
+                                        (rectangle-mark-mode 1)) "reset" :column "secondcol")
+                                 ("y" yank-rectangle "yank")
+                                 ("u" undo "undo")
+                                 ("s" string-rectangle "string")
+                                 ("p" kill-rectangle "paste")
+                                 ("o" nil "ok" :column "firstcol")
+                                 ("Os" 5x5-bol "outside of table 2" :column nil)
+                                 ("Ot" 5x5-eol "outside of table 3")))))))
+
+#("  k         ()()
+h   l       (O)(o)
+  j         (  O )
+            (’’)(’’)
+        
+
+firstcol    | secondcol    
+----------- | ------------ 
+e: exchange | r: reset     
+n: new-copy | y: yank      
+d: delete   | u: undo      
+o: ok       | s: string    
+            | p: paste     
+[Of]: outside of table 1, [Os]: outside of table 2, [Ot]: outside of table 3."
+2 3 (face hydra-face-pink)
+17 18 (face hydra-face-pink)
+21 22 (face hydra-face-pink)
+38 39 (face hydra-face-pink)
+142 143 (face hydra-face-pink)
+156 157 (face hydra-face-pink)
+170 171 (face hydra-face-pink)
+184 185 (face hydra-face-pink)
+198 199 (face hydra-face-pink)
+212 213 (face hydra-face-pink)
+226 227 (face hydra-face-blue)
+240 241 (face hydra-face-pink)
+268 269 (face hydra-face-pink)
+283 285 (face hydra-face-pink)
+309 311 (face hydra-face-pink)
+335 337 (face hydra-face-pink)))))
+
+
 (provide 'hydra-test)
 
 ;;; hydra-test.el ends here
