@@ -224,6 +224,12 @@ When nil, you can specify your own at each location like this: _ 5a_."
   "Default `format'-style specifier for ?a?  syntax in docstrings."
   :type 'string)
 
+(defcustom hydra-look-for-remap nil
+  "When non-nil and when calling a head with a simple command, hydra will lookup
+for a potential remap command according to the current active keymap and call it
+instead if found"
+  :type 'boolean)
+
 (make-obsolete-variable
  'hydra-key-format-spec
  "Since the docstrings are aligned by hand anyway, this isn't very useful."
@@ -740,6 +746,16 @@ HEADS is a list of heads."
     heads ",\n")
    (format "The body can be accessed via `%S'." body-name)))
 
+(defun hydra--call-interactively-remap-maybe (cmd)
+  "`call-interactively' the given CMD or its remapped equivalent according to
+current active keymap if applicable and if `hydra-look-for-remap' is non nil"
+  (let ((remapped-cmd (if hydra-look-for-remap
+                          (command-remapping `,cmd)
+                        nil)))
+    (if remapped-cmd
+        (call-interactively `,remapped-cmd)
+      (call-interactively `,cmd))))
+
 (defun hydra--call-interactively (cmd name)
   "Generate a `call-interactively' statement for CMD.
 Set `this-command' to NAME."
@@ -747,8 +763,8 @@ Set `this-command' to NAME."
            (not (memq name '(nil body))))
       `(progn
          (setq this-command ',name)
-         (call-interactively #',cmd))
-    `(call-interactively #',cmd)))
+         (hydra--call-interactively-remap-maybe #',cmd))
+    `(hydra--call-interactively-remap-maybe #',cmd)))
 
 (defun hydra--make-defun (name body doc head
                           keymap body-pre body-before-exit

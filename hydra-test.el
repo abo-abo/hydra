@@ -124,7 +124,7 @@ Call the head: `first-error'."
             (progn
               (setq this-command
                     (quote first-error))
-              (call-interactively
+              (hydra--call-interactively-remap-maybe
                (function first-error)))
           ((quit error)
            (message
@@ -160,7 +160,7 @@ Call the head: `next-error'."
             (progn
               (setq this-command
                     (quote next-error))
-              (call-interactively
+              (hydra--call-interactively-remap-maybe
                (function next-error)))
           ((quit error)
            (message
@@ -196,7 +196,7 @@ Call the head: `previous-error'."
             (progn
               (setq this-command
                     (quote previous-error))
-              (call-interactively
+              (hydra--call-interactively-remap-maybe
                (function previous-error)))
           ((quit error)
            (message
@@ -340,7 +340,7 @@ Call the head: `toggle-truncate-lines'."
         (progn
           (setq this-command
                 (quote toggle-truncate-lines))
-          (call-interactively
+          (hydra--call-interactively-remap-maybe
            (function
             toggle-truncate-lines))))
       (defun hydra-toggle/auto-fill-mode-and-exit nil
@@ -362,7 +362,7 @@ Call the head: `auto-fill-mode'."
         (progn
           (setq this-command
                 (quote auto-fill-mode))
-          (call-interactively
+          (hydra--call-interactively-remap-maybe
            (function auto-fill-mode))))
       (defun hydra-toggle/abbrev-mode-and-exit nil
         "Create a hydra with no body and the heads:
@@ -383,7 +383,7 @@ Call the head: `abbrev-mode'."
         (progn
           (setq this-command
                 (quote abbrev-mode))
-          (call-interactively
+          (hydra--call-interactively-remap-maybe
            (function abbrev-mode))))
       (defun hydra-toggle/nil nil
         "Create a hydra with no body and the heads:
@@ -514,7 +514,7 @@ Call the head: `next-line'."
             (progn
               (setq this-command
                     (quote next-line))
-              (call-interactively
+              (hydra--call-interactively-remap-maybe
                (function next-line)))
           ((quit error)
            (message
@@ -550,7 +550,7 @@ Call the head: `previous-line'."
             (progn
               (setq this-command
                     (quote previous-line))
-              (call-interactively
+              (hydra--call-interactively-remap-maybe
                (function previous-line)))
           ((quit error)
            (message
@@ -690,7 +690,7 @@ Call the head: `(text-scale-set 0)'."
           (setq hydra-curr-body-fn
                 (quote hydra-zoom/body)))
         (condition-case err
-            (call-interactively
+            (hydra--call-interactively-remap-maybe
              (function
               (lambda nil
                (interactive)
@@ -723,7 +723,7 @@ Call the head: `(text-scale-set 0)'."
         (hydra-keyboard-quit)
         (setq hydra-curr-body-fn
               (quote hydra-zoom/body))
-        (call-interactively
+        (hydra--call-interactively-remap-maybe
          (function
           (lambda nil
            (interactive)
@@ -836,7 +836,7 @@ Call the head: `(text-scale-set 0)'."
           (setq hydra-curr-body-fn
                 (quote hydra-zoom/body)))
         (condition-case err
-            (call-interactively
+            (hydra--call-interactively-remap-maybe
              (function
               (lambda nil
                (interactive)
@@ -869,7 +869,7 @@ Call the head: `(text-scale-set 0)'."
         (hydra-keyboard-quit)
         (setq hydra-curr-body-fn
               (quote hydra-zoom/body))
-        (call-interactively
+        (hydra--call-interactively-remap-maybe
          (function
           (lambda nil
            (interactive)
@@ -1290,6 +1290,19 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
   ("1" find-file)
   ("q" nil))
 
+(defun remapable-print ()
+  (interactive)
+  (insert "remapable print was called"))
+(defun remaped-print ()
+  (interactive)
+  (insert "*remaped* print was called"))
+(define-key global-map (kbd "C-=") 'remapable-print)
+(define-key global-map [remap remapable-print] 'remaped-print)
+
+(defhydra hydra-simple-with-remap (global-map "C-c")
+  ("r" remapable-print)
+  ("q" nil))
+
 (defmacro hydra-with (in &rest body)
   `(let ((temp-buffer (generate-new-buffer " *temp*")))
      (save-window-excursion
@@ -1345,6 +1358,21 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
                                (execute-kbd-macro
                                 (kbd "C-c g 1 RET q")))
                    "|foo\nbar")))
+
+(ert-deftest hydra-remap-lookup-1 ()
+  "try calling a remapped command while option is disabled "
+  (setq hydra-look-for-remap nil)
+  (should (string= (hydra-with "|"
+                               (execute-kbd-macro
+                                (kbd "C-c rq")))
+                   "remapable print was called|")))
+(ert-deftest hydra-remap-lookup-2 ()
+  "try calling a remapped command while option is enabled"
+  (setq hydra-look-for-remap t)
+  (should (string= (hydra-with "|"
+                               (execute-kbd-macro
+                                (kbd "C-c rq")))
+                   "*remaped* print was called|")))
 
 (ert-deftest hydra-columns-1 ()
   (should (equal (eval
