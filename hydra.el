@@ -720,6 +720,13 @@ HEADS is a list of heads."
     heads ",\n")
    (format "The body can be accessed via `%S'." body-name)))
 
+(defun hydra--call-interactively-remap-maybe (cmd)
+  "`call-interactively'  the given CMD or its remapped equivalent according to current active keymap"
+  (let ((remapped-cmd (eval `(command-remapping #',cmd))))
+    (if remapped-cmd
+        (eval `(call-interactively #',remapped-cmd))
+      (eval `(call-interactively #',cmd)))))
+
 (defun hydra--call-interactively (cmd name)
   "Generate a `call-interactively' statement for CMD.
 Set `this-command' to NAME."
@@ -727,8 +734,8 @@ Set `this-command' to NAME."
            (not (memq name '(nil body))))
       `(progn
          (setq this-command ',name)
-         (call-interactively #',cmd))
-    `(call-interactively #',cmd)))
+         (hydra--call-interactively-remap-maybe #',cmd))
+    `(hydra--call-interactively-remap-maybe #',cmd)))
 
 (defun hydra--make-defun (name body doc head
                           keymap body-pre body-before-exit
