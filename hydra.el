@@ -722,10 +722,10 @@ HEADS is a list of heads."
 
 (defun hydra--call-interactively-remap-maybe (cmd)
   "`call-interactively'  the given CMD or its remapped equivalent according to current active keymap"
-  (let ((remapped-cmd (eval `(command-remapping #',cmd))))
+  (let ((remapped-cmd (command-remapping `,cmd)))
     (if remapped-cmd
-        (eval `(call-interactively #',remapped-cmd))
-      (eval `(call-interactively #',cmd)))))
+        (call-interactively `,remapped-cmd)
+      (call-interactively `,cmd))))
 
 (defun hydra--call-interactively (cmd name)
   "Generate a `call-interactively' statement for CMD.
