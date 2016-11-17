@@ -555,18 +555,17 @@ HEAD's binding is returned as a string with a colored face."
     (when (and (null (cadr head))
                (not head-exit))
       (hydra--complain "nil cmd can only be blue"))
-    (propertize (if (string= (car head) "%")
-                    "%%"
-                  (car head))
-                'face
-                (or (hydra--head-property head :face)
-                    (cl-case head-color
-                      (blue 'hydra-face-blue)
-                      (red 'hydra-face-red)
-                      (amaranth 'hydra-face-amaranth)
-                      (pink 'hydra-face-pink)
-                      (teal 'hydra-face-teal)
-                      (t (error "Unknown color for %S" head)))))))
+    (propertize
+     (replace-regexp-in-string "%" "%%" (car head))
+     'face
+     (or (hydra--head-property head :face)
+         (cl-case head-color
+           (blue 'hydra-face-blue)
+           (red 'hydra-face-red)
+           (amaranth 'hydra-face-amaranth)
+           (pink 'hydra-face-pink)
+           (teal 'hydra-face-teal)
+           (t (error "Unknown color for %S" head)))))))
 
 (defun hydra-fontify-head-greyscale (head _body)
   "Produce a pretty string from HEAD and BODY.
