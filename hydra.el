@@ -224,6 +224,12 @@ When nil, you can specify your own at each location like this: _ 5a_."
   "Default `format'-style specifier for ?a?  syntax in docstrings."
   :type 'string)
 
+(defcustom hydra-look-for-remap nil
+  "When non-nil and when calling a head with a simple command, hydra will lookup
+for a potential remap command according to the current active keymap and call it
+instead if found"
+  :type 'boolean)
+
 (make-obsolete-variable
  'hydra-key-format-spec
  "Since the docstrings are aligned by hand anyway, this isn't very useful."
@@ -721,8 +727,11 @@ HEADS is a list of heads."
    (format "The body can be accessed via `%S'." body-name)))
 
 (defun hydra--call-interactively-remap-maybe (cmd)
-  "`call-interactively'  the given CMD or its remapped equivalent according to current active keymap"
-  (let ((remapped-cmd (command-remapping `,cmd)))
+  "`call-interactively' the given CMD or its remapped equivalent according to
+current active keymap if applicable and if `hydra-look-for-remap' is non nil"
+  (let ((remapped-cmd (if hydra-look-for-remap
+                          (command-remapping `,cmd)
+                        nil)))
     (if remapped-cmd
         (call-interactively `,remapped-cmd)
       (call-interactively `,cmd))))
