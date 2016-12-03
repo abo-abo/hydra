@@ -579,9 +579,8 @@ HEAD's binding is returned as a string with a colored face."
            (when (and (null (cadr head))
                       (not head-exit))
              (hydra--complain "nil cmd can only be blue"))
-           (propertize (if (string= (car head) "%")
-                           "%%"
-                         (car head))
+    (propertize
+     (replace-regexp-in-string "%" "%%" (car head))
                        'face
                        (or (hydra--head-property head :face)
                            (cl-case head-color
