@@ -1441,7 +1441,7 @@ t: info-to"
 ;; basic rendering
 ;; column compatibility with ruby style and no colum specified
 ;; column declared several time
-;; nil column 
+;; nil column
 (ert-deftest hydra-column-1 ()
   (should (equal (eval
                   (cadr
@@ -1456,7 +1456,7 @@ t: info-to"
 _h_   _l_       (O)(o)
   ^_j_^         (  O )
 ^^^^            (’’)(’’)
-^^^^        
+^^^^
 "
                                  ("h" backward-char nil)
                                  ("l" forward-char nil)
@@ -1476,37 +1476,36 @@ _h_   _l_       (O)(o)
                                  ("o" nil "ok" :column "firstcol")
                                  ("Os" 5x5-bol "outside of table 2" :column nil)
                                  ("Ot" 5x5-eol "outside of table 3")))))))
-
-#("  k         ()()
+                 #("  k         ()()
 h   l       (O)(o)
   j         (  O )
             (’’)(’’)
-        
 
-firstcol    | secondcol    
------------ | ------------ 
-e: exchange | r: reset     
-n: new-copy | y: yank      
-d: delete   | u: undo      
-o: ok       | s: string    
-            | p: paste     
+
+firstcol    | secondcol
+----------- | ------------
+e: exchange | r: reset
+n: new-copy | y: yank
+d: delete   | u: undo
+o: ok       | s: string
+            | p: paste
 [Of]: outside of table 1, [Os]: outside of table 2, [Ot]: outside of table 3."
-2 3 (face hydra-face-pink)
-17 18 (face hydra-face-pink)
-21 22 (face hydra-face-pink)
-38 39 (face hydra-face-pink)
-142 143 (face hydra-face-pink)
-156 157 (face hydra-face-pink)
-170 171 (face hydra-face-pink)
-184 185 (face hydra-face-pink)
-198 199 (face hydra-face-pink)
-212 213 (face hydra-face-pink)
-226 227 (face hydra-face-blue)
-240 241 (face hydra-face-pink)
-268 269 (face hydra-face-pink)
-283 285 (face hydra-face-pink)
-309 311 (face hydra-face-pink)
-335 337 (face hydra-face-pink)))))
+                   2 3 (face hydra-face-pink)
+                   17 18 (face hydra-face-pink)
+                   21 22 (face hydra-face-pink)
+                   38 39 (face hydra-face-pink)
+                   129 130 (face hydra-face-pink)
+                   143 144 (face hydra-face-pink)
+                   152 153 (face hydra-face-pink)
+                   166 167 (face hydra-face-pink)
+                   174 175 (face hydra-face-pink)
+                   188 189 (face hydra-face-pink)
+                   196 197 (face hydra-face-blue)
+                   210 211 (face hydra-face-pink)
+                   234 235 (face hydra-face-pink)
+                   244 246 (face hydra-face-pink)
+                   270 272 (face hydra-face-pink)
+                   296 298 (face hydra-face-pink)))))
 
 
 (provide 'hydra-test)

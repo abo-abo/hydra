@@ -1053,25 +1053,26 @@ every heads-group have equal length by adding padding heads where applicable."
        finally return decorated-heads-matrix)))
 
 (defun hydra--hint-from-matrix (body heads-matrix)
-  "Generate a formated table-style docstring according to HEADS-MATRIX and BODY data and structure
+  "Generate a formated table-style docstring according to BODY and HEADS-MATRIX data and structure.
 HEADS-MATRIX is expected to be a list of heads with following features:
 Each heads must have the same length
 Each head must have a property max-key-len and max-doc-len."
   (when heads-matrix
     (cl-loop with first-heads-col = (nth 0 heads-matrix)
-       with last-row-index = (- (length first-heads-col) 1)
-       for row-index from 0 to last-row-index
-       for heads-in-row = (mapcar (lambda (heads) (nth row-index heads)) heads-matrix)
-       concat (concat
-               (mapconcat (lambda (head)
-                            (funcall hydra-key-doc-function
-                                     (hydra-fontify-head head body) ;; key
-                                     (hydra--head-property head :max-key-len)
-                                     (nth 2 head) ;; doc
-                                     (hydra--head-property head :max-doc-len)))
-                          heads-in-row "| ") "\n")
-       into matrix-image
-       finally return matrix-image)))
+             with last-row-index = (- (length first-heads-col) 1)
+             for row-index from 0 to last-row-index
+             for heads-in-row = (mapcar (lambda (heads) (nth row-index heads)) heads-matrix)
+             concat (concat
+                     (replace-regexp-in-string "\s+$" ""
+                                               (mapconcat (lambda (head)
+                                                            (funcall hydra-key-doc-function
+                                                                     (hydra-fontify-head head body) ;; key
+                                                                     (hydra--head-property head :max-key-len)
+                                                                     (nth 2 head) ;; doc
+                                                                     (hydra--head-property head :max-doc-len)))
+                                                          heads-in-row "| ")) "\n")
+             into matrix-image
+             finally return matrix-image)))
 ;; previous functions dealt with automatic docstring table generation from :column head property
 
 (defun hydra-idle-message (secs hint name)
