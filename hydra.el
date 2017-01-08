@@ -1155,6 +1155,7 @@ want to bind anything.  In that case, typically you will bind the
 generated NAME/body command.  This command is also the return
 result of `defhydra'."
   (declare (indent defun))
+  (setq heads (copy-tree heads))
   (cond ((stringp docstring))
         ((and (consp docstring)
               (memq (car docstring) '(hydra--table concat format)))
