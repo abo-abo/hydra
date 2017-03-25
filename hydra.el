@@ -225,9 +225,10 @@ When nil, you can specify your own at each location like this: _ 5a_."
   :type 'string)
 
 (defcustom hydra-look-for-remap nil
-  "When non-nil and when calling a head with a simple command, hydra will lookup
-for a potential remap command according to the current active keymap and call it
-instead if found"
+  "When non-nil, hydra binding behaves as keymap binding with [remap].
+When calling a head with a simple command, hydra will lookup for a potential
+remap command according to the current active keymap and call it instead if
+found"
   :type 'boolean)
 
 (make-obsolete-variable
@@ -415,11 +416,11 @@ Return DEFAULT if PROP is not in H."
   (hydra-plist-get-default (cl-cdddr h) prop default))
 
 (defun hydra--head-set-property (h prop value)
-  "set a property PROP to the value VALUE in the hydra head H"
+  "In hydra Head H, set a property PROP to the value VALUE."
   (cons (car h) (plist-put (cdr h) prop value)))
 
 (defun hydra--head-has-property (h prop)
-  "return non nil if heads H has the property PROP"
+  "Return non nil if heads H has the property PROP."
   (plist-member (cdr h) prop))
 
 (defun hydra--body-foreign-keys (body)
@@ -747,8 +748,8 @@ HEADS is a list of heads."
    (format "The body can be accessed via `%S'." body-name)))
 
 (defun hydra--call-interactively-remap-maybe (cmd)
-  "`call-interactively' the given CMD or its remapped equivalent according to
-current active keymap if applicable and if `hydra-look-for-remap' is non nil"
+  "`call-interactively' the given CMD or its remapped equivalent.
+Only when `hydra-look-for-remap' is non nil."
   (let ((remapped-cmd (if hydra-look-for-remap
                           (command-remapping `,cmd)
                         nil)))
@@ -1024,8 +1025,7 @@ Each head of NORMALIZED-HEADS must have a column property."
        finally return (append heads-all-columns (list heads-one-column)))))
 
 (defun hydra--pad-heads (heads-groups padding-head)
-  "Return a list of heads copied from HEADS-GROUPS where each heads group have the same length.
-This is achieved by adding PADDING-HEAD were needed."
+  "Return a copy of HEADS-GROUPS padded where applicable with PADDING-HEAD."
   (cl-loop for heads-group in heads-groups
      for this-head-group-length = (length heads-group)
      with head-group-max-length = (apply #'max (mapcar (lambda (heads) (length heads)) heads-groups))
@@ -1036,29 +1036,31 @@ This is achieved by adding PADDING-HEAD were needed."
      finally return balanced-heads-groups))
 
 (defun hydra--generate-matrix (heads-groups)
-  "Return a copy of HEADS-GROUPS with following differences:
-2 virtual heads acting as table header were added to each heads-group
-each head is decorated with 2 new properties max-doc-len and max-key-len representing the maximum dimension of their owning group
-every heads-group have equal length by adding padding heads where applicable."
+  "Return a copy of HEADS-GROUPS decorated with table formating information.
+Details of modification:
+2 virtual heads acting as table header were added to each heads-group.
+Each head is decorated with 2 new properties max-doc-len and max-key-len
+representing the maximum dimension of their owning group.
+ Every heads-group have equal length by adding padding heads where applicable."
   (when heads-groups
     (cl-loop for heads-group in (hydra--pad-heads heads-groups '(" " nil " " :exit t))
-       for column-name = (hydra--head-property (nth 0 heads-group) :column)
-       for max-key-len = (apply #'max (mapcar (lambda (x) (length (car x))) heads-group))
-       for max-doc-len = (apply #'max
-                                (length column-name)
-                                (mapcar (lambda (x) (length (hydra--to-string (nth 2 x)))) heads-group))
-       for header-virtual-head = `(" " nil ,column-name :column ,column-name :exit t)
-       for separator-virtual-head = `(" " nil ,(make-string (+ 2 max-doc-len max-key-len) ?-) :column ,column-name :exit t)
-       for decorated-heads = (copy-tree (apply 'list header-virtual-head separator-virtual-head heads-group))
-       collect (mapcar (lambda (it)
-                         (hydra--head-set-property it :max-key-len max-key-len)
-                         (hydra--head-set-property it :max-doc-len max-doc-len))
-                       decorated-heads)
-       into decorated-heads-matrix
-       finally return decorated-heads-matrix)))
+             for column-name = (hydra--head-property (nth 0 heads-group) :column)
+             for max-key-len = (apply #'max (mapcar (lambda (x) (length (car x))) heads-group))
+             for max-doc-len = (apply #'max
+                                      (length column-name)
+                                      (mapcar (lambda (x) (length (hydra--to-string (nth 2 x)))) heads-group))
+             for header-virtual-head = `(" " nil ,column-name :column ,column-name :exit t)
+             for separator-virtual-head = `(" " nil ,(make-string (+ 2 max-doc-len max-key-len) ?-) :column ,column-name :exit t)
+             for decorated-heads = (copy-tree (apply 'list header-virtual-head separator-virtual-head heads-group))
+             collect (mapcar (lambda (it)
+                               (hydra--head-set-property it :max-key-len max-key-len)
+                               (hydra--head-set-property it :max-doc-len max-doc-len))
+                             decorated-heads)
+             into decorated-heads-matrix
+             finally return decorated-heads-matrix)))
 
 (defun hydra--hint-from-matrix (body heads-matrix)
-  "Generate a formated table-style docstring according to BODY and HEADS-MATRIX data and structure.
+  "Generate a formated table-style docstring according to BODY and HEADS-MATRIX.
 HEADS-MATRIX is expected to be a list of heads with following features:
 Each heads must have the same length
 Each head must have a property max-key-len and max-doc-len."
