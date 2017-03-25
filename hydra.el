@@ -1002,12 +1002,17 @@ was defined."
             heads)))
 
 (defun hydra--sort-heads (normalized-heads)
-  "Return a list of heads with non-nil doc sorted by ascending column property
-each head of NORMALIZED-HEADS must have a column property"
+  "Return a list of heads with non-nil doc grouped by column property.
+Each head of NORMALIZED-HEADS must have a column property."
   (let* ((heads-wo-nil-doc (cl-remove-if-not (lambda (head) (nth 2 head)) normalized-heads))
+         (columns-list (delete-dups (mapcar (lambda (head) (hydra--head-property head :column))
+                                            normalized-heads)))
+         (get-col-index-fun (lambda (head) (cl-position (hydra--head-property head :column)
+                                                        columns-list
+                                                        :test 'equal)))
          (heads-sorted (cl-sort heads-wo-nil-doc (lambda (it other)
-                                                   (string< (hydra--head-property it :column)
-                                                            (hydra--head-property other :column))))))
+                                                   (< (funcall get-col-index-fun it)
+                                                      (funcall get-col-index-fun other))))))
     ;; this operation partition the sorted head list into lists of heads with same column property
     (cl-loop for head in heads-sorted
        for column-name = (hydra--head-property head :column)

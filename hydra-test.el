@@ -1442,7 +1442,7 @@ t: info-to"
 ;; column compatibility with ruby style and no colum specified
 ;; column declared several time
 ;; nil column
-(ert-deftest hydra-column-1 ()
+(ert-deftest hydra-column-basic ()
   (should (equal (eval
                   (cadr
                    (nth 2
@@ -1507,6 +1507,54 @@ o: ok       | s: string
                    270 272 (face hydra-face-pink)
                    296 298 (face hydra-face-pink)))))
 
+;; check column order is the same as they appear in defhydra
+(ert-deftest hydra-column-order ()
+  (should (equal (eval
+                  (cadr
+                   (nth 2
+                        (nth 3
+                             (macroexpand
+                              '(defhydra hydra-window-order
+                                 (:color red :hint nil :timeout 4)
+                                 ("z" ace-window "ace" :color blue :column "Switch")
+                                 ("h" windmove-left "← window")
+                                 ("j" windmove-down "↓ window")
+                                 ("l" windmove-right "→ window")
+                                 ("s" split-window-below "split window" :color blue :column "Split Management")
+                                 ("v" split-window-right "split window vertically" :color blue)
+                                 ("d" delete-window "delete current window")
+                                 ("f" follow-mode "toogle follow mode")
+                                 ("u" winner-undo "undo window conf" :column "Undo/Redo")
+                                 ("r" winner-redo "redo window conf")
+                                 ("b" balance-windows "balance window height" :column "1-Sizing")
+                                 ("m" maximize-window "maximize current window")
+                                 ("k" windmove-up "↑ window" :column "Switch")
+                                 ("M" minimize-window "maximize current window" :column "1-Sizing")
+                                 ("q" nil "quit menu" :color blue :column nil)))))))
+                 #("hydra:
+Switch      | Split Management           | Undo/Redo           | 1-Sizing
+----------- | -------------------------- | ------------------- | --------------------------
+z: ace      | s: split window            | u: undo window conf | b: balance window height
+h: ← window | v: split window vertically | r: redo window conf | m: maximize current window
+j: ↓ window | d: delete current window   |                     | M: maximize current window
+l: → window | f: toogle follow mode      |                     |
+k: ↑ window |                            |                     |
+[q]: quit menu."
+                   173 174 (face hydra-face-blue)
+                   187 188 (face hydra-face-blue)
+                   216 217 (face hydra-face-red)
+                   238 239 (face hydra-face-red)
+                   263 264 (face hydra-face-red)
+                   277 278 (face hydra-face-blue)
+                   306 307 (face hydra-face-red)
+                   328 329 (face hydra-face-red)
+                   355 356 (face hydra-face-red)
+                   369 370 (face hydra-face-red)
+                   420 421 (face hydra-face-red)
+                   447 448 (face hydra-face-red)
+                   461 462 (face hydra-face-red)
+                   512 513 (face hydra-face-red)
+                   578 579 (face hydra-face-blue)))))
 
 (provide 'hydra-test)
 
