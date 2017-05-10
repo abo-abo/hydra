@@ -31,80 +31,123 @@
 
 (ert-deftest hydra-red-error ()
   (should
-   (equal
-    (macroexpand
-     '(defhydra hydra-error (global-map "M-g")
-       "error"
-       ("h" first-error "first")
-       ("j" next-error "next")
-       ("k" previous-error "prev")
-       ("SPC" hydra-repeat "rep" :bind nil)))
-    '(progn
-      (set
-       (defvar hydra-error/keymap nil
-         "Keymap for hydra-error.")
-       (quote
-        (keymap
-         (32 . hydra-repeat)
-         (107 . hydra-error/previous-error)
-         (106 . hydra-error/next-error)
-         (104 . hydra-error/first-error)
-         (kp-subtract . hydra--negative-argument)
-         (kp-9 . hydra--digit-argument)
-         (kp-8 . hydra--digit-argument)
-         (kp-7 . hydra--digit-argument)
-         (kp-6 . hydra--digit-argument)
-         (kp-5 . hydra--digit-argument)
-         (kp-4 . hydra--digit-argument)
-         (kp-3 . hydra--digit-argument)
-         (kp-2 . hydra--digit-argument)
-         (kp-1 . hydra--digit-argument)
-         (kp-0 . hydra--digit-argument)
-         (57 . hydra--digit-argument)
-         (56 . hydra--digit-argument)
-         (55 . hydra--digit-argument)
-         (54 . hydra--digit-argument)
-         (53 . hydra--digit-argument)
-         (52 . hydra--digit-argument)
-         (51 . hydra--digit-argument)
-         (50 . hydra--digit-argument)
-         (49 . hydra--digit-argument)
-         (48 . hydra--digit-argument)
-         (45 . hydra--negative-argument)
-         (21 . hydra--universal-argument))))
-      (set
-       (defvar hydra-error/heads nil
-         "Heads for hydra-error.")
-       (quote
-        (("h"
-          first-error
-          "first"
-          :exit nil)
-         ("j"
-          next-error
-          "next"
-          :exit nil)
-         ("k"
-          previous-error
-          "prev"
-          :exit nil)
-         ("SPC"
-          hydra-repeat
-          "rep"
-          :bind nil
-          :exit nil))))
-      (set
-       (defvar hydra-error/hint nil
-         "Dynamic hint for hydra-error.")
-       (quote
-        (format
-         #("error: [h]: first, [j]: next, [k]: prev, [SPC]: rep."
-           8 9 (face hydra-face-red)
-           20 21 (face hydra-face-red)
-           31 32 (face hydra-face-red)
-           42 45 (face hydra-face-red)))))
-      (defun hydra-error/first-error nil
-        "Create a hydra with a \"M-g\" body and the heads:
+    (equal
+      (macroexpand
+        '(defhydra hydra-error (global-map "M-g")
+           "error"
+           ("h" first-error "first")
+           ("j" next-error "next")
+           ("k" previous-error "prev")
+           ("SPC" hydra-repeat "rep" :bind nil)))
+      '(progn
+         (set
+           (defvar hydra-error/keymap nil
+             "Keymap for hydra-error.")
+           (quote
+             (keymap
+               (32 . hydra-repeat)
+               (107 . hydra-error/previous-error)
+               (106 . hydra-error/next-error)
+               (104 . hydra-error/first-error)
+               (kp-subtract . hydra--negative-argument)
+               (kp-9 . hydra--digit-argument)
+               (kp-8 . hydra--digit-argument)
+               (kp-7 . hydra--digit-argument)
+               (kp-6 . hydra--digit-argument)
+               (kp-5 . hydra--digit-argument)
+               (kp-4 . hydra--digit-argument)
+               (kp-3 . hydra--digit-argument)
+               (kp-2 . hydra--digit-argument)
+               (kp-1 . hydra--digit-argument)
+               (kp-0 . hydra--digit-argument)
+               (57 . hydra--digit-argument)
+               (56 . hydra--digit-argument)
+               (55 . hydra--digit-argument)
+               (54 . hydra--digit-argument)
+               (53 . hydra--digit-argument)
+               (52 . hydra--digit-argument)
+               (51 . hydra--digit-argument)
+               (50 . hydra--digit-argument)
+               (49 . hydra--digit-argument)
+               (48 . hydra--digit-argument)
+               (45 . hydra--negative-argument)
+               (21 . hydra--universal-argument))))
+         (set
+           (defvar hydra-error/heads nil
+             "Heads for hydra-error.")
+           (quote
+             (("h"
+                first-error
+                "first"
+                :exit nil)
+               ("j"
+                 next-error
+                 "next"
+                 :exit nil)
+               ("k"
+                 previous-error
+                 "prev"
+                 :exit nil)
+               ("SPC"
+                 hydra-repeat
+                 "rep"
+                 :bind nil
+                 :exit nil))))
+         (set
+           (defvar hydra-error/hint nil
+             "Dynamic hint for hydra-error.")
+           (quote
+             (let ((format-statement (format
+                                       #("error: [h]: first, [j]: next, [k]: prev, [SPC]: rep."
+                                          8 9 (face hydra-face-red)
+                                          20 21 (face hydra-face-red)
+                                          31 32 (face hydra-face-red)
+                                          42 45 (face hydra-face-red)))))
+               (let ((result (eval format-statement)))
+                 (cl-loop
+                   for
+                   i
+                   = (next-single-property-change
+                       i
+                       (quote face)
+                       result)
+                   with
+                   i
+                   = 0
+                   with
+                   last
+                   = 0
+                   while i
+                   if (get-char-property
+                        i
+                        (quote face)
+                        result)
+                   do
+                   (add-text-properties
+                     last
+                     i
+                     (quote
+                       (face hydra-default-face))
+                     result)
+                   do
+                   (setq last i)
+                   finally
+                   do
+                   (unless (get-char-property
+                             last
+                             (quote face)
+                             result)
+                     (add-text-properties
+                       last
+                       (length result)
+                       (quote
+                         (face hydra-default-face))
+                       result))
+                   finally
+                   return
+                   result)))))
+         (defun hydra-error/first-error nil
+           "Create a hydra with a \"M-g\" body and the heads:
 
 \"h\":    `first-error',
 \"j\":    `next-error',
@@ -114,33 +157,33 @@
 The body can be accessed via `hydra-error/body'.
 
 Call the head: `first-error'."
-        (interactive)
-        (hydra-default-pre)
-        (let ((hydra--ignore t))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-error/body)))
-        (condition-case err
-            (progn
-              (setq this-command
-                    (quote first-error))
-              (hydra--call-interactively-remap-maybe
-               (function first-error)))
-          ((quit error)
-           (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
-        (hydra-show-hint
-         hydra-error/hint
-         (quote hydra-error))
-        (hydra-set-transient-map
-         hydra-error/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           nil)
-         nil))
-      (defun hydra-error/next-error nil
-        "Create a hydra with a \"M-g\" body and the heads:
+           (interactive)
+           (hydra-default-pre)
+           (let ((hydra--ignore t))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-error/body)))
+           (condition-case err
+             (progn
+               (setq this-command
+                 (quote first-error))
+               (hydra--call-interactively-remap-maybe
+                 (function first-error)))
+             ((quit error)
+               (message
+                 (error-message-string err))
+               (unless hydra-lv (sit-for 0.8))))
+           (hydra-show-hint
+             hydra-error/hint
+             (quote hydra-error))
+           (hydra-set-transient-map
+             hydra-error/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               nil)
+             nil))
+         (defun hydra-error/next-error nil
+           "Create a hydra with a \"M-g\" body and the heads:
 
 \"h\":    `first-error',
 \"j\":    `next-error',
@@ -150,33 +193,33 @@ Call the head: `first-error'."
 The body can be accessed via `hydra-error/body'.
 
 Call the head: `next-error'."
-        (interactive)
-        (hydra-default-pre)
-        (let ((hydra--ignore t))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-error/body)))
-        (condition-case err
-            (progn
-              (setq this-command
-                    (quote next-error))
-              (hydra--call-interactively-remap-maybe
-               (function next-error)))
-          ((quit error)
-           (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
-        (hydra-show-hint
-         hydra-error/hint
-         (quote hydra-error))
-        (hydra-set-transient-map
-         hydra-error/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           nil)
-         nil))
-      (defun hydra-error/previous-error nil
-        "Create a hydra with a \"M-g\" body and the heads:
+           (interactive)
+           (hydra-default-pre)
+           (let ((hydra--ignore t))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-error/body)))
+           (condition-case err
+             (progn
+               (setq this-command
+                 (quote next-error))
+               (hydra--call-interactively-remap-maybe
+                 (function next-error)))
+             ((quit error)
+               (message
+                 (error-message-string err))
+               (unless hydra-lv (sit-for 0.8))))
+           (hydra-show-hint
+             hydra-error/hint
+             (quote hydra-error))
+           (hydra-set-transient-map
+             hydra-error/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               nil)
+             nil))
+         (defun hydra-error/previous-error nil
+           "Create a hydra with a \"M-g\" body and the heads:
 
 \"h\":    `first-error',
 \"j\":    `next-error',
@@ -186,46 +229,46 @@ Call the head: `next-error'."
 The body can be accessed via `hydra-error/body'.
 
 Call the head: `previous-error'."
-        (interactive)
-        (hydra-default-pre)
-        (let ((hydra--ignore t))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-error/body)))
-        (condition-case err
-            (progn
-              (setq this-command
-                    (quote previous-error))
-              (hydra--call-interactively-remap-maybe
-               (function previous-error)))
-          ((quit error)
-           (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
-        (hydra-show-hint
-         hydra-error/hint
-         (quote hydra-error))
-        (hydra-set-transient-map
-         hydra-error/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           nil)
-         nil))
-      (unless (keymapp
-               (lookup-key
-                global-map
-                (kbd "M-g")))
-        (define-key global-map (kbd "M-g")
-          nil))
-      (define-key global-map [134217831 104]
-       (quote hydra-error/first-error))
-      (define-key global-map [134217831 106]
-       (quote hydra-error/next-error))
-      (define-key global-map [134217831 107]
-       (quote
-        hydra-error/previous-error))
-      (defun hydra-error/body nil
-        "Create a hydra with a \"M-g\" body and the heads:
+           (interactive)
+           (hydra-default-pre)
+           (let ((hydra--ignore t))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-error/body)))
+           (condition-case err
+             (progn
+               (setq this-command
+                 (quote previous-error))
+               (hydra--call-interactively-remap-maybe
+                 (function previous-error)))
+             ((quit error)
+               (message
+                 (error-message-string err))
+               (unless hydra-lv (sit-for 0.8))))
+           (hydra-show-hint
+             hydra-error/hint
+             (quote hydra-error))
+           (hydra-set-transient-map
+             hydra-error/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               nil)
+             nil))
+         (unless (keymapp
+                   (lookup-key
+                     global-map
+                     (kbd "M-g")))
+           (define-key global-map (kbd "M-g")
+             nil))
+         (define-key global-map [134217831 104]
+           (quote hydra-error/first-error))
+         (define-key global-map [134217831 106]
+           (quote hydra-error/next-error))
+         (define-key global-map [134217831 107]
+           (quote
+             hydra-error/previous-error))
+         (defun hydra-error/body nil
+           "Create a hydra with a \"M-g\" body and the heads:
 
 \"h\":    `first-error',
 \"j\":    `next-error',
@@ -233,96 +276,139 @@ Call the head: `previous-error'."
 \"SPC\":    `hydra-repeat'
 
 The body can be accessed via `hydra-error/body'."
-        (interactive)
-        (hydra-default-pre)
-        (let ((hydra--ignore nil))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-error/body)))
-        (hydra-show-hint
-         hydra-error/hint
-         (quote hydra-error))
-        (hydra-set-transient-map
-         hydra-error/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           nil)
-         nil)
-        (setq prefix-arg
-              current-prefix-arg))))))
+           (interactive)
+           (hydra-default-pre)
+           (let ((hydra--ignore nil))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-error/body)))
+           (hydra-show-hint
+             hydra-error/hint
+             (quote hydra-error))
+           (hydra-set-transient-map
+             hydra-error/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               nil)
+             nil)
+           (setq prefix-arg
+             current-prefix-arg))))))
 
 (ert-deftest hydra-blue-toggle ()
   (should
-   (equal
-    (macroexpand
-     '(defhydra hydra-toggle (:color blue)
-       "toggle"
-       ("t" toggle-truncate-lines "truncate")
-       ("f" auto-fill-mode "fill")
-       ("a" abbrev-mode "abbrev")
-       ("q" nil "cancel")))
-    '(progn
-      (set
-       (defvar hydra-toggle/keymap nil
-         "Keymap for hydra-toggle.")
-       (quote
-        (keymap
-         (113 . hydra-toggle/nil)
-         (97 . hydra-toggle/abbrev-mode-and-exit)
-         (102 . hydra-toggle/auto-fill-mode-and-exit)
-         (116 . hydra-toggle/toggle-truncate-lines-and-exit)
-         (kp-subtract . hydra--negative-argument)
-         (kp-9 . hydra--digit-argument)
-         (kp-8 . hydra--digit-argument)
-         (kp-7 . hydra--digit-argument)
-         (kp-6 . hydra--digit-argument)
-         (kp-5 . hydra--digit-argument)
-         (kp-4 . hydra--digit-argument)
-         (kp-3 . hydra--digit-argument)
-         (kp-2 . hydra--digit-argument)
-         (kp-1 . hydra--digit-argument)
-         (kp-0 . hydra--digit-argument)
-         (57 . hydra--digit-argument)
-         (56 . hydra--digit-argument)
-         (55 . hydra--digit-argument)
-         (54 . hydra--digit-argument)
-         (53 . hydra--digit-argument)
-         (52 . hydra--digit-argument)
-         (51 . hydra--digit-argument)
-         (50 . hydra--digit-argument)
-         (49 . hydra--digit-argument)
-         (48 . hydra--digit-argument)
-         (45 . hydra--negative-argument)
-         (21 . hydra--universal-argument))))
-      (set
-       (defvar hydra-toggle/heads nil
-         "Heads for hydra-toggle.")
-       (quote
-        (("t"
-          toggle-truncate-lines
-          "truncate"
-          :exit t)
-         ("f"
-          auto-fill-mode
-          "fill"
-          :exit t)
-         ("a"
-          abbrev-mode
-          "abbrev"
-          :exit t)
-         ("q" nil "cancel" :exit t))))
-      (set
-       (defvar hydra-toggle/hint nil
-         "Dynamic hint for hydra-toggle.")
-       (quote
-        (format
-         #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel."
-           9 10 (face hydra-face-blue)
-           24 25 (face hydra-face-blue)
-           35 36 (face hydra-face-blue)
-           48 49 (face hydra-face-blue)))))
-      (defun hydra-toggle/toggle-truncate-lines-and-exit nil
-        "Create a hydra with no body and the heads:
+    (equal
+      (macroexpand
+        '(defhydra hydra-toggle (:color blue)
+           "toggle"
+           ("t" toggle-truncate-lines "truncate")
+           ("f" auto-fill-mode "fill")
+           ("a" abbrev-mode "abbrev")
+           ("q" nil "cancel")))
+      '(progn
+         (set
+           (defvar hydra-toggle/keymap nil
+             "Keymap for hydra-toggle.")
+           (quote
+             (keymap
+               (113 . hydra-toggle/nil)
+               (97 . hydra-toggle/abbrev-mode-and-exit)
+               (102 . hydra-toggle/auto-fill-mode-and-exit)
+               (116 . hydra-toggle/toggle-truncate-lines-and-exit)
+               (kp-subtract . hydra--negative-argument)
+               (kp-9 . hydra--digit-argument)
+               (kp-8 . hydra--digit-argument)
+               (kp-7 . hydra--digit-argument)
+               (kp-6 . hydra--digit-argument)
+               (kp-5 . hydra--digit-argument)
+               (kp-4 . hydra--digit-argument)
+               (kp-3 . hydra--digit-argument)
+               (kp-2 . hydra--digit-argument)
+               (kp-1 . hydra--digit-argument)
+               (kp-0 . hydra--digit-argument)
+               (57 . hydra--digit-argument)
+               (56 . hydra--digit-argument)
+               (55 . hydra--digit-argument)
+               (54 . hydra--digit-argument)
+               (53 . hydra--digit-argument)
+               (52 . hydra--digit-argument)
+               (51 . hydra--digit-argument)
+               (50 . hydra--digit-argument)
+               (49 . hydra--digit-argument)
+               (48 . hydra--digit-argument)
+               (45 . hydra--negative-argument)
+               (21 . hydra--universal-argument))))
+         (set
+           (defvar hydra-toggle/heads nil
+             "Heads for hydra-toggle.")
+           (quote
+             (("t"
+                toggle-truncate-lines
+                "truncate"
+                :exit t)
+               ("f"
+                 auto-fill-mode
+                 "fill"
+                 :exit t)
+               ("a"
+                 abbrev-mode
+                 "abbrev"
+                 :exit t)
+               ("q" nil "cancel" :exit t))))
+         (set
+           (defvar hydra-toggle/hint nil
+             "Dynamic hint for hydra-toggle.")
+           (quote
+             (let ((format-statement (format
+                                       #("toggle: [t]: truncate, [f]: fill, [a]: abbrev, [q]: cancel."
+                                          9 10 (face hydra-face-blue)
+                                          24 25 (face hydra-face-blue)
+                                          35 36 (face hydra-face-blue)
+                                          48 49 (face hydra-face-blue)))))
+               (let ((result (eval format-statement)))
+                 (cl-loop
+                   for
+                   i
+                   = (next-single-property-change
+                       i
+                       (quote face)
+                       result)
+                   with
+                   i
+                   = 0
+                   with
+                   last
+                   = 0
+                   while i
+                   if (get-char-property
+                        i
+                        (quote face)
+                        result)
+                   do
+                   (add-text-properties
+                     last
+                     i
+                     (quote
+                       (face hydra-default-face))
+                     result)
+                   do
+                   (setq last i)
+                   finally
+                   do
+                   (unless (get-char-property
+                             last
+                             (quote face)
+                             result)
+                     (add-text-properties
+                       last
+                       (length result)
+                       (quote
+                         (face hydra-default-face))
+                       result))
+                   finally
+                   return
+                   result)))))
+         (defun hydra-toggle/toggle-truncate-lines-and-exit nil
+           "Create a hydra with no body and the heads:
 
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
@@ -332,19 +418,19 @@ The body can be accessed via `hydra-error/body'."
 The body can be accessed via `hydra-toggle/body'.
 
 Call the head: `toggle-truncate-lines'."
-        (interactive)
-        (hydra-default-pre)
-        (hydra-keyboard-quit)
-        (setq hydra-curr-body-fn
-              (quote hydra-toggle/body))
-        (progn
-          (setq this-command
-                (quote toggle-truncate-lines))
-          (hydra--call-interactively-remap-maybe
-           (function
-            toggle-truncate-lines))))
-      (defun hydra-toggle/auto-fill-mode-and-exit nil
-        "Create a hydra with no body and the heads:
+           (interactive)
+           (hydra-default-pre)
+           (hydra-keyboard-quit)
+           (setq hydra-curr-body-fn
+             (quote hydra-toggle/body))
+           (progn
+             (setq this-command
+               (quote toggle-truncate-lines))
+             (hydra--call-interactively-remap-maybe
+               (function
+                 toggle-truncate-lines))))
+         (defun hydra-toggle/auto-fill-mode-and-exit nil
+           "Create a hydra with no body and the heads:
 
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
@@ -354,18 +440,18 @@ Call the head: `toggle-truncate-lines'."
 The body can be accessed via `hydra-toggle/body'.
 
 Call the head: `auto-fill-mode'."
-        (interactive)
-        (hydra-default-pre)
-        (hydra-keyboard-quit)
-        (setq hydra-curr-body-fn
-              (quote hydra-toggle/body))
-        (progn
-          (setq this-command
-                (quote auto-fill-mode))
-          (hydra--call-interactively-remap-maybe
-           (function auto-fill-mode))))
-      (defun hydra-toggle/abbrev-mode-and-exit nil
-        "Create a hydra with no body and the heads:
+           (interactive)
+           (hydra-default-pre)
+           (hydra-keyboard-quit)
+           (setq hydra-curr-body-fn
+             (quote hydra-toggle/body))
+           (progn
+             (setq this-command
+               (quote auto-fill-mode))
+             (hydra--call-interactively-remap-maybe
+               (function auto-fill-mode))))
+         (defun hydra-toggle/abbrev-mode-and-exit nil
+           "Create a hydra with no body and the heads:
 
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
@@ -375,18 +461,18 @@ Call the head: `auto-fill-mode'."
 The body can be accessed via `hydra-toggle/body'.
 
 Call the head: `abbrev-mode'."
-        (interactive)
-        (hydra-default-pre)
-        (hydra-keyboard-quit)
-        (setq hydra-curr-body-fn
-              (quote hydra-toggle/body))
-        (progn
-          (setq this-command
-                (quote abbrev-mode))
-          (hydra--call-interactively-remap-maybe
-           (function abbrev-mode))))
-      (defun hydra-toggle/nil nil
-        "Create a hydra with no body and the heads:
+           (interactive)
+           (hydra-default-pre)
+           (hydra-keyboard-quit)
+           (setq hydra-curr-body-fn
+             (quote hydra-toggle/body))
+           (progn
+             (setq this-command
+               (quote abbrev-mode))
+             (hydra--call-interactively-remap-maybe
+               (function abbrev-mode))))
+         (defun hydra-toggle/nil nil
+           "Create a hydra with no body and the heads:
 
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
@@ -396,13 +482,13 @@ Call the head: `abbrev-mode'."
 The body can be accessed via `hydra-toggle/body'.
 
 Call the head: `nil'."
-        (interactive)
-        (hydra-default-pre)
-        (hydra-keyboard-quit)
-        (setq hydra-curr-body-fn
-              (quote hydra-toggle/body)))
-      (defun hydra-toggle/body nil
-        "Create a hydra with no body and the heads:
+           (interactive)
+           (hydra-default-pre)
+           (hydra-keyboard-quit)
+           (setq hydra-curr-body-fn
+             (quote hydra-toggle/body)))
+         (defun hydra-toggle/body nil
+           "Create a hydra with no body and the heads:
 
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
@@ -410,91 +496,134 @@ Call the head: `nil'."
 \"q\":    `nil'
 
 The body can be accessed via `hydra-toggle/body'."
-        (interactive)
-        (hydra-default-pre)
-        (let ((hydra--ignore nil))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-toggle/body)))
-        (hydra-show-hint
-         hydra-toggle/hint
-         (quote hydra-toggle))
-        (hydra-set-transient-map
-         hydra-toggle/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           nil)
-         nil)
-        (setq prefix-arg
-              current-prefix-arg))))))
+           (interactive)
+           (hydra-default-pre)
+           (let ((hydra--ignore nil))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-toggle/body)))
+           (hydra-show-hint
+             hydra-toggle/hint
+             (quote hydra-toggle))
+           (hydra-set-transient-map
+             hydra-toggle/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               nil)
+             nil)
+           (setq prefix-arg
+             current-prefix-arg))))))
 
 (ert-deftest hydra-amaranth-vi ()
   (should
-   (equal
-    (macroexpand
-     '(defhydra hydra-vi
-       (:pre
-        (set-cursor-color "#e52b50")
-        :post
-        (set-cursor-color "#ffffff")
-        :color amaranth)
-       "vi"
-       ("j" next-line)
-       ("k" previous-line)
-       ("q" nil "quit")))
-    '(progn
-      (set
-       (defvar hydra-vi/keymap nil
-         "Keymap for hydra-vi.")
-       (quote
-        (keymap
-         (113 . hydra-vi/nil)
-         (107 . hydra-vi/previous-line)
-         (106 . hydra-vi/next-line)
-         (kp-subtract . hydra--negative-argument)
-         (kp-9 . hydra--digit-argument)
-         (kp-8 . hydra--digit-argument)
-         (kp-7 . hydra--digit-argument)
-         (kp-6 . hydra--digit-argument)
-         (kp-5 . hydra--digit-argument)
-         (kp-4 . hydra--digit-argument)
-         (kp-3 . hydra--digit-argument)
-         (kp-2 . hydra--digit-argument)
-         (kp-1 . hydra--digit-argument)
-         (kp-0 . hydra--digit-argument)
-         (57 . hydra--digit-argument)
-         (56 . hydra--digit-argument)
-         (55 . hydra--digit-argument)
-         (54 . hydra--digit-argument)
-         (53 . hydra--digit-argument)
-         (52 . hydra--digit-argument)
-         (51 . hydra--digit-argument)
-         (50 . hydra--digit-argument)
-         (49 . hydra--digit-argument)
-         (48 . hydra--digit-argument)
-         (45 . hydra--negative-argument)
-         (21 . hydra--universal-argument))))
-      (set
-       (defvar hydra-vi/heads nil
-         "Heads for hydra-vi.")
-       (quote
-        (("j" next-line "" :exit nil)
-         ("k"
-          previous-line
-          ""
-          :exit nil)
-         ("q" nil "quit" :exit t))))
-      (set
-       (defvar hydra-vi/hint nil
-         "Dynamic hint for hydra-vi.")
-       (quote
-        (format
-         #("vi: j, k, [q]: quit."
-           4 5 (face hydra-face-amaranth)
-           7 8 (face hydra-face-amaranth)
-           11 12 (face hydra-face-teal)))))
-      (defun hydra-vi/next-line nil
-        "Create a hydra with no body and the heads:
+    (equal
+      (macroexpand
+        '(defhydra hydra-vi
+           (:pre
+             (set-cursor-color "#e52b50")
+             :post
+             (set-cursor-color "#ffffff")
+             :color amaranth)
+           "vi"
+           ("j" next-line)
+           ("k" previous-line)
+           ("q" nil "quit")))
+      '(progn
+         (set
+           (defvar hydra-vi/keymap nil
+             "Keymap for hydra-vi.")
+           (quote
+             (keymap
+               (113 . hydra-vi/nil)
+               (107 . hydra-vi/previous-line)
+               (106 . hydra-vi/next-line)
+               (kp-subtract . hydra--negative-argument)
+               (kp-9 . hydra--digit-argument)
+               (kp-8 . hydra--digit-argument)
+               (kp-7 . hydra--digit-argument)
+               (kp-6 . hydra--digit-argument)
+               (kp-5 . hydra--digit-argument)
+               (kp-4 . hydra--digit-argument)
+               (kp-3 . hydra--digit-argument)
+               (kp-2 . hydra--digit-argument)
+               (kp-1 . hydra--digit-argument)
+               (kp-0 . hydra--digit-argument)
+               (57 . hydra--digit-argument)
+               (56 . hydra--digit-argument)
+               (55 . hydra--digit-argument)
+               (54 . hydra--digit-argument)
+               (53 . hydra--digit-argument)
+               (52 . hydra--digit-argument)
+               (51 . hydra--digit-argument)
+               (50 . hydra--digit-argument)
+               (49 . hydra--digit-argument)
+               (48 . hydra--digit-argument)
+               (45 . hydra--negative-argument)
+               (21 . hydra--universal-argument))))
+         (set
+           (defvar hydra-vi/heads nil
+             "Heads for hydra-vi.")
+           (quote
+             (("j" next-line "" :exit nil)
+               ("k"
+                 previous-line
+                 ""
+                 :exit nil)
+               ("q" nil "quit" :exit t))))
+         (set
+           (defvar hydra-vi/hint nil
+             "Dynamic hint for hydra-vi.")
+           (quote
+             (let ((format-statement (format
+                                       #("vi: j, k, [q]: quit."
+                                          4 5 (face hydra-face-amaranth)
+                                          7 8 (face hydra-face-amaranth)
+                                          11 12 (face hydra-face-teal)))))
+               (let ((result (eval format-statement)))
+                 (cl-loop
+                   for
+                   i
+                   = (next-single-property-change
+                       i
+                       (quote face)
+                       result)
+                   with
+                   i
+                   = 0
+                   with
+                   last
+                   = 0
+                   while i
+                   if (get-char-property
+                        i
+                        (quote face)
+                        result)
+                   do
+                   (add-text-properties
+                     last
+                     i
+                     (quote
+                       (face hydra-default-face))
+                     result)
+                   do
+                   (setq last i)
+                   finally
+                   do
+                   (unless (get-char-property
+                             last
+                             (quote face)
+                             result)
+                     (add-text-properties
+                       last
+                       (length result)
+                       (quote
+                         (face hydra-default-face))
+                       result))
+                   finally
+                   return
+                   result)))))
+         (defun hydra-vi/next-line nil
+           "Create a hydra with no body and the heads:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
@@ -503,34 +632,34 @@ The body can be accessed via `hydra-toggle/body'."
 The body can be accessed via `hydra-vi/body'.
 
 Call the head: `next-line'."
-        (interactive)
-        (hydra-default-pre)
-        (set-cursor-color "#e52b50")
-        (let ((hydra--ignore t))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-vi/body)))
-        (condition-case err
-            (progn
-              (setq this-command
-                    (quote next-line))
-              (hydra--call-interactively-remap-maybe
-               (function next-line)))
-          ((quit error)
-           (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
-        (hydra-show-hint
-         hydra-vi/hint
-         (quote hydra-vi))
-        (hydra-set-transient-map
-         hydra-vi/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           (set-cursor-color "#ffffff"))
-         (quote warn)))
-      (defun hydra-vi/previous-line nil
-        "Create a hydra with no body and the heads:
+           (interactive)
+           (hydra-default-pre)
+           (set-cursor-color "#e52b50")
+           (let ((hydra--ignore t))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-vi/body)))
+           (condition-case err
+             (progn
+               (setq this-command
+                 (quote next-line))
+               (hydra--call-interactively-remap-maybe
+                 (function next-line)))
+             ((quit error)
+               (message
+                 (error-message-string err))
+               (unless hydra-lv (sit-for 0.8))))
+           (hydra-show-hint
+             hydra-vi/hint
+             (quote hydra-vi))
+           (hydra-set-transient-map
+             hydra-vi/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               (set-cursor-color "#ffffff"))
+             (quote warn)))
+         (defun hydra-vi/previous-line nil
+           "Create a hydra with no body and the heads:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
@@ -539,34 +668,34 @@ Call the head: `next-line'."
 The body can be accessed via `hydra-vi/body'.
 
 Call the head: `previous-line'."
-        (interactive)
-        (hydra-default-pre)
-        (set-cursor-color "#e52b50")
-        (let ((hydra--ignore t))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-vi/body)))
-        (condition-case err
-            (progn
-              (setq this-command
-                    (quote previous-line))
-              (hydra--call-interactively-remap-maybe
-               (function previous-line)))
-          ((quit error)
-           (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
-        (hydra-show-hint
-         hydra-vi/hint
-         (quote hydra-vi))
-        (hydra-set-transient-map
-         hydra-vi/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           (set-cursor-color "#ffffff"))
-         (quote warn)))
-      (defun hydra-vi/nil nil
-        "Create a hydra with no body and the heads:
+           (interactive)
+           (hydra-default-pre)
+           (set-cursor-color "#e52b50")
+           (let ((hydra--ignore t))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-vi/body)))
+           (condition-case err
+             (progn
+               (setq this-command
+                 (quote previous-line))
+               (hydra--call-interactively-remap-maybe
+                 (function previous-line)))
+             ((quit error)
+               (message
+                 (error-message-string err))
+               (unless hydra-lv (sit-for 0.8))))
+           (hydra-show-hint
+             hydra-vi/hint
+             (quote hydra-vi))
+           (hydra-set-transient-map
+             hydra-vi/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               (set-cursor-color "#ffffff"))
+             (quote warn)))
+         (defun hydra-vi/nil nil
+           "Create a hydra with no body and the heads:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
@@ -575,106 +704,149 @@ Call the head: `previous-line'."
 The body can be accessed via `hydra-vi/body'.
 
 Call the head: `nil'."
-        (interactive)
-        (hydra-default-pre)
-        (set-cursor-color "#e52b50")
-        (hydra-keyboard-quit)
-        (setq hydra-curr-body-fn
-              (quote hydra-vi/body)))
-      (defun hydra-vi/body nil
-        "Create a hydra with no body and the heads:
+           (interactive)
+           (hydra-default-pre)
+           (set-cursor-color "#e52b50")
+           (hydra-keyboard-quit)
+           (setq hydra-curr-body-fn
+             (quote hydra-vi/body)))
+         (defun hydra-vi/body nil
+           "Create a hydra with no body and the heads:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
 \"q\":    `nil'
 
 The body can be accessed via `hydra-vi/body'."
-        (interactive)
-        (hydra-default-pre)
-        (set-cursor-color "#e52b50")
-        (let ((hydra--ignore nil))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-vi/body)))
-        (hydra-show-hint
-         hydra-vi/hint
-         (quote hydra-vi))
-        (hydra-set-transient-map
-         hydra-vi/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           (set-cursor-color "#ffffff"))
-         (quote warn))
-        (setq prefix-arg
-              current-prefix-arg))))))
+           (interactive)
+           (hydra-default-pre)
+           (set-cursor-color "#e52b50")
+           (let ((hydra--ignore nil))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-vi/body)))
+           (hydra-show-hint
+             hydra-vi/hint
+             (quote hydra-vi))
+           (hydra-set-transient-map
+             hydra-vi/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               (set-cursor-color "#ffffff"))
+             (quote warn))
+           (setq prefix-arg
+             current-prefix-arg))))))
 
 (ert-deftest hydra-zoom-duplicate-1 ()
   (should
-   (equal
-    (macroexpand
-     '(defhydra hydra-zoom ()
-       "zoom"
-       ("r" (text-scale-set 0) "reset")
-       ("0" (text-scale-set 0) :bind nil :exit t)
-       ("1" (text-scale-set 0) nil :bind nil :exit t)))
-    '(progn
-      (set
-       (defvar hydra-zoom/keymap nil
-         "Keymap for hydra-zoom.")
-       (quote
-        (keymap
-         (114 . hydra-zoom/lambda-r)
-         (kp-subtract . hydra--negative-argument)
-         (kp-9 . hydra--digit-argument)
-         (kp-8 . hydra--digit-argument)
-         (kp-7 . hydra--digit-argument)
-         (kp-6 . hydra--digit-argument)
-         (kp-5 . hydra--digit-argument)
-         (kp-4 . hydra--digit-argument)
-         (kp-3 . hydra--digit-argument)
-         (kp-2 . hydra--digit-argument)
-         (kp-1 . hydra--digit-argument)
-         (kp-0 . hydra--digit-argument)
-         (57 . hydra--digit-argument)
-         (56 . hydra--digit-argument)
-         (55 . hydra--digit-argument)
-         (54 . hydra--digit-argument)
-         (53 . hydra--digit-argument)
-         (52 . hydra--digit-argument)
-         (51 . hydra--digit-argument)
-         (50 . hydra--digit-argument)
-         (49 . hydra-zoom/lambda-0-and-exit)
-         (48 . hydra-zoom/lambda-0-and-exit)
-         (45 . hydra--negative-argument)
-         (21 . hydra--universal-argument))))
-      (set
-       (defvar hydra-zoom/heads nil
-         "Heads for hydra-zoom.")
-       (quote
-        (("r"
-          (text-scale-set 0)
-          "reset"
-          :exit nil)
-         ("0"
-          (text-scale-set 0)
-          ""
-          :bind nil
-          :exit t)
-         ("1"
-          (text-scale-set 0)
-          nil
-          :bind nil
-          :exit t))))
-      (set
-       (defvar hydra-zoom/hint nil
-         "Dynamic hint for hydra-zoom.")
-       (quote
-        (format
-         #("zoom: [r 0]: reset."
-           7 8 (face hydra-face-red)
-           9 10 (face hydra-face-blue)))))
-      (defun hydra-zoom/lambda-r nil
-        "Create a hydra with no body and the heads:
+    (equal
+      (macroexpand
+        '(defhydra hydra-zoom ()
+           "zoom"
+           ("r" (text-scale-set 0) "reset")
+           ("0" (text-scale-set 0) :bind nil :exit t)
+           ("1" (text-scale-set 0) nil :bind nil :exit t)))
+      '(progn
+         (set
+           (defvar hydra-zoom/keymap nil
+             "Keymap for hydra-zoom.")
+           (quote
+             (keymap
+               (114 . hydra-zoom/lambda-r)
+               (kp-subtract . hydra--negative-argument)
+               (kp-9 . hydra--digit-argument)
+               (kp-8 . hydra--digit-argument)
+               (kp-7 . hydra--digit-argument)
+               (kp-6 . hydra--digit-argument)
+               (kp-5 . hydra--digit-argument)
+               (kp-4 . hydra--digit-argument)
+               (kp-3 . hydra--digit-argument)
+               (kp-2 . hydra--digit-argument)
+               (kp-1 . hydra--digit-argument)
+               (kp-0 . hydra--digit-argument)
+               (57 . hydra--digit-argument)
+               (56 . hydra--digit-argument)
+               (55 . hydra--digit-argument)
+               (54 . hydra--digit-argument)
+               (53 . hydra--digit-argument)
+               (52 . hydra--digit-argument)
+               (51 . hydra--digit-argument)
+               (50 . hydra--digit-argument)
+               (49 . hydra-zoom/lambda-0-and-exit)
+               (48 . hydra-zoom/lambda-0-and-exit)
+               (45 . hydra--negative-argument)
+               (21 . hydra--universal-argument))))
+         (set
+           (defvar hydra-zoom/heads nil
+             "Heads for hydra-zoom.")
+           (quote
+             (("r"
+                (text-scale-set 0)
+                "reset"
+                :exit nil)
+               ("0"
+                 (text-scale-set 0)
+                 ""
+                 :bind nil
+                 :exit t)
+               ("1"
+                 (text-scale-set 0)
+                 nil
+                 :bind nil
+                 :exit t))))
+         (set
+           (defvar hydra-zoom/hint nil
+             "Dynamic hint for hydra-zoom.")
+           (quote
+             (let ((format-statement (format
+                                       #("zoom: [r 0]: reset."
+                                          7 8 (face hydra-face-red)
+                                          9 10 (face hydra-face-blue)))))
+               (let ((result (eval format-statement)))
+                 (cl-loop
+                   for
+                   i
+                   = (next-single-property-change
+                       i
+                       (quote face)
+                       result)
+                   with
+                   i
+                   = 0
+                   with
+                   last
+                   = 0
+                   while i
+                   if (get-char-property
+                        i
+                        (quote face)
+                        result)
+                   do
+                   (add-text-properties
+                     last
+                     i
+                     (quote
+                       (face hydra-default-face))
+                     result)
+                   do
+                   (setq last i)
+                   finally
+                   do
+                   (unless (get-char-property
+                             last
+                             (quote face)
+                             result)
+                     (add-text-properties
+                       last
+                       (length result)
+                       (quote
+                         (face hydra-default-face))
+                       result))
+                   finally
+                   return
+                   result)))))
+         (defun hydra-zoom/lambda-r nil
+           "Create a hydra with no body and the heads:
 
 \"r\":    `(text-scale-set 0)',
 \"0\":    `(text-scale-set 0)',
@@ -683,144 +855,187 @@ The body can be accessed via `hydra-vi/body'."
 The body can be accessed via `hydra-zoom/body'.
 
 Call the head: `(text-scale-set 0)'."
-        (interactive)
-        (hydra-default-pre)
-        (let ((hydra--ignore t))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-zoom/body)))
-        (condition-case err
-            (hydra--call-interactively-remap-maybe
-             (function
-              (lambda nil
-               (interactive)
-               (text-scale-set 0))))
-          ((quit error)
-           (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
-        (hydra-show-hint
-         hydra-zoom/hint
-         (quote hydra-zoom))
-        (hydra-set-transient-map
-         hydra-zoom/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           nil)
-         nil))
-      (defun hydra-zoom/lambda-0-and-exit nil
-        "Create a hydra with no body and the heads:
-
-\"r\":    `(text-scale-set 0)',
-\"0\":    `(text-scale-set 0)',
-\"1\":    `(text-scale-set 0)'
-
-The body can be accessed via `hydra-zoom/body'.
-
-Call the head: `(text-scale-set 0)'."
-        (interactive)
-        (hydra-default-pre)
-        (hydra-keyboard-quit)
-        (setq hydra-curr-body-fn
-              (quote hydra-zoom/body))
-        (hydra--call-interactively-remap-maybe
-         (function
-          (lambda nil
            (interactive)
-           (text-scale-set 0)))))
-      (defun hydra-zoom/body nil
-        "Create a hydra with no body and the heads:
+           (hydra-default-pre)
+           (let ((hydra--ignore t))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-zoom/body)))
+           (condition-case err
+             (hydra--call-interactively-remap-maybe
+               (function
+                 (lambda nil
+                   (interactive)
+                   (text-scale-set 0))))
+             ((quit error)
+               (message
+                 (error-message-string err))
+               (unless hydra-lv (sit-for 0.8))))
+           (hydra-show-hint
+             hydra-zoom/hint
+             (quote hydra-zoom))
+           (hydra-set-transient-map
+             hydra-zoom/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               nil)
+             nil))
+         (defun hydra-zoom/lambda-0-and-exit nil
+           "Create a hydra with no body and the heads:
+
+\"r\":    `(text-scale-set 0)',
+\"0\":    `(text-scale-set 0)',
+\"1\":    `(text-scale-set 0)'
+
+The body can be accessed via `hydra-zoom/body'.
+
+Call the head: `(text-scale-set 0)'."
+           (interactive)
+           (hydra-default-pre)
+           (hydra-keyboard-quit)
+           (setq hydra-curr-body-fn
+             (quote hydra-zoom/body))
+           (hydra--call-interactively-remap-maybe
+             (function
+               (lambda nil
+                 (interactive)
+                 (text-scale-set 0)))))
+         (defun hydra-zoom/body nil
+           "Create a hydra with no body and the heads:
 
 \"r\":    `(text-scale-set 0)',
 \"0\":    `(text-scale-set 0)',
 \"1\":    `(text-scale-set 0)'
 
 The body can be accessed via `hydra-zoom/body'."
-        (interactive)
-        (hydra-default-pre)
-        (let ((hydra--ignore nil))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-zoom/body)))
-        (hydra-show-hint
-         hydra-zoom/hint
-         (quote hydra-zoom))
-        (hydra-set-transient-map
-         hydra-zoom/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           nil)
-         nil)
-        (setq prefix-arg
-              current-prefix-arg))))))
+           (interactive)
+           (hydra-default-pre)
+           (let ((hydra--ignore nil))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-zoom/body)))
+           (hydra-show-hint
+             hydra-zoom/hint
+             (quote hydra-zoom))
+           (hydra-set-transient-map
+             hydra-zoom/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               nil)
+             nil)
+           (setq prefix-arg
+             current-prefix-arg))))))
 
 (ert-deftest hydra-zoom-duplicate-2 ()
   (should
-   (equal
-    (macroexpand
-     '(defhydra hydra-zoom ()
-       "zoom"
-       ("r" (text-scale-set 0) "reset")
-       ("0" (text-scale-set 0) :bind nil :exit t)
-       ("1" (text-scale-set 0) nil :bind nil)))
-    '(progn
-      (set
-       (defvar hydra-zoom/keymap nil
-         "Keymap for hydra-zoom.")
-       (quote
-        (keymap
-         (114 . hydra-zoom/lambda-r)
-         (kp-subtract . hydra--negative-argument)
-         (kp-9 . hydra--digit-argument)
-         (kp-8 . hydra--digit-argument)
-         (kp-7 . hydra--digit-argument)
-         (kp-6 . hydra--digit-argument)
-         (kp-5 . hydra--digit-argument)
-         (kp-4 . hydra--digit-argument)
-         (kp-3 . hydra--digit-argument)
-         (kp-2 . hydra--digit-argument)
-         (kp-1 . hydra--digit-argument)
-         (kp-0 . hydra--digit-argument)
-         (57 . hydra--digit-argument)
-         (56 . hydra--digit-argument)
-         (55 . hydra--digit-argument)
-         (54 . hydra--digit-argument)
-         (53 . hydra--digit-argument)
-         (52 . hydra--digit-argument)
-         (51 . hydra--digit-argument)
-         (50 . hydra--digit-argument)
-         (49 . hydra-zoom/lambda-r)
-         (48 . hydra-zoom/lambda-0-and-exit)
-         (45 . hydra--negative-argument)
-         (21 . hydra--universal-argument))))
-      (set
-       (defvar hydra-zoom/heads nil
-         "Heads for hydra-zoom.")
-       (quote
-        (("r"
-          (text-scale-set 0)
-          "reset"
-          :exit nil)
-         ("0"
-          (text-scale-set 0)
-          ""
-          :bind nil
-          :exit t)
-         ("1"
-          (text-scale-set 0)
-          nil
-          :bind nil
-          :exit nil))))
-      (set
-       (defvar hydra-zoom/hint nil
-         "Dynamic hint for hydra-zoom.")
-       (quote
-        (format
-         #("zoom: [r 0]: reset."
-           7 8 (face hydra-face-red)
-           9 10 (face hydra-face-blue)))))
-      (defun hydra-zoom/lambda-r nil
-        "Create a hydra with no body and the heads:
+    (equal
+      (macroexpand
+        '(defhydra hydra-zoom ()
+           "zoom"
+           ("r" (text-scale-set 0) "reset")
+           ("0" (text-scale-set 0) :bind nil :exit t)
+           ("1" (text-scale-set 0) nil :bind nil)))
+      '(progn
+         (set
+           (defvar hydra-zoom/keymap nil
+             "Keymap for hydra-zoom.")
+           (quote
+             (keymap
+               (114 . hydra-zoom/lambda-r)
+               (kp-subtract . hydra--negative-argument)
+               (kp-9 . hydra--digit-argument)
+               (kp-8 . hydra--digit-argument)
+               (kp-7 . hydra--digit-argument)
+               (kp-6 . hydra--digit-argument)
+               (kp-5 . hydra--digit-argument)
+               (kp-4 . hydra--digit-argument)
+               (kp-3 . hydra--digit-argument)
+               (kp-2 . hydra--digit-argument)
+               (kp-1 . hydra--digit-argument)
+               (kp-0 . hydra--digit-argument)
+               (57 . hydra--digit-argument)
+               (56 . hydra--digit-argument)
+               (55 . hydra--digit-argument)
+               (54 . hydra--digit-argument)
+               (53 . hydra--digit-argument)
+               (52 . hydra--digit-argument)
+               (51 . hydra--digit-argument)
+               (50 . hydra--digit-argument)
+               (49 . hydra-zoom/lambda-r)
+               (48 . hydra-zoom/lambda-0-and-exit)
+               (45 . hydra--negative-argument)
+               (21 . hydra--universal-argument))))
+         (set
+           (defvar hydra-zoom/heads nil
+             "Heads for hydra-zoom.")
+           (quote
+             (("r"
+                (text-scale-set 0)
+                "reset"
+                :exit nil)
+               ("0"
+                 (text-scale-set 0)
+                 ""
+                 :bind nil
+                 :exit t)
+               ("1"
+                 (text-scale-set 0)
+                 nil
+                 :bind nil
+                 :exit nil))))
+         (set
+           (defvar hydra-zoom/hint nil
+             "Dynamic hint for hydra-zoom.")
+           (quote
+             (let ((format-statement (format
+                                       #("zoom: [r 0]: reset."
+                                          7 8 (face hydra-face-red)
+                                          9 10 (face hydra-face-blue)))))
+               (let ((result (eval format-statement)))
+                 (cl-loop
+                   for
+                   i
+                   = (next-single-property-change
+                       i
+                       (quote face)
+                       result)
+                   with
+                   i
+                   = 0
+                   with
+                   last
+                   = 0
+                   while i
+                   if (get-char-property
+                        i
+                        (quote face)
+                        result)
+                   do
+                   (add-text-properties
+                     last
+                     i
+                     (quote
+                       (face hydra-default-face))
+                     result)
+                   do
+                   (setq last i)
+                   finally
+                   do
+                   (unless (get-char-property
+                             last
+                             (quote face)
+                             result)
+                     (add-text-properties
+                       last
+                       (length result)
+                       (quote
+                         (face hydra-default-face))
+                       result))
+                   finally
+                   return
+                   result)))))
+         (defun hydra-zoom/lambda-r nil
+           "Create a hydra with no body and the heads:
 
 \"r\":    `(text-scale-set 0)',
 \"0\":    `(text-scale-set 0)',
@@ -829,76 +1044,76 @@ The body can be accessed via `hydra-zoom/body'."
 The body can be accessed via `hydra-zoom/body'.
 
 Call the head: `(text-scale-set 0)'."
-        (interactive)
-        (hydra-default-pre)
-        (let ((hydra--ignore t))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-zoom/body)))
-        (condition-case err
-            (hydra--call-interactively-remap-maybe
-             (function
-              (lambda nil
-               (interactive)
-               (text-scale-set 0))))
-          ((quit error)
-           (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
-        (hydra-show-hint
-         hydra-zoom/hint
-         (quote hydra-zoom))
-        (hydra-set-transient-map
-         hydra-zoom/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           nil)
-         nil))
-      (defun hydra-zoom/lambda-0-and-exit nil
-        "Create a hydra with no body and the heads:
-
-\"r\":    `(text-scale-set 0)',
-\"0\":    `(text-scale-set 0)',
-\"1\":    `(text-scale-set 0)'
-
-The body can be accessed via `hydra-zoom/body'.
-
-Call the head: `(text-scale-set 0)'."
-        (interactive)
-        (hydra-default-pre)
-        (hydra-keyboard-quit)
-        (setq hydra-curr-body-fn
-              (quote hydra-zoom/body))
-        (hydra--call-interactively-remap-maybe
-         (function
-          (lambda nil
            (interactive)
-           (text-scale-set 0)))))
-      (defun hydra-zoom/body nil
-        "Create a hydra with no body and the heads:
+           (hydra-default-pre)
+           (let ((hydra--ignore t))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-zoom/body)))
+           (condition-case err
+             (hydra--call-interactively-remap-maybe
+               (function
+                 (lambda nil
+                   (interactive)
+                   (text-scale-set 0))))
+             ((quit error)
+               (message
+                 (error-message-string err))
+               (unless hydra-lv (sit-for 0.8))))
+           (hydra-show-hint
+             hydra-zoom/hint
+             (quote hydra-zoom))
+           (hydra-set-transient-map
+             hydra-zoom/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               nil)
+             nil))
+         (defun hydra-zoom/lambda-0-and-exit nil
+           "Create a hydra with no body and the heads:
+
+\"r\":    `(text-scale-set 0)',
+\"0\":    `(text-scale-set 0)',
+\"1\":    `(text-scale-set 0)'
+
+The body can be accessed via `hydra-zoom/body'.
+
+Call the head: `(text-scale-set 0)'."
+           (interactive)
+           (hydra-default-pre)
+           (hydra-keyboard-quit)
+           (setq hydra-curr-body-fn
+             (quote hydra-zoom/body))
+           (hydra--call-interactively-remap-maybe
+             (function
+               (lambda nil
+                 (interactive)
+                 (text-scale-set 0)))))
+         (defun hydra-zoom/body nil
+           "Create a hydra with no body and the heads:
 
 \"r\":    `(text-scale-set 0)',
 \"0\":    `(text-scale-set 0)',
 \"1\":    `(text-scale-set 0)'
 
 The body can be accessed via `hydra-zoom/body'."
-        (interactive)
-        (hydra-default-pre)
-        (let ((hydra--ignore nil))
-          (hydra-keyboard-quit)
-          (setq hydra-curr-body-fn
-                (quote hydra-zoom/body)))
-        (hydra-show-hint
-         hydra-zoom/hint
-         (quote hydra-zoom))
-        (hydra-set-transient-map
-         hydra-zoom/keymap
-         (lambda nil
-           (hydra-keyboard-quit)
-           nil)
-         nil)
-        (setq prefix-arg
-              current-prefix-arg))))))
+           (interactive)
+           (hydra-default-pre)
+           (let ((hydra--ignore nil))
+             (hydra-keyboard-quit)
+             (setq hydra-curr-body-fn
+               (quote hydra-zoom/body)))
+           (hydra-show-hint
+             hydra-zoom/hint
+             (quote hydra-zoom))
+           (hydra-set-transient-map
+             hydra-zoom/keymap
+             (lambda nil
+               (hydra-keyboard-quit)
+               nil)
+             nil)
+           (setq prefix-arg
+             current-prefix-arg))))))
 
 (ert-deftest defhydradio ()
   (should (equal
@@ -1002,165 +1217,708 @@ The body can be accessed via `hydra-zoom/body'."
 
 (ert-deftest hydra-format-1 ()
   (should (equal
-           (let ((hydra-fontify-head-function
-                  'hydra-fontify-head-greyscale))
-             (hydra--format
-              'hydra-toggle
-              nil
-              "
+            (let ((hydra-fontify-head-function
+                    'hydra-fontify-head-greyscale))
+              (hydra--format
+                'hydra-toggle
+                nil
+                "
 _a_ abbrev-mode:       %`abbrev-mode
 _d_ debug-on-error:    %`debug-on-error
 _f_ auto-fill-mode:    %`auto-fill-function
 " '(("a" abbrev-mode nil)
-    ("d" toggle-debug-on-error nil)
-    ("f" auto-fill-mode nil)
-    ("g" golden-ratio-mode nil)
-    ("t" toggle-truncate-lines nil)
-    ("w" whitespace-mode nil)
-    ("q" nil "quit"))))
-           '(concat (format "%s abbrev-mode:       %S
+     ("d" toggle-debug-on-error nil)
+     ("f" auto-fill-mode nil)
+     ("g" golden-ratio-mode nil)
+     ("t" toggle-truncate-lines nil)
+     ("w" whitespace-mode nil)
+     ("q" nil "quit"))))
+            '(let ((format-statement (concat
+                                       (format
+                                         "%s abbrev-mode:       %S
 %s debug-on-error:    %S
 %s auto-fill-mode:    %S
-" "{a}" abbrev-mode "{d}" debug-on-error "{f}" auto-fill-function) "[{q}]: quit."))))
+"
+                                         "{a}"
+                                         abbrev-mode
+                                         "{d}"
+                                         debug-on-error
+                                         "{f}"
+                                         auto-fill-function)
+                                       "[{q}]: quit.")))
+               (let ((result (eval format-statement)))
+                 (cl-loop
+                   for
+                   i
+                   = (next-single-property-change
+                       i
+                       (quote face)
+                       result)
+                   with
+                   i
+                   = 0
+                   with
+                   last
+                   = 0
+                   while i
+                   if (get-char-property
+                        i
+                        (quote face)
+                        result)
+                   do
+                   (add-text-properties
+                     last
+                     i
+                     (quote
+                       (face hydra-default-face))
+                     result)
+                   do
+                   (setq last i)
+                   finally
+                   do
+                   (unless (get-char-property
+                             last
+                             (quote face)
+                             result)
+                     (add-text-properties
+                       last
+                       (length result)
+                       (quote
+                         (face hydra-default-face))
+                       result))
+                   finally
+                   return
+                   result))))))
 
 (ert-deftest hydra-format-2 ()
   (should (equal
-           (let ((hydra-fontify-head-function
-                  'hydra-fontify-head-greyscale))
-             (hydra--format
-              'bar
-              nil
-              "\n  bar %s`foo\n"
-              '(("a" (quote t) "" :cmd-name bar/lambda-a :exit nil)
-                ("q" nil "" :cmd-name bar/nil :exit t))))
-           '(concat (format "  bar %s\n" foo) "{a}, [q]."))))
+            (let ((hydra-fontify-head-function
+                    'hydra-fontify-head-greyscale))
+              (hydra--format
+                'bar
+                nil
+                "\n  bar %s`foo\n"
+                '(("a" (quote t) "" :cmd-name bar/lambda-a :exit nil)
+                   ("q" nil "" :cmd-name bar/nil :exit t))))
+            '(let ((format-statement (concat
+                                       (format "  bar %s
+" foo)
+                                       "{a}, [q].")))
+               (let ((result (eval format-statement)))
+                 (cl-loop
+                   for
+                   i
+                   = (next-single-property-change
+                       i
+                       (quote face)
+                       result)
+                   with
+                   i
+                   = 0
+                   with
+                   last
+                   = 0
+                   while i
+                   if (get-char-property
+                        i
+                        (quote face)
+                        result)
+                   do
+                   (add-text-properties
+                     last
+                     i
+                     (quote
+                       (face hydra-default-face))
+                     result)
+                   do
+                   (setq last i)
+                   finally
+                   do
+                   (unless (get-char-property
+                             last
+                             (quote face)
+                             result)
+                     (add-text-properties
+                       last
+                       (length result)
+                       (quote
+                         (face hydra-default-face))
+                       result))
+                   finally
+                   return
+                   result))))))
 
 (ert-deftest hydra-format-3 ()
   (should (equal
-           (let ((hydra-fontify-head-function
-                  'hydra-fontify-head-greyscale))
-             (hydra--format
-              'bar
-              nil
-              "\n_<SPC>_   ^^ace jump\n"
-              '(("<SPC>" ace-jump-char-mode nil :cmd-name bar/ace-jump-char-mode))))
-           '(concat (format "%s   ace jump\n" "{<SPC>}") ""))))
+            (let ((hydra-fontify-head-function
+                    'hydra-fontify-head-greyscale))
+              (hydra--format
+                'bar
+                nil
+                "\n_<SPC>_   ^^ace jump\n"
+                '(("<SPC>" ace-jump-char-mode nil :cmd-name bar/ace-jump-char-mode))))
+            '(let ((format-statement (concat
+                                       (format
+                                         "%s   ace jump
+"
+                                         "{<SPC>}")
+                                       "")))
+               (let ((result (eval format-statement)))
+                 (cl-loop
+                   for
+                   i
+                   = (next-single-property-change
+                       i
+                       (quote face)
+                       result)
+                   with
+                   i
+                   = 0
+                   with
+                   last
+                   = 0
+                   while i
+                   if (get-char-property
+                        i
+                        (quote face)
+                        result)
+                   do
+                   (add-text-properties
+                     last
+                     i
+                     (quote
+                       (face hydra-default-face))
+                     result)
+                   do
+                   (setq last i)
+                   finally
+                   do
+                   (unless (get-char-property
+                             last
+                             (quote face)
+                             result)
+                     (add-text-properties
+                       last
+                       (length result)
+                       (quote
+                         (face hydra-default-face))
+                       result))
+                   finally
+                   return
+                   result))))))
 
 (ert-deftest hydra-format-4 ()
   (should
-   (equal (hydra--format
-           nil
-           '(nil nil :hint nil)
-           "\n_j_,_k_"
-           '(("j" nil nil :exit t) ("k" nil nil :exit t)))
-          '(concat (format "%s,%s"
-                    #("j" 0 1 (face hydra-face-blue))
-                    #("k" 0 1 (face hydra-face-blue))) ""))))
+    (equal (hydra--format
+             nil
+             '(nil nil :hint nil)
+             "\n_j_,_k_"
+             '(("j" nil nil :exit t) ("k" nil nil :exit t)))
+      '(let ((format-statement (concat
+                                 (format
+                                   "%s,%s"
+                                   #("j"
+                                      0 1 (face hydra-face-blue))
+                                   #("k"
+                                      0 1 (face hydra-face-blue)))
+                                 "")))
+         (let ((result (eval format-statement)))
+           (cl-loop
+             for
+             i
+             = (next-single-property-change
+                 i
+                 (quote face)
+                 result)
+             with
+             i
+             = 0
+             with
+             last
+             = 0
+             while i
+             if (get-char-property
+                  i
+                  (quote face)
+                  result)
+             do
+             (add-text-properties
+               last
+               i
+               (quote
+                 (face hydra-default-face))
+               result)
+             do
+             (setq last i)
+             finally
+             do
+             (unless (get-char-property
+                       last
+                       (quote face)
+                       result)
+               (add-text-properties
+                 last
+                 (length result)
+                 (quote
+                   (face hydra-default-face))
+                 result))
+             finally
+             return
+             result))))))
 
 (ert-deftest hydra-format-5 ()
   (should
-   (equal (hydra--format
-           nil nil "\n_-_: mark          _u_: unmark\n"
-           '(("-" Buffer-menu-mark)
-             ("u" Buffer-menu-unmark)))
-          '(concat
-           (format
-            "%s: mark          %s: unmark\n"
-            #("-" 0 1 (face hydra-face-red))
-            #("u" 0 1 (face hydra-face-red)))
-            ""))))
+    (equal (hydra--format
+             nil nil "\n_-_: mark          _u_: unmark\n"
+             '(("-" Buffer-menu-mark)
+                ("u" Buffer-menu-unmark)))
+      '(let ((format-statement (concat
+                                 (format
+                                   "%s: mark          %s: unmark
+"
+                                   #("-" 0 1 (face hydra-face-red))
+                                   #("u" 0 1 (face hydra-face-red)))
+                                 "")))
+         (let ((result (eval format-statement)))
+           (cl-loop
+             for
+             i
+             = (next-single-property-change
+                 i
+                 (quote face)
+                 result)
+             with
+             i
+             = 0
+             with
+             last
+             = 0
+             while i
+             if (get-char-property
+                  i
+                  (quote face)
+                  result)
+             do
+             (add-text-properties
+               last
+               i
+               (quote
+                 (face hydra-default-face))
+               result)
+             do
+             (setq last i)
+             finally
+             do
+             (unless (get-char-property
+                       last
+                       (quote face)
+                       result)
+               (add-text-properties
+                 last
+                 (length result)
+                 (quote
+                   (face hydra-default-face))
+                 result))
+             finally
+             return
+             result))))))
 
 (ert-deftest hydra-format-6 ()
   (should
-   (equal (hydra--format
-           nil nil "\n[_]_] forward [_[_] backward\n"
-           '(("]" forward-char)
-             ("[" backward-char)))
-          '(concat
-            (format
-             "[%s] forward [%s] backward\n"
-             #("]"
-               0 1 (face
-                    hydra-face-red))
-             #("["
-               0 1 (face
-                    hydra-face-red)))
-            ""))))
+    (equal (hydra--format
+             nil nil "\n[_]_] forward [_[_] backward\n"
+             '(("]" forward-char)
+                ("[" backward-char)))
+      '(let ((format-statement (concat
+                                 (format
+                                   "[%s] forward [%s] backward
+"
+                                   #("]" 0 1 (face hydra-face-red))
+                                   #("[" 0 1 (face hydra-face-red)))
+                                 "")))
+         (let ((result (eval format-statement)))
+           (cl-loop
+             for
+             i
+             = (next-single-property-change
+                 i
+                 (quote face)
+                 result)
+             with
+             i
+             = 0
+             with
+             last
+             = 0
+             while i
+             if (get-char-property
+                  i
+                  (quote face)
+                  result)
+             do
+             (add-text-properties
+               last
+               i
+               (quote
+                 (face hydra-default-face))
+               result)
+             do
+             (setq last i)
+             finally
+             do
+             (unless (get-char-property
+                       last
+                       (quote face)
+                       result)
+               (add-text-properties
+                 last
+                 (length result)
+                 (quote
+                   (face hydra-default-face))
+                 result))
+             finally
+             return
+             result))))))
 
 (ert-deftest hydra-format-7 ()
   (should
-   (equal
-    (hydra--format nil nil "test"
-                   '(("%" forward-char "" :exit nil)
-                     ("b" backward-char "" :exit nil)))
-    '(format
-      #("test: %%%%, b."
-        6 7 (face hydra-face-red)
-        7 8 (face hydra-face-red)
-        8 9 (face hydra-face-red)
-        9 10 (face hydra-face-red)
-        12 13 (face hydra-face-red)))))
+    (equal
+      (hydra--format nil nil "test"
+        '(("%" forward-char "" :exit nil)
+           ("b" backward-char "" :exit nil)))
+      '(let ((format-statement (format
+                                 #("test: %%%%, b."
+                                    6 7 (face hydra-face-red)
+                                    7 8 (face hydra-face-red)
+                                    8 9 (face hydra-face-red)
+                                    9 10 (face hydra-face-red)
+                                    12 13 (face hydra-face-red)))))
+         (let ((result (eval format-statement)))
+           (cl-loop
+             for
+             i
+             = (next-single-property-change
+                 i
+                 (quote face)
+                 result)
+             with
+             i
+             = 0
+             with
+             last
+             = 0
+             while i
+             if (get-char-property
+                  i
+                  (quote face)
+                  result)
+             do
+             (add-text-properties
+               last
+               i
+               (quote
+                 (face hydra-default-face))
+               result)
+             do
+             (setq last i)
+             finally
+             do
+             (unless (get-char-property
+                       last
+                       (quote face)
+                       result)
+               (add-text-properties
+                 last
+                 (length result)
+                 (quote
+                   (face hydra-default-face))
+                 result))
+             finally
+             return
+             result)))))
   (should
-   (equal
-    (hydra--format nil nil "\n_%_ forward\n"
-                   '(("%" forward-char nil :exit nil)))
-    '(concat
-      (format
-       "%s forward\n"
-       #("%%"
-         0 2 (face hydra-face-red)))
-      ""))))
+    (equal
+      (hydra--format nil nil "\n_%_ forward\n"
+        '(("%" forward-char nil :exit nil)))
+      '(let ((format-statement (concat
+                                 (format
+                                   "%s forward
+"
+                                   #("%%"
+                                      0 2 (face hydra-face-red)))
+                                 "")))
+         (let ((result (eval format-statement)))
+           (cl-loop
+             for
+             i
+             = (next-single-property-change
+                 i
+                 (quote face)
+                 result)
+             with
+             i
+             = 0
+             with
+             last
+             = 0
+             while i
+             if (get-char-property
+                  i
+                  (quote face)
+                  result)
+             do
+             (add-text-properties
+               last
+               i
+               (quote
+                 (face hydra-default-face))
+               result)
+             do
+             (setq last i)
+             finally
+             do
+             (unless (get-char-property
+                       last
+                       (quote face)
+                       result)
+               (add-text-properties
+                 last
+                 (length result)
+                 (quote
+                   (face hydra-default-face))
+                 result))
+             finally
+             return
+             result))))))
 
 (ert-deftest hydra-format-8 ()
   (should
-   (equal
-    (hydra--format nil '(nil nil :hint nil) "test"
-                   '(("f" forward-char nil :exit nil)
-                     ("b" backward-char "back" :exit nil)))
-    '(format
-      #("test: [b]: back."
-        7 8 (face hydra-face-red))))))
+    (equal
+      (hydra--format nil '(nil nil :hint nil) "test"
+        '(("f" forward-char nil :exit nil)
+           ("b" backward-char "back" :exit nil)))
+      '(let ((format-statement (format
+                                 #("test: [b]: back."
+                                    7 8 (face hydra-face-red)))))
+         (let ((result (eval format-statement)))
+           (cl-loop
+             for
+             i
+             = (next-single-property-change
+                 i
+                 (quote face)
+                 result)
+             with
+             i
+             = 0
+             with
+             last
+             = 0
+             while i
+             if (get-char-property
+                  i
+                  (quote face)
+                  result)
+             do
+             (add-text-properties
+               last
+               i
+               (quote
+                 (face hydra-default-face))
+               result)
+             do
+             (setq last i)
+             finally
+             do
+             (unless (get-char-property
+                       last
+                       (quote face)
+                       result)
+               (add-text-properties
+                 last
+                 (length result)
+                 (quote
+                   (face hydra-default-face))
+                 result))
+             finally
+             return
+             result))))))
 
 (ert-deftest hydra-format-9 ()
   (should
-   (equal
-    (hydra--format nil '(nil nil :hint nil) "\n_f_(foo)"
-                   '(("f" forward-char nil :exit nil)))
-    '(concat
-      (format
-       "%s(foo)"
-       #("f" 0 1 (face hydra-face-red)))
-      ""))))
+    (equal
+      (hydra--format nil '(nil nil :hint nil) "\n_f_(foo)"
+        '(("f" forward-char nil :exit nil)))
+      '(let ((format-statement (concat
+                                 (format
+                                   "%s(foo)"
+                                   #("f" 0 1 (face hydra-face-red)))
+                                 "")))
+         (let ((result (eval format-statement)))
+           (cl-loop
+             for
+             i
+             = (next-single-property-change
+                 i
+                 (quote face)
+                 result)
+             with
+             i
+             = 0
+             with
+             last
+             = 0
+             while i
+             if (get-char-property
+                  i
+                  (quote face)
+                  result)
+             do
+             (add-text-properties
+               last
+               i
+               (quote
+                 (face hydra-default-face))
+               result)
+             do
+             (setq last i)
+             finally
+             do
+             (unless (get-char-property
+                       last
+                       (quote face)
+                       result)
+               (add-text-properties
+                 last
+                 (length result)
+                 (quote
+                   (face hydra-default-face))
+                 result))
+             finally
+             return
+             result))))))
 
 (ert-deftest hydra-format-with-sexp-1 ()
   (should (equal
-           (let ((hydra-fontify-head-function
-                  'hydra-fontify-head-greyscale))
-             (hydra--format
-              'hydra-toggle nil
-              "\n_n_ narrow-or-widen-dwim %(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
-              '(("n" narrow-to-region nil) ("q" nil "cancel" :exit t))))
-           '(concat (format "%s narrow-or-widen-dwim %Sasdf\n"
-                     "{n}"
-                     (progn
-                       (message "checking")
-                       (buffer-narrowed-p)))
-             "[[q]]: cancel."))))
+            (let ((hydra-fontify-head-function
+                    'hydra-fontify-head-greyscale))
+              (hydra--format
+                'hydra-toggle nil
+                "\n_n_ narrow-or-widen-dwim %(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
+                '(("n" narrow-to-region nil) ("q" nil "cancel" :exit t))))
+            '(let ((format-statement (concat
+                                       (format
+                                         "%s narrow-or-widen-dwim %Sasdf
+"
+                                         "{n}"
+                                         (progn
+                                           (message "checking")
+                                           (buffer-narrowed-p)))
+                                       "[[q]]: cancel.")))
+               (let ((result (eval format-statement)))
+                 (cl-loop
+                   for
+                   i
+                   = (next-single-property-change
+                       i
+                       (quote face)
+                       result)
+                   with
+                   i
+                   = 0
+                   with
+                   last
+                   = 0
+                   while i
+                   if (get-char-property
+                        i
+                        (quote face)
+                        result)
+                   do
+                   (add-text-properties
+                     last
+                     i
+                     (quote
+                       (face hydra-default-face))
+                     result)
+                   do
+                   (setq last i)
+                   finally
+                   do
+                   (unless (get-char-property
+                             last
+                             (quote face)
+                             result)
+                     (add-text-properties
+                       last
+                       (length result)
+                       (quote
+                         (face hydra-default-face))
+                       result))
+                   finally
+                   return
+                   result))))))
 
 (ert-deftest hydra-format-with-sexp-2 ()
   (should (equal
-           (let ((hydra-fontify-head-function
-                  'hydra-fontify-head-greyscale))
-             (hydra--format
-              'hydra-toggle nil
-              "\n_n_ narrow-or-widen-dwim %s(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
-              '(("n" narrow-to-region nil) ("q" nil "cancel" :exit t))))
-           '(concat (format "%s narrow-or-widen-dwim %sasdf\n"
-                     "{n}"
-                     (progn
-                       (message "checking")
-                       (buffer-narrowed-p)))
-             "[[q]]: cancel."))))
+            (let ((hydra-fontify-head-function
+                    'hydra-fontify-head-greyscale))
+              (hydra--format
+                'hydra-toggle nil
+                "\n_n_ narrow-or-widen-dwim %s(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
+                '(("n" narrow-to-region nil) ("q" nil "cancel" :exit t))))
+            '(let ((format-statement (concat
+                                       (format
+                                         "%s narrow-or-widen-dwim %sasdf
+"
+                                         "{n}"
+                                         (progn
+                                           (message "checking")
+                                           (buffer-narrowed-p)))
+                                       "[[q]]: cancel.")))
+               (let ((result (eval format-statement)))
+                 (cl-loop
+                   for
+                   i
+                   = (next-single-property-change
+                       i
+                       (quote face)
+                       result)
+                   with
+                   i
+                   = 0
+                   with
+                   last
+                   = 0
+                   while i
+                   if (get-char-property
+                        i
+                        (quote face)
+                        result)
+                   do
+                   (add-text-properties
+                     last
+                     i
+                     (quote
+                       (face hydra-default-face))
+                     result)
+                   do
+                   (setq last i)
+                   finally
+                   do
+                   (unless (get-char-property
+                             last
+                             (quote face)
+                             result)
+                     (add-text-properties
+                       last
+                       (length result)
+                       (quote
+                         (face hydra-default-face))
+                       result))
+                   finally
+                   return
+                   result))))))
 
 (ert-deftest hydra-compat-colors-2 ()
   (should
