@@ -5,7 +5,7 @@
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
 ;; URL: https://github.com/abo-abo/hydra
-;; Version: 0.13.6
+;; Version: 0.14.0
 ;; Keywords: bindings
 ;; Package-Requires: ((cl-lib "0.5"))
 
