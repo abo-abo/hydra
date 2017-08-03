@@ -1161,7 +1161,7 @@ It is possible to omit both BODY-MAP and BODY-KEY if you don't
 want to bind anything.  In that case, typically you will bind the
 generated NAME/body command.  This command is also the return
 result of `defhydra'."
-  (declare (indent defun))
+  (declare (indent defun) (doc-string 3))
   (setq heads (copy-tree heads))
   (cond ((stringp docstring))
         ((and (consp docstring)
