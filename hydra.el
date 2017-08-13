@@ -236,32 +236,37 @@ found"
  "Since the docstrings are aligned by hand anyway, this isn't very useful."
  "0.13.1")
 
+(defface hydra-default-face
+  '((t (:inherit default)))
+  "Face from which all Hydra faces inherit."
+  :group 'hydra)
+
 (defface hydra-face-red
-  '((t (:foreground "#FF0000" :bold t)))
+  '((t (:inherit hydra-default-face :foreground "#FF0000" :bold t)))
   "Red Hydra heads don't exit the Hydra.
 Every other command exits the Hydra."
   :group 'hydra)
 
 (defface hydra-face-blue
   '((((class color) (background light))
-     :foreground "#0000FF" :bold t)
+     :inherit hydra-default-face :foreground "#0000FF" :bold t)
     (((class color) (background dark))
-     :foreground "#8ac6f2" :bold t))
+     :inherit hydra-default-face :foreground "#8ac6f2" :bold t))
   "Blue Hydra heads exit the Hydra.
 Every other command exits as well.")
 
 (defface hydra-face-amaranth
-  '((t (:foreground "#E52B50" :bold t)))
+  '((t (:inherit hydra-default-face :foreground "#E52B50" :bold t)))
   "Amaranth body has red heads and warns on intercepting non-heads.
 Exitable only through a blue head.")
 
 (defface hydra-face-pink
-  '((t (:foreground "#FF6EB4" :bold t)))
+  '((t (:inherit hydra-default-face  :foreground "#FF6EB4" :bold t)))
   "Pink body has red heads and runs intercepted non-heads.
 Exitable only through a blue head.")
 
 (defface hydra-face-teal
-  '((t (:foreground "#367588" :bold t)))
+  '((t (:inherit hydra-default-face :foreground "#367588" :bold t)))
   "Teal body has blue heads and warns on intercepting non-heads.
 Exitable only through a blue head.")
 
@@ -713,17 +718,35 @@ The expressions can be auto-expanded according to NAME."
                       (substring docstring 0 start)
                       "%" spec
                       (substring docstring (+ start offset 1 lspec varp))))))))
-    (if (eq ?\n (aref docstring 0))
-        `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
-                 ,rest)
-      (let ((r `(replace-regexp-in-string
-                 " +$" ""
-                 (concat ,docstring ": "
-                         (replace-regexp-in-string
-                          "\\(%\\)" "\\1\\1" ,rest)))))
-        (if (stringp rest)
-            `(format ,(eval r))
-          `(format ,r))))))
+    `(let ((format-statement
+            ,(if (eq ?\n (aref docstring 0))
+                 `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
+                          ,rest)
+               (let ((r `(replace-regexp-in-string
+                          " +$" ""
+                          (concat ,docstring ": "
+                                  (replace-regexp-in-string
+                                   "\\(%\\)" "\\1\\1" ,rest)))))
+                 (if (stringp rest)
+                     `(format ,(eval r))
+                   `(format ,r))))))
+       ;; Applying hydra-default-face to everything would clobber the already
+       ;; propertized heads, so we have to scan for unpropertized spans.
+       (let ((result (eval format-statement)))
+         (cl-loop for i = (next-single-property-change i 'face result)
+                  with i = 0
+                  with last = 0
+                  while i
+                  if (get-char-property i 'face result)
+                  do (add-text-properties last i '(face hydra-default-face) result)
+                  do (setq last i)
+                  finally do (unless (get-char-property last 'face result)
+                               (add-text-properties
+                                last
+                                (length result)
+                                '(face hydra-default-face)
+                                result))
+                  finally return result)))))
 
 (defun hydra--complain (format-string &rest args)
   "Forward to (`message' FORMAT-STRING ARGS) unless `hydra-verbose' is nil."
