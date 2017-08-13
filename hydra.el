@@ -501,7 +501,7 @@ Works for heads without a property :column."
     (dolist (h heads)
       (let ((val (assoc (cadr h) alist))
             (pstr (hydra-fontify-head h body)))
-        (unless (null (cl-caddr h))
+        (unless (not (stringp (cl-caddr h)))
           (if val
               (setf (cadr val)
                     (concat (cadr val) " " pstr))
