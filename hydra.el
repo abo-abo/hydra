@@ -639,91 +639,92 @@ HEAD's binding is returned as a string wrapped with [] or {}."
 \"%`...\" expressions are extracted into \"%S\".
 _NAME, BODY, DOCSTRING and HEADS are parameters of `defhydra'.
 The expressions can be auto-expanded according to NAME."
-  (setq docstring (hydra--strip-align-markers docstring))
-  (setq docstring (replace-regexp-in-string "___" "_β_" docstring))
-  (let ((rest (if (eq (plist-get (cddr body) :hint) 'none)
-                  ""
-                (hydra--hint body heads)))
-        (start 0)
-        varlist
-        offset)
-    (while (setq start
-                 (string-match
-                  (format
-                   "\\(?:%%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:[_?]\\(%s\\)\\(%s\\)[_?]\\)"
-                   hydra-width-spec-regex
-                   hydra-key-regex)
-                  docstring start))
-      (cond ((eq ?? (aref (match-string 0 docstring) 0))
-             (let* ((key (match-string 4 docstring))
-                    (head (assoc key heads)))
-               (if head
-                   (progn
-                     (push (nth 2 head) varlist)
-                     (setq docstring
-                           (replace-match
-                            (or
-                             hydra-doc-format-spec
-                             (concat "%" (match-string 3 docstring) "s"))
-                            t nil docstring)))
-                 (setq start (match-end 0))
-                 (warn "Unrecognized key: ?%s?" key))))
-            ((eq ?_ (aref (match-string 0 docstring) 0))
-             (let* ((key (match-string 4 docstring))
-                    (key (if (equal key "β") "_" key))
-                    normal-key
-                    (head (or (assoc key heads)
-                              (when (setq normal-key
-                                          (cdr (assoc
-                                                key hydra-docstring-keys-translate-alist)))
-                                (assoc normal-key heads)))))
-               (if head
-                   (progn
-                     (push (hydra-fontify-head (if normal-key
-                                                   (cons key (cdr head))
-                                                 head)
-                                               body)
-                           varlist)
-                     (let ((replacement
-                            (or
-                             hydra-key-format-spec
-                             (concat "%" (match-string 3 docstring) "s"))))
+  (unless (memq 'elisp--witness--lisp (mapcar #'cadr heads))
+    (setq docstring (hydra--strip-align-markers docstring))
+    (setq docstring (replace-regexp-in-string "___" "_β_" docstring))
+    (let ((rest (if (eq (plist-get (cddr body) :hint) 'none)
+                    ""
+                  (hydra--hint body heads)))
+          (start 0)
+          varlist
+          offset)
+      (while (setq start
+                   (string-match
+                    (format
+                     "\\(?:%%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:[_?]\\(%s\\)\\(%s\\)[_?]\\)"
+                     hydra-width-spec-regex
+                     hydra-key-regex)
+                    docstring start))
+        (cond ((eq ?? (aref (match-string 0 docstring) 0))
+               (let* ((key (match-string 4 docstring))
+                      (head (assoc key heads)))
+                 (if head
+                     (progn
+                       (push (nth 2 head) varlist)
                        (setq docstring
-                             (replace-match replacement t nil docstring))
-                       (setq start (+ start (length replacement)))))
-                 (setq start (match-end 0))
-                 (warn "Unrecognized key: _%s_" key))))
+                             (replace-match
+                              (or
+                               hydra-doc-format-spec
+                               (concat "%" (match-string 3 docstring) "s"))
+                              t nil docstring)))
+                   (setq start (match-end 0))
+                   (warn "Unrecognized key: ?%s?" key))))
+              ((eq ?_ (aref (match-string 0 docstring) 0))
+               (let* ((key (match-string 4 docstring))
+                      (key (if (equal key "β") "_" key))
+                      normal-key
+                      (head (or (assoc key heads)
+                                (when (setq normal-key
+                                            (cdr (assoc
+                                                  key hydra-docstring-keys-translate-alist)))
+                                  (assoc normal-key heads)))))
+                 (if head
+                     (progn
+                       (push (hydra-fontify-head (if normal-key
+                                                     (cons key (cdr head))
+                                                   head)
+                                                 body)
+                             varlist)
+                       (let ((replacement
+                              (or
+                               hydra-key-format-spec
+                               (concat "%" (match-string 3 docstring) "s"))))
+                         (setq docstring
+                               (replace-match replacement t nil docstring))
+                         (setq start (+ start (length replacement)))))
+                   (setq start (match-end 0))
+                   (warn "Unrecognized key: _%s_" key))))
 
-            (t
-             (let* ((varp (if (eq ?` (aref (match-string 2 docstring) 0)) 1 0))
-                    (spec (match-string 1 docstring))
-                    (lspec (length spec)))
-               (setq offset
-                     (with-temp-buffer
-                       (insert (substring docstring (+ 1 start varp
-                                                       (length spec))))
-                       (goto-char (point-min))
-                       (push (read (current-buffer)) varlist)
-                       (- (point) (point-min))))
-               (when (or (zerop lspec)
-                         (/= (aref spec (1- (length spec))) ?s))
-                 (setq spec (concat spec "S")))
-               (setq docstring
-                     (concat
-                      (substring docstring 0 start)
-                      "%" spec
-                      (substring docstring (+ start offset 1 lspec varp))))))))
-    (if (eq ?\n (aref docstring 0))
-        `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
-                 ,rest)
-      (let ((r `(replace-regexp-in-string
-                 " +$" ""
-                 (concat ,docstring ": "
-                         (replace-regexp-in-string
-                          "\\(%\\)" "\\1\\1" ,rest)))))
-        (if (stringp rest)
-            `(format ,(eval r))
-          `(format ,r))))))
+              (t
+               (let* ((varp (if (eq ?` (aref (match-string 2 docstring) 0)) 1 0))
+                      (spec (match-string 1 docstring))
+                      (lspec (length spec)))
+                 (setq offset
+                       (with-temp-buffer
+                         (insert (substring docstring (+ 1 start varp
+                                                         (length spec))))
+                         (goto-char (point-min))
+                         (push (read (current-buffer)) varlist)
+                         (- (point) (point-min))))
+                 (when (or (zerop lspec)
+                           (/= (aref spec (1- (length spec))) ?s))
+                   (setq spec (concat spec "S")))
+                 (setq docstring
+                       (concat
+                        (substring docstring 0 start)
+                        "%" spec
+                        (substring docstring (+ start offset 1 lspec varp))))))))
+      (if (eq ?\n (aref docstring 0))
+          `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
+                   ,rest)
+        (let ((r `(replace-regexp-in-string
+                   " +$" ""
+                   (concat ,docstring ": "
+                           (replace-regexp-in-string
+                            "\\(%\\)" "\\1\\1" ,rest)))))
+          (if (stringp rest)
+              `(format ,(eval r))
+            `(format ,r)))))))
 
 (defun hydra--complain (format-string &rest args)
   "Forward to (`message' FORMAT-STRING ARGS) unless `hydra-verbose' is nil."
