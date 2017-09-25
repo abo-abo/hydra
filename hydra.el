@@ -631,7 +631,7 @@ HEAD's binding is returned as a string wrapped with [] or {}."
 (defconst hydra-width-spec-regex " ?-?[0-9]*?"
   "Regex for the width spec in keys and %` quoted sexps.")
 
-(defvar hydra-key-regex "\\[\\|]\\|[-[:alnum:] ~.,;:/|?<>={}*+#%@!&^↑↓←→⌫⌦⏎'`()\"$]+?"
+(defvar hydra-key-regex "\\[\\|]\\|[-\\[:alnum:] ~.,;:/|?<>={}*+#%@!&^↑↓←→⌫⌦⏎'`()\"$]+?"
   "Regex for the key quoted in the docstring.")
 
 (defun hydra--format (_name body docstring heads)
