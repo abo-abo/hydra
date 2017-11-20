@@ -1078,7 +1078,8 @@ Each head must have a property max-key-len and max-doc-len."
                  (mapconcat (lambda (head)
                               (funcall hydra-key-doc-function
                                        (hydra-fontify-head head body) ;; key
-                                       (hydra--head-property head :max-key-len)
+                                       (let ((n (hydra--head-property head :max-key-len)))
+                                         (+ n (cl-count ?% (car head))))
                                        (nth 2 head) ;; doc
                                        (hydra--head-property head :max-doc-len)))
                             heads-in-row "| "))
