@@ -485,8 +485,8 @@ Return DEFAULT if PROP is not in H."
 (defun hydra-key-doc-function-default (key key-width doc doc-width)
   "Doc"
   (cond
-   ((equal key " ") (format (format "%%-%ds" (+ 3 key-width doc-width)) doc))
-   (t (format (format "%%%ds: %%%ds" key-width (- -1 doc-width)) key doc))))
+    ((equal key " ") (format (format "%%-%ds" (+ 3 key-width doc-width)) doc))
+    (t (format (format "%%%ds: %%%ds" key-width (- -1 doc-width)) key doc))))
 
 (defun hydra--to-string (x)
   (if (stringp x)
@@ -1044,21 +1044,22 @@ Each head is decorated with 2 new properties max-doc-len and max-key-len
 representing the maximum dimension of their owning group.
  Every heads-group have equal length by adding padding heads where applicable."
   (when heads-groups
-    (cl-loop for heads-group in (hydra--pad-heads heads-groups '(" " nil " " :exit t))
-             for column-name = (hydra--head-property (nth 0 heads-group) :column)
-             for max-key-len = (apply #'max (mapcar (lambda (x) (length (car x))) heads-group))
-             for max-doc-len = (apply #'max
-                                      (length column-name)
-                                      (mapcar (lambda (x) (length (hydra--to-string (nth 2 x)))) heads-group))
-             for header-virtual-head = `(" " nil ,column-name :column ,column-name :exit t)
-             for separator-virtual-head = `(" " nil ,(make-string (+ 2 max-doc-len max-key-len) ?-) :column ,column-name :exit t)
-             for decorated-heads = (copy-tree (apply 'list header-virtual-head separator-virtual-head heads-group))
-             collect (mapcar (lambda (it)
-                               (hydra--head-set-property it :max-key-len max-key-len)
-                               (hydra--head-set-property it :max-doc-len max-doc-len))
-                             decorated-heads)
-             into decorated-heads-matrix
-             finally return decorated-heads-matrix)))
+    (cl-loop
+       for heads-group in (hydra--pad-heads heads-groups '(" " nil " " :exit t))
+       for column-name = (hydra--head-property (nth 0 heads-group) :column)
+       for max-key-len = (apply #'max (mapcar (lambda (x) (length (car x))) heads-group))
+       for max-doc-len = (apply #'max
+                                (length column-name)
+                                (mapcar (lambda (x) (length (hydra--to-string (nth 2 x)))) heads-group))
+       for header-virtual-head = `(" " nil ,column-name :column ,column-name :exit t)
+       for separator-virtual-head = `(" " nil ,(make-string (+ 2 max-doc-len max-key-len) ?-) :column ,column-name :exit t)
+       for decorated-heads = (copy-tree (apply 'list header-virtual-head separator-virtual-head heads-group))
+       collect (mapcar (lambda (it)
+                         (hydra--head-set-property it :max-key-len max-key-len)
+                         (hydra--head-set-property it :max-doc-len max-doc-len))
+                       decorated-heads)
+       into decorated-heads-matrix
+       finally return decorated-heads-matrix)))
 
 (defun hydra--hint-from-matrix (body heads-matrix)
   "Generate a formated table-style docstring according to BODY and HEADS-MATRIX.
@@ -1066,21 +1067,25 @@ HEADS-MATRIX is expected to be a list of heads with following features:
 Each heads must have the same length
 Each head must have a property max-key-len and max-doc-len."
   (when heads-matrix
-    (cl-loop with first-heads-col = (nth 0 heads-matrix)
-             with last-row-index = (- (length first-heads-col) 1)
-             for row-index from 0 to last-row-index
-             for heads-in-row = (mapcar (lambda (heads) (nth row-index heads)) heads-matrix)
-             concat (concat
-                     (replace-regexp-in-string "\s+$" ""
-                                               (mapconcat (lambda (head)
-                                                            (funcall hydra-key-doc-function
-                                                                     (hydra-fontify-head head body) ;; key
-                                                                     (hydra--head-property head :max-key-len)
-                                                                     (nth 2 head) ;; doc
-                                                                     (hydra--head-property head :max-doc-len)))
-                                                          heads-in-row "| ")) "\n")
-             into matrix-image
-             finally return matrix-image)))
+    (let* ((first-heads-col (nth 0 heads-matrix))
+           (last-row-index (- (length first-heads-col) 1))
+           (lines nil))
+      (dolist (row-index (number-sequence 0 last-row-index))
+        (let ((heads-in-row (mapcar
+                             (lambda (heads) (nth row-index heads))
+                             heads-matrix)))
+          (push (replace-regexp-in-string
+                 "\s+$" ""
+                 (mapconcat (lambda (head)
+                              (funcall hydra-key-doc-function
+                                       (hydra-fontify-head head body) ;; key
+                                       (hydra--head-property head :max-key-len)
+                                       (nth 2 head) ;; doc
+                                       (hydra--head-property head :max-doc-len)))
+                            heads-in-row "| "))
+                lines)))
+      (concat (mapconcat #'identity (nreverse lines) "\n") "\n"))))
+
 ;; previous functions dealt with automatic docstring table generation from :column head property
 
 (defun hydra-idle-message (secs hint name)
