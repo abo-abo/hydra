@@ -1061,21 +1061,21 @@ _f_ auto-fill-mode:    %`auto-fill-function
   (should
    (equal (hydra--format
            nil nil "\n_-_: mark          _u_: unmark\n"
-           '(("-" Buffer-menu-mark)
-             ("u" Buffer-menu-unmark)))
+           '(("-" Buffer-menu-mark nil)
+             ("u" Buffer-menu-unmark nil)))
           '(concat
-           (format
-            "%s: mark          %s: unmark\n"
-            #("-" 0 1 (face hydra-face-red))
-            #("u" 0 1 (face hydra-face-red)))
+            (format
+             "%s: mark          %s: unmark\n"
+             #("-" 0 1 (face hydra-face-red))
+             #("u" 0 1 (face hydra-face-red)))
             ""))))
 
 (ert-deftest hydra-format-6 ()
   (should
    (equal (hydra--format
            nil nil "\n[_]_] forward [_[_] backward\n"
-           '(("]" forward-char)
-             ("[" backward-char)))
+           '(("]" forward-char nil)
+             ("[" backward-char nil)))
           '(concat
             (format
              "[%s] forward [%s] backward\n"
