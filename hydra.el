@@ -1044,22 +1044,21 @@ Each head is decorated with 2 new properties max-doc-len and max-key-len
 representing the maximum dimension of their owning group.
  Every heads-group have equal length by adding padding heads where applicable."
   (when heads-groups
-    (cl-loop
-       for heads-group in (hydra--pad-heads heads-groups '(" " nil " " :exit t))
-       for column-name = (hydra--head-property (nth 0 heads-group) :column)
-       for max-key-len = (apply #'max (mapcar (lambda (x) (length (car x))) heads-group))
-       for max-doc-len = (apply #'max
-                                (length column-name)
-                                (mapcar (lambda (x) (length (hydra--to-string (nth 2 x)))) heads-group))
-       for header-virtual-head = `(" " nil ,column-name :column ,column-name :exit t)
-       for separator-virtual-head = `(" " nil ,(make-string (+ 2 max-doc-len max-key-len) ?-) :column ,column-name :exit t)
-       for decorated-heads = (copy-tree (apply 'list header-virtual-head separator-virtual-head heads-group))
-       collect (mapcar (lambda (it)
-                         (hydra--head-set-property it :max-key-len max-key-len)
-                         (hydra--head-set-property it :max-doc-len max-doc-len))
-                       decorated-heads)
-       into decorated-heads-matrix
-       finally return decorated-heads-matrix)))
+    (let ((res nil))
+      (dolist (heads-group (hydra--pad-heads heads-groups '(" " nil " " :exit t)))
+        (let* ((column-name (hydra--head-property (nth 0 heads-group) :column))
+               (max-key-len (apply #'max (mapcar (lambda (x) (length (car x))) heads-group)))
+               (max-doc-len (apply #'max
+                                   (length column-name)
+                                   (mapcar (lambda (x) (length (hydra--to-string (nth 2 x)))) heads-group)))
+               (header-virtual-head `(" " nil ,column-name :column ,column-name :exit t))
+               (separator-virtual-head `(" " nil ,(make-string (+ 2 max-doc-len max-key-len) ?-) :column ,column-name :exit t))
+               (decorated-heads (copy-tree (apply 'list header-virtual-head separator-virtual-head heads-group))))
+          (push (mapcar (lambda (it)
+                          (hydra--head-set-property it :max-key-len max-key-len)
+                          (hydra--head-set-property it :max-doc-len max-doc-len))
+                        decorated-heads) res)))
+      (nreverse res))))
 
 (defun hydra--hint-from-matrix (body heads-matrix)
   "Generate a formated table-style docstring according to BODY and HEADS-MATRIX.
