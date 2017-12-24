@@ -399,7 +399,7 @@ Here's an example of the last option:
 ### `head-hint`
 
 In case of a large body docstring, you usually don't want the head hint to show up, since
-you've already documented it the the body docstring.
+you've already documented it in the body docstring.
 You can set the head hint to `nil` to do this.
 
 Example:
