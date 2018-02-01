@@ -738,15 +738,14 @@ BODY-KEY is the body key binding.
 BODY-NAME is the symbol that identifies the Hydra.
 HEADS is a list of heads."
   (format
-   "Create a hydra with %s body and the heads:\n\n%s\n\n%s"
-   (if body-key
-       (format "a \"%s\"" body-key)
-     "no")
+   "The heads for the associated hydra are:\n\n%s\n\n%s%s."
    (mapconcat
     (lambda (x)
       (format "\"%s\":    `%S'" (car x) (cadr x)))
     heads ",\n")
-   (format "The body can be accessed via `%S'." body-name)))
+   (format "The body can be accessed via `%S'" body-name)
+   (when body-key
+     (format ", which is bound to \"%s\"" body-key))))
 
 (defun hydra--call-interactively-remap-maybe (cmd)
   "`call-interactively' the given CMD or its remapped equivalent.
@@ -783,8 +782,10 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                (hydra--make-callable
                 (cadr head))))
         (doc (if (car head)
-                 (format "%s\n\nCall the head: `%S'." doc (cadr head))
-               doc))
+                 (format "Call the head `%S' in the \"%s\" hydra.\n\n%s"
+                         (cadr head) name doc)
+               (format "Call the body in the \"%s\" hydra.\n\n%s"
+                       name doc)))
         (hint (intern (format "%S/hint" name)))
         (body-foreign-keys (hydra--body-foreign-keys body))
         (body-timeout (plist-get body :timeout))
