@@ -744,8 +744,9 @@ HEADS is a list of heads."
       (format "\"%s\":    `%S'" (car x) (cadr x)))
     heads ",\n")
    (format "The body can be accessed via `%S'" body-name)
-   (when body-key
-     (format ", which is bound to \"%s\"" body-key))))
+   (if body-key
+       (format ", which is bound to \"%s\"" body-key)
+     "")))
 
 (defun hydra--call-interactively-remap-maybe (cmd)
   "`call-interactively' the given CMD or its remapped equivalent.
