@@ -794,6 +794,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
     `(defun ,cmd-name ()
        ,doc
        (interactive)
+       (require 'hydra)
        (hydra-default-pre)
        ,@(when body-pre (list body-pre))
        ,@(if (hydra--head-property head :exit)
