@@ -115,6 +115,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-error/body', which is bound to \"M-g\"."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (let ((hydra--ignore t))
           (hydra-keyboard-quit)
@@ -151,6 +152,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-error/body', which is bound to \"M-g\"."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (let ((hydra--ignore t))
           (hydra-keyboard-quit)
@@ -187,6 +189,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-error/body', which is bound to \"M-g\"."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (let ((hydra--ignore t))
           (hydra-keyboard-quit)
@@ -236,6 +239,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-error/body', which is bound to \"M-g\"."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (let ((hydra--ignore nil))
           (hydra-keyboard-quit)
@@ -335,6 +339,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-toggle/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (hydra-keyboard-quit)
         (setq hydra-curr-body-fn
@@ -357,6 +362,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-toggle/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (hydra-keyboard-quit)
         (setq hydra-curr-body-fn
@@ -378,6 +384,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-toggle/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (hydra-keyboard-quit)
         (setq hydra-curr-body-fn
@@ -399,6 +406,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-toggle/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (hydra-keyboard-quit)
         (setq hydra-curr-body-fn
@@ -415,6 +423,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-toggle/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (let ((hydra--ignore nil))
           (hydra-keyboard-quit)
@@ -508,6 +517,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-vi/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (let ((hydra--ignore t))
@@ -544,6 +554,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-vi/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (let ((hydra--ignore t))
@@ -580,6 +591,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-vi/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (hydra-keyboard-quit)
@@ -596,6 +608,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-vi/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (set-cursor-color "#e52b50")
         (let ((hydra--ignore nil))
@@ -690,6 +703,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-zoom/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (let ((hydra--ignore t))
           (hydra-keyboard-quit)
@@ -725,6 +739,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-zoom/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (hydra-keyboard-quit)
         (setq hydra-curr-body-fn
@@ -745,6 +760,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-zoom/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (let ((hydra--ignore nil))
           (hydra-keyboard-quit)
@@ -838,6 +854,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-zoom/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (let ((hydra--ignore t))
           (hydra-keyboard-quit)
@@ -873,6 +890,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-zoom/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (hydra-keyboard-quit)
         (setq hydra-curr-body-fn
@@ -893,6 +911,7 @@ The heads for the associated hydra are:
 
 The body can be accessed via `hydra-zoom/body'."
         (interactive)
+        (require (quote hydra))
         (hydra-default-pre)
         (let ((hydra--ignore nil))
           (hydra-keyboard-quit)
