@@ -646,17 +646,18 @@ The expressions can be auto-expanded according to NAME."
                     ""
                   (hydra--hint body heads)))
           (start 0)
+          (inner-regex (format "\\(%s\\)\\(%s\\)" hydra-width-spec-regex hydra-key-regex))
           varlist
           offset)
       (while (setq start
                    (string-match
                     (format
-                     "\\(?:%%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:[_?]\\(%s\\)\\(%s\\)[_?]\\)"
-                     hydra-width-spec-regex
-                     hydra-key-regex)
+                     "\\(?:%%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_%s_\\)\\|\\(?:[?]%s[?]\\)"
+                     inner-regex
+                     inner-regex)
                     docstring start))
         (cond ((eq ?? (aref (match-string 0 docstring) 0))
-               (let* ((key (match-string 4 docstring))
+               (let* ((key (match-string 6 docstring))
                       (head (assoc key heads)))
                  (if head
                      (progn
