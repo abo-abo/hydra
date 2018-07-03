@@ -1544,7 +1544,7 @@ o: ok       | s: string
                         (nth 3
                              (macroexpand
                               '(defhydra hydra-window-order
-                                 (:color red :hint nil :timeout 4)
+                                 (:color red :timeout 4)
                                  ("z" ace-window "ace" :color blue :column "Switch")
                                  ("h" windmove-left "← window")
                                  ("j" windmove-down "↓ window")
@@ -1559,9 +1559,8 @@ o: ok       | s: string
                                  ("m" maximize-window "maximize current window")
                                  ("k" windmove-up "↑ window" :column "Switch")
                                  ("M" minimize-window "maximize current window" :column "1-Sizing")
-                                 ("q" nil "quit menu" :color blue :column nil)))))))
-                 #("hydra:
-Switch      | Split Management           | Undo/Redo           | 1-Sizing
+                                ("q" nil "quit menu" :color blue :column nil)))))))
+                 #("Switch      | Split Management           | Undo/Redo           | 1-Sizing
 ----------- | -------------------------- | ------------------- | --------------------------
 z: ace      | s: split window            | u: undo window conf | b: balance window height
 h: ← window | v: split window vertically | r: redo window conf | m: maximize current window

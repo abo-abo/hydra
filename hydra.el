@@ -715,17 +715,21 @@ The expressions can be auto-expanded according to NAME."
                         (substring docstring 0 start)
                         "%" spec
                         (substring docstring (+ start offset 1 lspec varp))))))))
-      (if (eq ?\n (aref docstring 0))
-          `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
-                   ,rest)
-        (let ((r `(replace-regexp-in-string
-                   " +$" ""
-                   (concat ,docstring ": "
-                           (replace-regexp-in-string
-                            "\\(%\\)" "\\1\\1" ,rest)))))
-          (if (stringp rest)
-              `(format ,(eval r))
-            `(format ,r)))))))
+      (cond
+        ((string= docstring "")
+         (substring rest 1))
+        ((eq ?\n (aref docstring 0))
+         `(concat (format ,(substring docstring 1) ,@(nreverse varlist))
+                  ,rest))
+        (t
+         (let ((r `(replace-regexp-in-string
+                    " +$" ""
+                    (concat ,docstring ": "
+                            (replace-regexp-in-string
+                             "\\(%\\)" "\\1\\1" ,rest)))))
+           (if (stringp rest)
+               `(format ,(eval r))
+             `(format ,r))))))))
 
 (defun hydra--complain (format-string &rest args)
   "Forward to (`message' FORMAT-STRING ARGS) unless `hydra-verbose' is nil."
@@ -1179,7 +1183,7 @@ result of `defhydra'."
          (setq docstring (concat "\n" (eval docstring))))
         (t
          (setq heads (cons docstring heads))
-         (setq docstring "hydra")))
+         (setq docstring "")))
   (when (keywordp (car body))
     (setq body (cons nil (cons nil body))))
   (condition-case-unless-debug err
