@@ -1558,13 +1558,13 @@ o: ok       | s: string
                                  ("b" balance-windows "balance window height" :column "1-Sizing")
                                  ("m" maximize-window "maximize current window")
                                  ("k" windmove-up "↑ window" :column "Switch")
-                                 ("M" minimize-window "maximize current window" :column "1-Sizing")
+                                 ("M" minimize-window "minimize current window" :column "1-Sizing")
                                 ("q" nil "quit menu" :color blue :column nil)))))))
                  #("Switch      | Split Management           | Undo/Redo           | 1-Sizing
 ----------- | -------------------------- | ------------------- | --------------------------
 z: ace      | s: split window            | u: undo window conf | b: balance window height
 h: ← window | v: split window vertically | r: redo window conf | m: maximize current window
-j: ↓ window | d: delete current window   |                     | M: maximize current window
+j: ↓ window | d: delete current window   |                     | M: minimize current window
 l: → window | f: toogle follow mode      |                     |
 k: ↑ window |                            |                     |
 [q]: quit menu."
