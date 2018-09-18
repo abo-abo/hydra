@@ -72,6 +72,7 @@ Only the background color is significant."
           (setq window-size-fixed t)
           (setq mode-line-format nil)
           (setq cursor-type nil)
+          (setq display-line-numbers nil)
           (set-window-dedicated-p lv-wnd t)
           (set-window-parameter lv-wnd 'no-other-window t))
         (select-window ori)))))
