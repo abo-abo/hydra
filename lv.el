@@ -54,6 +54,8 @@ Only the background color is significant."
 (defvar lv-wnd nil
   "Holds the current LV window.")
 
+(defvar display-line-numbers)
+
 (defun lv-window ()
   "Ensure that LV window is live and return it."
   (if (window-live-p lv-wnd)
