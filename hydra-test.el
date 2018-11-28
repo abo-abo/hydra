@@ -1466,6 +1466,29 @@ t: info-to"
                    314 315 (face hydra-face-blue)
                    322 323 (face hydra-face-blue)))))
 
+(ert-deftest hydra-columns-2 ()
+  (should (equal (eval
+                  (cadr
+                   (nth 2
+                        (nth 3
+                             (macroexpand
+                              '(defhydra hydra-foo (:color blue)
+                                "Silly hydra"
+                                ("x" forward-char "forward" :column "sideways")
+                                ("y" backward-char "back")
+                                ("a" next-line "down" :column "vertical")
+                                ("b" previous-line "up")))))))
+                 #("Silly hydra:
+sideways    | vertical
+----------- | -----------
+x: forward  | a: down
+y: back     | b: up
+"
+                   62 63 (face hydra-face-blue)
+                   76 77 (face hydra-face-blue)
+                   84 85 (face hydra-face-blue)
+                   98 99 (face hydra-face-blue)))))
+
 ;; checked:
 ;; basic rendering
 ;; column compatibility with ruby style and no colum specified

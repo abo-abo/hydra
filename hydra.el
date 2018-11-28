@@ -724,7 +724,13 @@ The expressions can be auto-expanded according to NAME."
         (t
          (let ((r `(replace-regexp-in-string
                     " +$" ""
-                    (concat ,docstring ": "
+                    (concat ,docstring
+                            ,(cond ((string-match-p "\\`\n" rest)
+                                    ":")
+                                   ((string-match-p "\n" rest)
+                                    ":\n")
+                                   (t
+                                    ": "))
                             (replace-regexp-in-string
                              "\\(%\\)" "\\1\\1" ,rest)))))
            (if (stringp rest)
