@@ -1,4 +1,8 @@
+# Hydra
+
 [![Build Status](https://travis-ci.org/abo-abo/hydra.svg?branch=master)](https://travis-ci.org/abo-abo/hydra)
+[![MELPA](https://melpa.org/packages/hydra-badge.svg)](https://melpa.org/#/hydra)
+[![MELPA Stable](https://stable.melpa.org/packages/hydra-badge.svg)](https://stable.melpa.org/#/hydra)
 
 This is a package for GNU Emacs that can be used to tie related commands into a family of short
 bindings with a common prefix - a Hydra.
