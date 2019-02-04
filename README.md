@@ -428,3 +428,6 @@ Here's a list of body keys that can be overridden in each head:
 - `:color`
 - `:bind`
 - `:column`
+
+Use `:column` feature to have an aligned rectangular docstring without defining it manually.
+See [hydra-examples.el](https://github.com/abo-abo/hydra/blob/05871dd6c8af7b2268bd1a10eb9f8a3e423209cd/hydra-examples.el#L337) for an example code.
