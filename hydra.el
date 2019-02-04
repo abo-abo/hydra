@@ -454,7 +454,7 @@ Remove :color key. And sort the plist alphabetically."
            (alist2 (cl-sort alist1 #'string<
                             :key (lambda (x) (symbol-name (car x))))))
       (append (list (car body) (cadr body))
-              (mapcan (lambda (x) (list (car x) (cdr x))) alist2)))))
+              (cl-mapcan (lambda (x) (list (car x) (cdr x))) alist2)))))
 
 (defalias 'hydra--imf #'list)
 
