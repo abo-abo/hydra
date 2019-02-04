@@ -427,3 +427,4 @@ Here's a list of body keys that can be overridden in each head:
 - `:exit`
 - `:color`
 - `:bind`
+- `:column`

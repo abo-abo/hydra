@@ -333,6 +333,13 @@ _y_: ?y? year       _q_: quit           _L__l__c_: log = ?l?"
 ;; Recommended binding:
 ;; (define-key org-agenda-mode-map "v" 'hydra-org-agenda-view/body)
 
+;;** Example 13: automatic columns
+(defhydra hydra-movement ()
+  ("j" next-line "down" :column "Vertical")
+  ("k" previous-line "up")
+  ("l" forward-char "forward" :column "Horizontal")
+  ("h" backward-char "back"))
+
 ;;* Helpers
 (require 'windmove)
 

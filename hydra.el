@@ -1182,7 +1182,7 @@ nil.  If you don't even want the KEY to be printed, set HINT
 explicitly to nil.
 
 The heads inherit their PLIST from BODY-PLIST and are allowed to
-override some keys.  The keys recognized are :exit and :bind.
+override some keys.  The keys recognized are :exit, :bind, and :column.
 :exit can be:
 
 - nil (default): this head will continue the Hydra state.
@@ -1191,6 +1191,8 @@ override some keys.  The keys recognized are :exit and :bind.
 :bind can be:
 - nil: this head will not be bound in BODY-MAP.
 - a lambda taking KEY and CMD used to bind a head.
+
+:column is a string that sets the column for all subsequent heads.
 
 It is possible to omit both BODY-MAP and BODY-KEY if you don't
 want to bind anything.  In that case, typically you will bind the
