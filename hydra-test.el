@@ -41,6 +41,35 @@
        ("SPC" hydra-repeat "rep" :bind nil)))
     '(progn
       (set
+       (defvar hydra-error/params nil
+         "Params of hydra-error.")
+       (quote (global-map "M-g")))
+      (set
+       (defvar hydra-error/docstring nil
+         "Docstring of hydra-error.")
+       "error")
+      (set
+       (defvar hydra-error/heads nil
+         "Heads for hydra-error.")
+       (quote
+        (("h"
+          first-error
+          "first"
+          :exit nil)
+         ("j"
+          next-error
+          "next"
+          :exit nil)
+         ("k"
+          previous-error
+          "prev"
+          :exit nil)
+         ("SPC"
+          hydra-repeat
+          "rep"
+          :bind nil
+          :exit nil))))
+      (set
        (defvar hydra-error/keymap nil
          "Keymap for hydra-error.")
        (quote
@@ -72,27 +101,6 @@
          (48 . hydra--digit-argument)
          (45 . hydra--negative-argument)
          (21 . hydra--universal-argument))))
-      (set
-       (defvar hydra-error/heads nil
-         "Heads for hydra-error.")
-       (quote
-        (("h"
-          first-error
-          "first"
-          :exit nil)
-         ("j"
-          next-error
-          "next"
-          :exit nil)
-         ("k"
-          previous-error
-          "prev"
-          :exit nil)
-         ("SPC"
-          hydra-repeat
-          "rep"
-          :bind nil
-          :exit nil))))
       (set
        (defvar hydra-error/hint nil
          "Dynamic hint for hydra-error.")
@@ -269,6 +277,35 @@ The body can be accessed via `hydra-error/body', which is bound to \"M-g\"."
        ("q" nil "cancel")))
     '(progn
       (set
+       (defvar hydra-toggle/params nil
+         "Params of hydra-toggle.")
+       (quote
+        (nil
+         nil
+         :exit t
+         :foreign-keys nil)))
+      (set
+       (defvar hydra-toggle/docstring nil
+         "Docstring of hydra-toggle.")
+       "toggle")
+      (set
+       (defvar hydra-toggle/heads nil
+         "Heads for hydra-toggle.")
+       (quote
+        (("t"
+          toggle-truncate-lines
+          "truncate"
+          :exit t)
+         ("f"
+          auto-fill-mode
+          "fill"
+          :exit t)
+         ("a"
+          abbrev-mode
+          "abbrev"
+          :exit t)
+         ("q" nil "cancel" :exit t))))
+      (set
        (defvar hydra-toggle/keymap nil
          "Keymap for hydra-toggle.")
        (quote
@@ -300,23 +337,6 @@ The body can be accessed via `hydra-error/body', which is bound to \"M-g\"."
          (48 . hydra--digit-argument)
          (45 . hydra--negative-argument)
          (21 . hydra--universal-argument))))
-      (set
-       (defvar hydra-toggle/heads nil
-         "Heads for hydra-toggle.")
-       (quote
-        (("t"
-          toggle-truncate-lines
-          "truncate"
-          :exit t)
-         ("f"
-          auto-fill-mode
-          "fill"
-          :exit t)
-         ("a"
-          abbrev-mode
-          "abbrev"
-          :exit t)
-         ("q" nil "cancel" :exit t))))
       (set
        (defvar hydra-toggle/hint nil
          "Dynamic hint for hydra-toggle.")
@@ -457,6 +477,30 @@ The body can be accessed via `hydra-toggle/body'."
        ("q" nil "quit")))
     '(progn
       (set
+       (defvar hydra-vi/params nil
+         "Params of hydra-vi.")
+       (quote
+        (nil
+         nil
+         :exit nil
+         :foreign-keys warn
+         :post (set-cursor-color "#ffffff")
+         :pre (set-cursor-color "#e52b50"))))
+      (set
+       (defvar hydra-vi/docstring nil
+         "Docstring of hydra-vi.")
+       "vi")
+      (set
+       (defvar hydra-vi/heads nil
+         "Heads for hydra-vi.")
+       (quote
+        (("j" next-line "" :exit nil)
+         ("k"
+          previous-line
+          ""
+          :exit nil)
+         ("q" nil "quit" :exit t))))
+      (set
        (defvar hydra-vi/keymap nil
          "Keymap for hydra-vi.")
        (quote
@@ -487,16 +531,6 @@ The body can be accessed via `hydra-toggle/body'."
          (48 . hydra--digit-argument)
          (45 . hydra--negative-argument)
          (21 . hydra--universal-argument))))
-      (set
-       (defvar hydra-vi/heads nil
-         "Heads for hydra-vi.")
-       (quote
-        (("j" next-line "" :exit nil)
-         ("k"
-          previous-line
-          ""
-          :exit nil)
-         ("q" nil "quit" :exit t))))
       (set
        (defvar hydra-vi/hint nil
          "Dynamic hint for hydra-vi.")
@@ -638,6 +672,32 @@ The body can be accessed via `hydra-vi/body'."
        ("1" (text-scale-set 0) nil :bind nil :exit t)))
     '(progn
       (set
+       (defvar hydra-zoom/params nil
+         "Params of hydra-zoom.")
+       (quote (nil nil)))
+      (set
+       (defvar hydra-zoom/docstring nil
+         "Docstring of hydra-zoom.")
+       "zoom")
+      (set
+       (defvar hydra-zoom/heads nil
+         "Heads for hydra-zoom.")
+       (quote
+        (("r"
+          (text-scale-set 0)
+          "reset"
+          :exit nil)
+         ("0"
+          (text-scale-set 0)
+          ""
+          :bind nil
+          :exit t)
+         ("1"
+          (text-scale-set 0)
+          nil
+          :bind nil
+          :exit t))))
+      (set
        (defvar hydra-zoom/keymap nil
          "Keymap for hydra-zoom.")
        (quote
@@ -666,24 +726,6 @@ The body can be accessed via `hydra-vi/body'."
          (48 . hydra-zoom/lambda-0-and-exit)
          (45 . hydra--negative-argument)
          (21 . hydra--universal-argument))))
-      (set
-       (defvar hydra-zoom/heads nil
-         "Heads for hydra-zoom.")
-       (quote
-        (("r"
-          (text-scale-set 0)
-          "reset"
-          :exit nil)
-         ("0"
-          (text-scale-set 0)
-          ""
-          :bind nil
-          :exit t)
-         ("1"
-          (text-scale-set 0)
-          nil
-          :bind nil
-          :exit t))))
       (set
        (defvar hydra-zoom/hint nil
          "Dynamic hint for hydra-zoom.")
@@ -789,6 +831,32 @@ The body can be accessed via `hydra-zoom/body'."
        ("1" (text-scale-set 0) nil :bind nil)))
     '(progn
       (set
+       (defvar hydra-zoom/params nil
+         "Params of hydra-zoom.")
+       (quote (nil nil)))
+      (set
+       (defvar hydra-zoom/docstring nil
+         "Docstring of hydra-zoom.")
+       "zoom")
+      (set
+       (defvar hydra-zoom/heads nil
+         "Heads for hydra-zoom.")
+       (quote
+        (("r"
+          (text-scale-set 0)
+          "reset"
+          :exit nil)
+         ("0"
+          (text-scale-set 0)
+          ""
+          :bind nil
+          :exit t)
+         ("1"
+          (text-scale-set 0)
+          nil
+          :bind nil
+          :exit nil))))
+      (set
        (defvar hydra-zoom/keymap nil
          "Keymap for hydra-zoom.")
        (quote
@@ -817,24 +885,6 @@ The body can be accessed via `hydra-zoom/body'."
          (48 . hydra-zoom/lambda-0-and-exit)
          (45 . hydra--negative-argument)
          (21 . hydra--universal-argument))))
-      (set
-       (defvar hydra-zoom/heads nil
-         "Heads for hydra-zoom.")
-       (quote
-        (("r"
-          (text-scale-set 0)
-          "reset"
-          :exit nil)
-         ("0"
-          (text-scale-set 0)
-          ""
-          :bind nil
-          :exit t)
-         ("1"
-          (text-scale-set 0)
-          nil
-          :bind nil
-          :exit nil))))
       (set
        (defvar hydra-zoom/hint nil
          "Dynamic hint for hydra-zoom.")
@@ -1194,62 +1244,62 @@ _f_ auto-fill-mode:    %`auto-fill-function
 (ert-deftest hydra-compat-colors-2 ()
   (should
    (equal
-    (macroexpand
-     '(defhydra hydra-test (:color amaranth)
-       ("a" fun-a)
-       ("b" fun-b :color blue)
-       ("c" fun-c :color blue)
-       ("d" fun-d :color blue)
-       ("e" fun-e :color blue)
-       ("f" fun-f :color blue)))
-    (macroexpand
-     '(defhydra hydra-test (:color teal)
-       ("a" fun-a :color red)
-       ("b" fun-b)
-       ("c" fun-c)
-       ("d" fun-d)
-       ("e" fun-e)
-       ("f" fun-f))))))
+    (cddr (macroexpand
+           '(defhydra hydra-test (:color amaranth)
+             ("a" fun-a)
+             ("b" fun-b :color blue)
+             ("c" fun-c :color blue)
+             ("d" fun-d :color blue)
+             ("e" fun-e :color blue)
+             ("f" fun-f :color blue))))
+    (cddr (macroexpand
+           '(defhydra hydra-test (:color teal)
+             ("a" fun-a :color red)
+             ("b" fun-b)
+             ("c" fun-c)
+             ("d" fun-d)
+             ("e" fun-e)
+             ("f" fun-f)))))))
 
 (ert-deftest hydra-compat-colors-3 ()
   (should
    (equal
-    (macroexpand
-     '(defhydra hydra-test ()
-       ("a" fun-a)
-       ("b" fun-b :color blue)
-       ("c" fun-c :color blue)
-       ("d" fun-d :color blue)
-       ("e" fun-e :color blue)
-       ("f" fun-f :color blue)))
-    (macroexpand
-     '(defhydra hydra-test (:color blue)
-       ("a" fun-a :color red)
-       ("b" fun-b)
-       ("c" fun-c)
-       ("d" fun-d)
-       ("e" fun-e)
-       ("f" fun-f))))))
+    (cddr (macroexpand
+           '(defhydra hydra-test ()
+             ("a" fun-a)
+             ("b" fun-b :color blue)
+             ("c" fun-c :color blue)
+             ("d" fun-d :color blue)
+             ("e" fun-e :color blue)
+             ("f" fun-f :color blue))))
+    (cddr (macroexpand
+           '(defhydra hydra-test (:color blue)
+             ("a" fun-a :color red)
+             ("b" fun-b)
+             ("c" fun-c)
+             ("d" fun-d)
+             ("e" fun-e)
+             ("f" fun-f)))))))
 
 (ert-deftest hydra-compat-colors-4 ()
   (should
    (equal
-    (macroexpand
-     '(defhydra hydra-test ()
-       ("a" fun-a)
-       ("b" fun-b :exit t)
-       ("c" fun-c :exit t)
-       ("d" fun-d :exit t)
-       ("e" fun-e :exit t)
-       ("f" fun-f :exit t)))
-    (macroexpand
-     '(defhydra hydra-test (:exit t)
-       ("a" fun-a :exit nil)
-       ("b" fun-b)
-       ("c" fun-c)
-       ("d" fun-d)
-       ("e" fun-e)
-       ("f" fun-f))))))
+    (cddr (macroexpand
+           '(defhydra hydra-test ()
+             ("a" fun-a)
+             ("b" fun-b :exit t)
+             ("c" fun-c :exit t)
+             ("d" fun-d :exit t)
+             ("e" fun-e :exit t)
+             ("f" fun-f :exit t))))
+    (cddr (macroexpand
+           '(defhydra hydra-test (:exit t)
+             ("a" fun-a :exit nil)
+             ("b" fun-b)
+             ("c" fun-c)
+             ("d" fun-d)
+             ("e" fun-e)
+             ("f" fun-f)))))))
 
 (ert-deftest hydra--pad ()
   (should (equal (hydra--pad '(a b c) 3)
@@ -1407,7 +1457,7 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
   (should (equal (eval
                   (cadr
                    (nth 2
-                        (nth 3
+                        (nth 5
                              (macroexpand
                               '(defhydra hydra-info (:color blue
                                                      :columns 3)
@@ -1470,7 +1520,7 @@ t: info-to"
   (should (equal (eval
                   (cadr
                    (nth 2
-                        (nth 3
+                        (nth 5
                              (macroexpand
                               '(defhydra hydra-foo (:color blue)
                                 "Silly hydra"
@@ -1498,7 +1548,7 @@ y: back     | b: up
   (should (equal (eval
                   (cadr
                    (nth 2
-                        (nth 3
+                        (nth 5
                              (macroexpand
                               '(defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
                                                           :color pink
@@ -1563,7 +1613,7 @@ o: ok       | s: string
   (should (equal (eval
                   (cadr
                    (nth 2
-                        (nth 3
+                        (nth 5
                              (macroexpand
                               '(defhydra hydra-window-order
                                 (:color red :timeout 4)
