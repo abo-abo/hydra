@@ -1656,6 +1656,28 @@ k: ↑ window |                            |                     |
                    512 513 (face hydra-face-red)
                    578 579 (face hydra-face-blue)))))
 
+(defhydra hydra-extendable ()
+  "extendable"
+  ("j" next-line "down"))
+
+(ert-deftest hydra-extend ()
+  (should (equal (macroexpand
+                  '(defhydra+ hydra-extendable ()
+                    ("k" previous-line "up")))
+                 (macroexpand
+                  '(defhydra hydra-extendable ()
+                    "extendable"
+                    ("j" next-line "down")
+                    ("k" previous-line "up")))))
+  (should (equal (macroexpand
+                  '(defhydra+ hydra-extendable ()
+                    ("k" previous-line "up" :exit t)))
+                 (macroexpand
+                  '(defhydra hydra-extendable ()
+                    "extendable"
+                    ("j" next-line "down")
+                    ("k" previous-line "up" :exit t))))))
+
 (provide 'hydra-test)
 
 ;;; hydra-test.el ends here

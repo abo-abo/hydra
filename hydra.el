@@ -1364,6 +1364,21 @@ result of `defhydra'."
      (hydra--complain "Error in defhydra %S: %s" name (cdr err))
      nil)))
 
+(defmacro defhydra+ (name body &optional docstring &rest heads)
+  "Redefine an existing hydra by adding new heads.
+Arguments are same as of `defhydra'."
+  (declare (indent 1))
+  (unless (stringp docstring)
+    (setq heads
+          (cons docstring heads))
+    (setq docstring nil))
+  `(defhydra ,name ,(or body (hydra--prop name "/params"))
+     ,(or docstring (hydra--prop name "/docstring"))
+     ,@(cl-delete-duplicates
+        (append (hydra--prop name "/heads") heads)
+        :key #'car
+        :test #'equal)))
+
 (defun hydra--prop (name prop-name)
   (symbol-value (intern (concat (symbol-name name) prop-name))))
 
