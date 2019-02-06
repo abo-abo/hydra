@@ -1367,7 +1367,7 @@ result of `defhydra'."
 (defmacro defhydra+ (name body &optional docstring &rest heads)
   "Redefine an existing hydra by adding new heads.
 Arguments are same as of `defhydra'."
-  (declare (indent 1))
+  (declare (indent defun) (doc-string 3))
   (unless (stringp docstring)
     (setq heads
           (cons docstring heads))
