@@ -1097,10 +1097,14 @@ _f_ auto-fill-mode:    %`auto-fill-function
     ("t" toggle-truncate-lines nil)
     ("w" whitespace-mode nil)
     ("q" nil "quit"))))
-           '(concat (format "%s abbrev-mode:       %S
+           '(format
+             "%s abbrev-mode:       %S
 %s debug-on-error:    %S
 %s auto-fill-mode:    %S
-" "{a}" abbrev-mode "{d}" debug-on-error "{f}" auto-fill-function) "[{q}]: quit."))))
+[{q}]: quit."
+             "{a}" abbrev-mode
+             "{d}" debug-on-error
+             "{f}" auto-fill-function))))
 
 (ert-deftest hydra-format-2 ()
   (should (equal
@@ -1112,7 +1116,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
               "\n  bar %s`foo\n"
               '(("a" (quote t) "" :cmd-name bar/lambda-a :exit nil)
                 ("q" nil "" :cmd-name bar/nil :exit t))))
-           '(concat (format "  bar %s\n" foo) "{a}, [q]."))))
+           '(format "  bar %s\n{a}, [q]." foo))))
 
 (ert-deftest hydra-format-3 ()
   (should (equal
@@ -1123,7 +1127,7 @@ _f_ auto-fill-mode:    %`auto-fill-function
               nil
               "\n_<SPC>_   ^^ace jump\n"
               '(("<SPC>" ace-jump-char-mode nil :cmd-name bar/ace-jump-char-mode))))
-           '(concat (format "%s   ace jump\n" "{<SPC>}") ""))))
+           '(format "%s   ace jump\n" "{<SPC>}"))))
 
 (ert-deftest hydra-format-4 ()
   (should
@@ -1132,9 +1136,9 @@ _f_ auto-fill-mode:    %`auto-fill-function
            '(nil nil :hint nil)
            "\n_j_,_k_"
            '(("j" nil nil :exit t) ("k" nil nil :exit t)))
-          '(concat (format "%s,%s"
-                    #("j" 0 1 (face hydra-face-blue))
-                    #("k" 0 1 (face hydra-face-blue))) ""))))
+          '(format "%s,%s"
+            #("j" 0 1 (face hydra-face-blue))
+            #("k" 0 1 (face hydra-face-blue))))))
 
 (ert-deftest hydra-format-5 ()
   (should
@@ -1142,12 +1146,10 @@ _f_ auto-fill-mode:    %`auto-fill-function
            nil nil "\n_-_: mark          _u_: unmark\n"
            '(("-" Buffer-menu-mark nil)
              ("u" Buffer-menu-unmark nil)))
-          '(concat
-            (format
-             "%s: mark          %s: unmark\n"
-             #("-" 0 1 (face hydra-face-red))
-             #("u" 0 1 (face hydra-face-red)))
-            ""))))
+          '(format
+            "%s: mark          %s: unmark\n"
+            #("-" 0 1 (face hydra-face-red))
+            #("u" 0 1 (face hydra-face-red))))))
 
 (ert-deftest hydra-format-6 ()
   (should
@@ -1155,16 +1157,14 @@ _f_ auto-fill-mode:    %`auto-fill-function
            nil nil "\n[_]_] forward [_[_] backward\n"
            '(("]" forward-char nil)
              ("[" backward-char nil)))
-          '(concat
-            (format
-             "[%s] forward [%s] backward\n"
-             #("]"
-               0 1 (face
-                    hydra-face-red))
-             #("["
-               0 1 (face
-                    hydra-face-red)))
-            ""))))
+          '(format
+            "[%s] forward [%s] backward\n"
+            #("]"
+              0 1 (face
+                   hydra-face-red))
+            #("["
+              0 1 (face
+                   hydra-face-red))))))
 
 (ert-deftest hydra-format-7 ()
   (should
@@ -1183,12 +1183,10 @@ _f_ auto-fill-mode:    %`auto-fill-function
    (equal
     (hydra--format nil nil "\n_%_ forward\n"
                    '(("%" forward-char nil :exit nil)))
-    '(concat
-      (format
-       "%s forward\n"
-       #("%%"
-         0 2 (face hydra-face-red)))
-      ""))))
+    '(format
+      "%s forward\n"
+      #("%%"
+        0 2 (face hydra-face-red))))))
 
 (ert-deftest hydra-format-8 ()
   (should
@@ -1205,11 +1203,28 @@ _f_ auto-fill-mode:    %`auto-fill-function
    (equal
     (hydra--format nil '(nil nil :hint nil) "\n_f_(foo)"
                    '(("f" forward-char nil :exit nil)))
+    '(format
+      "%s(foo)"
+      #("f" 0 1 (face hydra-face-red))))))
+
+(ert-deftest hydra-format-10 ()
+  (should
+   (equal
+    (hydra--format nil '(nil nil) "Test:"
+                   '(("j" next-line (format-time-string "%H:%M:%S" (current-time))
+                      :exit nil)))
     '(concat
-      (format
-       "%s(foo)"
-       #("f" 0 1 (face hydra-face-red)))
-      ""))))
+      (format "Test:\n")
+      (mapconcat
+       (function
+        hydra--eval-and-format)
+       (quote
+        ((#("j" 0 1 (face hydra-face-red))
+           format-time-string
+           "%H:%M:%S"
+           (current-time))))
+       ", ")
+      "."))))
 
 (ert-deftest hydra-format-with-sexp-1 ()
   (should (equal
@@ -1219,12 +1234,12 @@ _f_ auto-fill-mode:    %`auto-fill-function
               'hydra-toggle nil
               "\n_n_ narrow-or-widen-dwim %(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
               '(("n" narrow-to-region nil) ("q" nil "cancel" :exit t))))
-           '(concat (format "%s narrow-or-widen-dwim %Sasdf\n"
-                     "{n}"
-                     (progn
-                       (message "checking")
-                       (buffer-narrowed-p)))
-             "[[q]]: cancel."))))
+           '(format
+             "%s narrow-or-widen-dwim %Sasdf\n[[q]]: cancel."
+             "{n}"
+             (progn
+               (message "checking")
+               (buffer-narrowed-p))))))
 
 (ert-deftest hydra-format-with-sexp-2 ()
   (should (equal
@@ -1234,12 +1249,12 @@ _f_ auto-fill-mode:    %`auto-fill-function
               'hydra-toggle nil
               "\n_n_ narrow-or-widen-dwim %s(progn (message \"checking\")(buffer-narrowed-p))asdf\n"
               '(("n" narrow-to-region nil) ("q" nil "cancel" :exit t))))
-           '(concat (format "%s narrow-or-widen-dwim %sasdf\n"
-                     "{n}"
-                     (progn
-                       (message "checking")
-                       (buffer-narrowed-p)))
-             "[[q]]: cancel."))))
+           '(format
+             "%s narrow-or-widen-dwim %sasdf\n[[q]]: cancel."
+             "{n}"
+             (progn
+               (message "checking")
+               (buffer-narrowed-p))))))
 
 (ert-deftest hydra-compat-colors-2 ()
   (should
