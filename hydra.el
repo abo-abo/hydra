@@ -1126,7 +1126,8 @@ representing the maximum dimension of their owning group.
          (new-last (replace-regexp-in-string "\s+$" "" (car (last lst)))))
     (when (= 0 (length (setf (nth (- len 1) lst) new-last)))
       (setf (nth (- len 2) lst) "|"))
-    (apply #'concat lst)))
+    lst))
+
 
 (defun hydra--hint-from-matrix (body heads-matrix)
   "Generate a formated table-style docstring according to BODY and HEADS-MATRIX.
@@ -1134,18 +1135,24 @@ HEADS-MATRIX is expected to be a list of heads with following features:
 Each heads must have the same length
 Each head must have a property max-key-len and max-doc-len."
   (when heads-matrix
-    (let* ((first-heads-col (nth 0 heads-matrix))
-           (last-row-index (- (length first-heads-col) 1))
-           (lines nil))
-      (dolist (row-index (number-sequence 0 last-row-index))
-        (let ((heads-in-row (mapcar
-                             (lambda (heads) (nth row-index heads))
-                             heads-matrix)))
-          (push (hydra--hint-row heads-in-row body)
-                lines)))
-      (concat (mapconcat #'identity (nreverse lines) "\n") "\n"))))
+    (let ((lines (hydra--hint-from-matrix-1 body heads-matrix)))
+      (concat
+       (mapconcat #'identity
+                  (mapcar (lambda (lst) (apply #'concat lst))
+                          lines) "\n")
+       "\n"))))
 
-;; previous functions dealt with automatic docstring table generation from :column head property
+(defun hydra--hint-from-matrix-1 (body heads-matrix)
+  (let* ((first-heads-col (nth 0 heads-matrix))
+         (last-row-index (- (length first-heads-col) 1))
+         (lines nil))
+    (dolist (row-index (number-sequence 0 last-row-index))
+      (let ((heads-in-row (mapcar
+                           (lambda (heads) (nth row-index heads))
+                           heads-matrix)))
+        (push (hydra--hint-row heads-in-row body)
+              lines)))
+    (nreverse lines)))
 
 (defun hydra-idle-message (secs hint name)
   "In SECS seconds display HINT."
