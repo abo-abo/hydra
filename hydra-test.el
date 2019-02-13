@@ -1671,6 +1671,37 @@ k: ↑ window |                            |                     |
                    512 513 (face hydra-face-red)
                    578 579 (face hydra-face-blue)))))
 
+(ert-deftest hydra-column-sexp ()
+  (should (equal
+           (eval (nth 5
+                      (macroexpand
+                       '(defhydra hydra-toggle-stuff ()
+                         "Toggle"
+                         ("d" toggle-debug-on-error "debug-on-error" :column "Misc")
+                         ("a" abbrev-mode
+                          (format "abbrev: %s"
+                           (if (bound-and-true-p abbrev-mode)
+                               "[x]"
+                             "[ ]")))))))
+           '(concat
+             (format "Toggle:\n")
+             "Misc"
+             "\n"
+             "-----------------"
+             "\n"
+             #("d: debug-on-error"
+               0 1 (face hydra-face-red))
+             "\n"
+             (format
+              "%1s: %-15s"
+              #("a" 0 1 (face hydra-face-red))
+              (format
+               "abbrev: %s"
+               (if (bound-and-true-p abbrev-mode)
+                   "[x]"
+                 "[ ]")))
+             "\n"))))
+
 (defhydra hydra-extendable ()
   "extendable"
   ("j" next-line "down"))

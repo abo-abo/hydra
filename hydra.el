@@ -498,9 +498,10 @@ Remove :color key. And sort the plist alphabetically."
   "The function for formatting key-doc pairs.")
 
 (defun hydra-key-doc-function-default (key key-width doc doc-width)
-  "Doc"
   (cond
     ((equal key " ") (format (format "%%-%ds" (+ 3 key-width doc-width)) doc))
+    ((listp doc)
+     `(format ,(format "%%%ds: %%%ds" key-width (- -1 doc-width)) ,key ,doc))
     (t (format (format "%%%ds: %%%ds" key-width (- -1 doc-width)) key doc))))
 
 (defun hydra--to-string (x)
@@ -1114,20 +1115,21 @@ representing the maximum dimension of their owning group.
     (nreverse (cdr res))))
 
 (defun hydra--hint-row (heads body)
-  (let* ((lst (hydra-interpose
-               "| "
-               (mapcar (lambda (head)
-                         (funcall hydra-key-doc-function
-                                  (hydra-fontify-head head body)
-                                  (let ((n (hydra--head-property head :max-key-len)))
-                                    (+ n (cl-count ?% (car head))))
-                                  (nth 2 head) ;; doc
-                                  (hydra--head-property head :max-doc-len)))
-                       heads)))
-         (len (length lst))
-         (new-last (replace-regexp-in-string "\s+$" "" (car (last lst)))))
-    (when (= 0 (length (setf (nth (- len 1) lst) new-last)))
-      (setf (nth (- len 2) lst) "|"))
+  (let ((lst (hydra-interpose
+              "| "
+              (mapcar (lambda (head)
+                        (funcall hydra-key-doc-function
+                                 (hydra-fontify-head head body)
+                                 (let ((n (hydra--head-property head :max-key-len)))
+                                   (+ n (cl-count ?% (car head))))
+                                 (nth 2 head) ;; doc
+                                 (hydra--head-property head :max-doc-len)))
+                      heads))))
+    (when (stringp (car (last lst)))
+      (let ((len (length lst))
+            (new-last (replace-regexp-in-string "\s+$" "" (car (last lst)))))
+        (when (= 0 (length (setf (nth (- len 1) lst) new-last)))
+          (setf (nth (- len 2) lst) "|"))))
     lst))
 
 
