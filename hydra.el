@@ -1,6 +1,6 @@
 ;;; hydra.el --- Make bindings that stick around. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015  Free Software Foundation, Inc.
+;; Copyright (C) 2015-2019  Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel <ohwoeowho@gmail.com>
 ;; Maintainer: Oleh Krehel <ohwoeowho@gmail.com>
@@ -1136,11 +1136,8 @@ Each heads must have the same length
 Each head must have a property max-key-len and max-doc-len."
   (when heads-matrix
     (let ((lines (hydra--hint-from-matrix-1 body heads-matrix)))
-      (concat
-       (mapconcat #'identity
-                  (mapcar (lambda (lst) (apply #'concat lst))
-                          lines) "\n")
-       "\n"))))
+      (apply #'concat
+             `(,@(apply #'append (hydra-interpose '("\n") lines)) "\n")))))
 
 (defun hydra--hint-from-matrix-1 (body heads-matrix)
   (let* ((first-heads-col (nth 0 heads-matrix))
