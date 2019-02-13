@@ -581,8 +581,8 @@ BODY, and HEADS are parameters to `defhydra'."
     (if (null hint-w-col)
         hint-wo-col
       (if (stringp hint-wo-col)
-          `(concat ,@(cdr hint-w-col) ,hint-wo-col)
-        `(concat ,@(cdr hint-w-col) ,@(cdr hint-wo-col))))))
+          `(concat ,@hint-w-col ,hint-wo-col)
+        `(concat ,@hint-w-col ,@(cdr hint-wo-col))))))
 
 (defvar hydra-fontify-head-function nil
   "Possible replacement for `hydra-fontify-head-default'.")
@@ -1138,9 +1138,8 @@ Each heads must have the same length
 Each head must have a property max-key-len and max-doc-len."
   (when heads-matrix
     (let ((lines (hydra--hint-from-matrix-1 body heads-matrix)))
-      `(concat
-        ,@(apply #'append (hydra-interpose '("\n") lines))
-        "\n"))))
+      `(,@(apply #'append (hydra-interpose '("\n") lines))
+          "\n"))))
 
 (defun hydra--hint-from-matrix-1 (body heads-matrix)
   (let* ((first-heads-col (nth 0 heads-matrix))
