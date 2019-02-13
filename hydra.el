@@ -578,12 +578,11 @@ BODY, and HEADS are parameters to `defhydra'."
                        (hydra--hint-from-matrix body (hydra--generate-matrix heads-w-col))))
          (hint-wo-col (when heads-wo-col
                         (hydra--hint-heads-wocol body (car heads-wo-col)))))
-    (if (or (stringp hint-wo-col) (null hint-wo-col))
-        (concat hint-w-col hint-wo-col)
-      (cl-assert (or (eq (car hint-wo-col) 'concat)))
-      (if hint-w-col
-          `(concat ,hint-w-col ,@(cdr hint-wo-col))
-        hint-wo-col))))
+    (if (null hint-w-col)
+        hint-wo-col
+      (if (stringp hint-wo-col)
+          `(concat ,@(cdr hint-w-col) ,hint-wo-col)
+        `(concat ,@(cdr hint-w-col) ,@(cdr hint-wo-col))))))
 
 (defvar hydra-fontify-head-function nil
   "Possible replacement for `hydra-fontify-head-default'.")
@@ -744,10 +743,13 @@ The expressions can be auto-expanded according to NAME."
     ((string= docstring "")
      rest)
     ((listp rest)
+     (unless (string-match-p "[:\n]" docstring)
+       (setq docstring (concat docstring ":\n")))
      (unless (or (string-match-p "\n\\'" docstring)
                  (equal (cadr rest) "\n"))
        (setq docstring (concat docstring "\n")))
-     `(concat (format ,docstring ,@(nreverse varlist)) ,@(cdr rest)))
+     `(concat (format ,(replace-regexp-in-string "\\`\n" "" docstring) ,@(nreverse varlist))
+              ,@(cdr rest)))
     ((eq ?\n (aref docstring 0))
      `(format ,(concat (substring docstring 1) rest) ,@(nreverse varlist)))
     (t
@@ -1136,8 +1138,9 @@ Each heads must have the same length
 Each head must have a property max-key-len and max-doc-len."
   (when heads-matrix
     (let ((lines (hydra--hint-from-matrix-1 body heads-matrix)))
-      (apply #'concat
-             `(,@(apply #'append (hydra-interpose '("\n") lines)) "\n")))))
+      `(concat
+        ,@(apply #'append (hydra-interpose '("\n") lines))
+        "\n"))))
 
 (defun hydra--hint-from-matrix-1 (body heads-matrix)
   (let* ((first-heads-col (nth 0 heads-matrix))
