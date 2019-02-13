@@ -1112,19 +1112,21 @@ representing the maximum dimension of their owning group.
     (nreverse (cdr res))))
 
 (defun hydra--hint-row (heads body)
-  (let ((lst (hydra-interpose
-              "| "
-              (mapcar (lambda (head)
-                        (funcall hydra-key-doc-function
-                                 (hydra-fontify-head head body)
-                                 (let ((n (hydra--head-property head :max-key-len)))
-                                   (+ n (cl-count ?% (car head))))
-                                 (nth 2 head) ;; doc
-                                 (hydra--head-property head :max-doc-len)))
-                      heads))))
-    (replace-regexp-in-string
-     "\s+$" ""
-     (apply #'concat lst))))
+  (let* ((lst (hydra-interpose
+               "| "
+               (mapcar (lambda (head)
+                         (funcall hydra-key-doc-function
+                                  (hydra-fontify-head head body)
+                                  (let ((n (hydra--head-property head :max-key-len)))
+                                    (+ n (cl-count ?% (car head))))
+                                  (nth 2 head) ;; doc
+                                  (hydra--head-property head :max-doc-len)))
+                       heads)))
+         (len (length lst))
+         (new-last (replace-regexp-in-string "\s+$" "" (car (last lst)))))
+    (when (= 0 (length (setf (nth (- len 1) lst) new-last)))
+      (setf (nth (- len 2) lst) "|"))
+    (apply #'concat lst)))
 
 (defun hydra--hint-from-matrix (body heads-matrix)
   "Generate a formated table-style docstring according to BODY and HEADS-MATRIX.
