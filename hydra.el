@@ -207,6 +207,14 @@ the body or the head."
   :type 'sexp
   :group 'hydra)
 
+(defcustom hydra-hint-display-type 'lv
+  "The utility to show hydra hint"
+  :type '(choice
+          (const message)
+          (const lv)
+          (const posframe))
+  :group 'hydra)
+
 (defcustom hydra-lv t
   "When non-nil, `lv-message' (not `message') will be used to display hints."
   :type 'boolean)
