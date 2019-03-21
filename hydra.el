@@ -207,6 +207,13 @@ the body or the head."
   :type 'sexp
   :group 'hydra)
 
+(defcustom hydra-hint-display-type 'lv
+  "The utility to show hydra hint"
+  :type '(choice (const message)
+                 (const lv)
+                 (const posframe))
+  :group 'hydra)
+
 (defcustom hydra-lv t
   "When non-nil, `lv-message' (not `message') will be used to display hints."
   :type 'boolean)
@@ -486,9 +493,10 @@ Remove :color key. And sort the plist alphabetically."
   (setq hydra-curr-map nil)
   (unless (and hydra--ignore
                (null hydra--work-around-dedicated))
-    (if hydra-lv
-        (lv-delete-window)
-      (message "")))
+    (pcase hydra-hint-display-type
+      ('message (message ""))
+      ('lv (lv-delete-window))
+      ('posframe (posframe-hide " *hydra-posframe*"))))
   nil)
 
 (defvar hydra-head-format "[%s]: "
@@ -904,9 +912,12 @@ KEY is forwarded to `plist-get'."
            (message (eval hint)))
           (t
            (when hydra-is-helpful
-             (if hydra-lv
-                 (lv-message (eval hint))
-               (message (eval hint))))))))
+             (pcase hydra-hint-display-type
+               ('message (message (eval hint)))
+               ('lv (lv-message (eval hint)))
+               ('posframe (posframe-show " *hydra-posframe*"
+                                         :string (eval hint)
+                                         :poshandler 'posframe-poshandler-frame-top-left-corner))))))))
 
 (defmacro hydra--make-funcall (sym)
   "Transform SYM into a `funcall' to call it."
