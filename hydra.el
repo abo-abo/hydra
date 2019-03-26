@@ -207,6 +207,26 @@ the body or the head."
   :type 'sexp
   :group 'hydra)
 
+(declare-function posframe-show "posframe")
+(declare-function posframe-hide "posframe")
+(declare-function posframe-poshandler-window-center "posframe")
+
+(defun hydra-posframe-show (str)
+  (require 'posframe)
+  (posframe-show
+   " *hydra-posframe*"
+   :string str
+   :poshandler #'posframe-poshandler-window-center))
+
+(defun hydra-posframe-hide ()
+  (posframe-hide " *hydra-posframe*"))
+
+(defvar hydra-hint-display-alist
+  (list (list 'lv #'lv-message #'lv-delete-window)
+        (list 'message #'message (lambda () (message "")))
+        (list 'posframe #'hydra-posframe-show #'hydra-posframe-hide))
+  "Store the functions for `hydra-hint-display-type'.")
+
 (defcustom hydra-hint-display-type 'lv
   "The utility to show hydra hint"
   :type '(choice
@@ -494,9 +514,8 @@ Remove :color key. And sort the plist alphabetically."
   (setq hydra-curr-map nil)
   (unless (and hydra--ignore
                (null hydra--work-around-dedicated))
-    (if hydra-lv
-        (lv-delete-window)
-      (message "")))
+    (funcall
+     (nth 2 (assoc hydra-hint-display-type hydra-hint-display-alist))))
   nil)
 
 (defvar hydra-head-format "[%s]: "
@@ -912,9 +931,9 @@ KEY is forwarded to `plist-get'."
            (message (eval hint)))
           (t
            (when hydra-is-helpful
-             (if hydra-lv
-                 (lv-message (eval hint))
-               (message (eval hint))))))))
+             (funcall
+              (nth 1 (assoc hydra-hint-display-type hydra-hint-display-alist))
+              (eval hint)))))))
 
 (defmacro hydra--make-funcall (sym)
   "Transform SYM into a `funcall' to call it."
