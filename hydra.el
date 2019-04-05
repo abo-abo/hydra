@@ -7,7 +7,7 @@
 ;; URL: https://github.com/abo-abo/hydra
 ;; Version: 0.14.0
 ;; Keywords: bindings
-;; Package-Requires: ((cl-lib "0.5"))
+;; Package-Requires: ((cl-lib "0.5") (lv "0"))
 
 ;; This file is part of GNU Emacs.
 
