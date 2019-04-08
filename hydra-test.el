@@ -137,8 +137,7 @@ The body can be accessed via `hydra-error/body', which is bound to \"M-g\"."
                (function first-error)))
           ((quit error)
            (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
+            (error-message-string err))))
         (hydra-show-hint
          hydra-error/hint
          (quote hydra-error))
@@ -174,8 +173,7 @@ The body can be accessed via `hydra-error/body', which is bound to \"M-g\"."
                (function next-error)))
           ((quit error)
            (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
+            (error-message-string err))))
         (hydra-show-hint
          hydra-error/hint
          (quote hydra-error))
@@ -211,8 +209,7 @@ The body can be accessed via `hydra-error/body', which is bound to \"M-g\"."
                (function previous-error)))
           ((quit error)
            (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
+            (error-message-string err))))
         (hydra-show-hint
          hydra-error/hint
          (quote hydra-error))
@@ -566,8 +563,7 @@ The body can be accessed via `hydra-vi/body'."
                (function next-line)))
           ((quit error)
            (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
+            (error-message-string err))))
         (hydra-show-hint
          hydra-vi/hint
          (quote hydra-vi))
@@ -603,8 +599,7 @@ The body can be accessed via `hydra-vi/body'."
                (function previous-line)))
           ((quit error)
            (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
+            (error-message-string err))))
         (hydra-show-hint
          hydra-vi/hint
          (quote hydra-vi))
@@ -759,8 +754,7 @@ The body can be accessed via `hydra-zoom/body'."
                (text-scale-set 0))))
           ((quit error)
            (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
+            (error-message-string err))))
         (hydra-show-hint
          hydra-zoom/hint
          (quote hydra-zoom))
@@ -918,8 +912,7 @@ The body can be accessed via `hydra-zoom/body'."
                (text-scale-set 0))))
           ((quit error)
            (message
-            (error-message-string err))
-           (unless hydra-lv (sit-for 0.8))))
+            (error-message-string err))))
         (hydra-show-hint
          hydra-zoom/hint
          (quote hydra-zoom))
