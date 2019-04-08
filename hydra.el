@@ -235,6 +235,10 @@ the body or the head."
           (const posframe))
   :group 'hydra)
 
+(define-obsolete-variable-alias
+    'hydra-lv 'hydra-hint-display-type "0.14.0"
+    "Use either `hydra-hint-display-type' or `hydra-set-property' :verbosity.")
+
 (defcustom hydra-lv t
   "When non-nil, `lv-message' (not `message') will be used to display hints."
   :type 'boolean)
@@ -886,9 +890,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                  `(condition-case err
                       ,(hydra--call-interactively cmd (cadr head))
                     ((quit error)
-                     (message (error-message-string err))
-                     (unless hydra-lv
-                       (sit-for 0.8)))))
+                     (message (error-message-string err)))))
               ,(if (and body-idle (eq (cadr head) 'body))
                    `(hydra-idle-message ,body-idle ,hint ',name)
                  `(hydra-show-hint ,hint ',name))
