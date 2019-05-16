@@ -1,0 +1,69 @@
+* 0.15.0
+** New Features
+
+*** defhydra
+
+**** New :base-map option in body plist
+In case your hydra conficts with el:hydra-base-map, you can now override it.
+
+Example:
+#+begin_src elisp
+(defhydra hydra-numbers (:base-map (make-sparse-keymap))
+  "test"
+  ("0" (message "zero"))
+  ("1" (message "one")))
+#+end_src
+See [[https://github.com/abo-abo/hydra/issues/285][#285]].
+
+**** Make no docstring equivalent to :hint nil
+Example:
+#+begin_src elisp
+(defhydra hydra-clock (:color blue)
+  ("q" nil "quit" :column "Clock")
+  ("c" org-clock-cancel "cancel" :color pink :column "Do")
+  ("d" org-clock-display "display")
+  ("e" org-clock-modify-effort-estimate "effort")
+  ("i" org-clock-in "in")
+  ("j" org-clock-goto "jump")
+  ("o" org-clock-out "out")
+  ("r" org-clock-report "report"))
+#+end_src
+See [[https://github.com/abo-abo/hydra/issues/291][#291]].
+
+**** Declare /params and /docstring
+See [[https://github.com/abo-abo/hydra/issues/185][#185]].
+
+**** Sexp hints are now supported for :columns
+Example
+#+begin_src elisp
+(defhydra hydra-test ()
+  "Test"
+  ("j" next-line (format-time-string "%H:%M:%S" (current-time)) :column "One")
+  ("k" previous-line (format-time-string "%H:%M:%S" (current-time)))
+  ("l" backward-char "back" :column "Two"))
+#+end_src
+See [[https://github.com/abo-abo/hydra/issues/311][#311]].
+
+
+*** defhydra+
+New macro. Allows to add heads to an existing hydra.
+
+Example:
+#+begin_src elisp
+(defhydra hydra-extendable ()
+  "extendable"
+  ("j" next-line "down"))
+
+(defhydra+ hydra-extendable ()
+  ("k" previous-line "up"))
+#+end_src
+See [[https://github.com/abo-abo/hydra/issues/185][#185]].
+
+*** el:hydra-hint-display-type
+Customize what to use to display the hint:
+- el:message
+- el:lv-message
+- posframe
+
+el:hydra-lv is now obsolete.
+See [[https://github.com/abo-abo/hydra/issues/317][#317]].
