@@ -216,6 +216,8 @@ the body or the head."
   (posframe-show
    " *hydra-posframe*"
    :string str
+   :internal-border-width 1
+   :internal-border-color "red"
    :poshandler #'posframe-poshandler-window-center))
 
 (defun hydra-posframe-hide ()
