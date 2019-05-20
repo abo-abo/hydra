@@ -211,16 +211,21 @@ the body or the head."
 (declare-function posframe-hide "posframe")
 (declare-function posframe-poshandler-window-center "posframe")
 
+(defvar hydra-posframe-show-params
+  '(:internal-border-width 1
+    :internal-border-color "red"
+    :poshandler posframe-poshandler-window-center)
+  "List of parameters passed to `posframe-show'.")
+
 (defun hydra-posframe-show (str)
   (require 'posframe)
-  (posframe-show
-   " *hydra-posframe*"
-   :string str
-   :internal-border-width 1
-   :internal-border-color "red"
-   :poshandler #'posframe-poshandler-window-center))
+  (apply #'posframe-show
+         " *hydra-posframe*"
+         :string str
+         hydra-posframe-show-params))
 
 (defun hydra-posframe-hide ()
+  (require 'posframe)
   (posframe-hide " *hydra-posframe*"))
 
 (defvar hydra-hint-display-alist
