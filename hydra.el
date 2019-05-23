@@ -512,7 +512,6 @@ Remove :color key. And sort the plist alphabetically."
 (defvar hydra-message-timer (timer-create)
   "Timer for the hint.")
 
-(defvar hydra--no-hide nil)
 (defvar hydra--delay-hide nil)
 
 (defun hydra--hide-hint ()
@@ -536,9 +535,8 @@ Remove :color key. And sort the plist alphabetically."
   (cancel-timer hydra-timeout-timer)
   (cancel-timer hydra-message-timer)
   (setq hydra-curr-map nil)
-  (if (or (and hydra--ignore
-               (null hydra--work-around-dedicated))
-          (and hydra--no-hide
+  (if (and hydra--ignore
+           (or (null hydra--work-around-dedicated)
                (eq hydra-hint-display-type 'posframe)))
       (hydra--cancel-hiding-hint)
     (hydra--hide-hint))
@@ -907,8 +905,9 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
            (delq
             nil
             `((let ((hydra--ignore ,(not (eq (cadr head) 'body)))
-                    (hydra--no-hide t))
+                    (hydra--delay-hide t))
                 (hydra-keyboard-quit)
+                (hydra--cancel-hiding-hint)
                 (setq hydra-curr-body-fn ',(intern (format "%S/body" name))))
               ,(when cmd
                  `(condition-case err
