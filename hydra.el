@@ -217,8 +217,14 @@ the body or the head."
     :poshandler posframe-poshandler-window-center)
   "List of parameters passed to `posframe-show'.")
 
+(defvar hydra--posframe-timer nil
+  "Timer for hiding posframe hint.")
+
 (defun hydra-posframe-show (str)
   (require 'posframe)
+  (when hydra--posframe-timer
+    (cancel-timer hydra--posframe-timer))
+  (setq hydra--posframe-timer nil)
   (apply #'posframe-show
          " *hydra-posframe*"
          :string str
@@ -226,7 +232,12 @@ the body or the head."
 
 (defun hydra-posframe-hide ()
   (require 'posframe)
-  (posframe-hide " *hydra-posframe*"))
+  (unless hydra--posframe-timer
+    (setq hydra--posframe-timer
+          (run-with-idle-timer
+           0 nil (lambda ()
+                   (setq hydra--posframe-timer nil)
+                   (posframe-hide " *hydra-posframe*"))))))
 
 (defvar hydra-hint-display-alist
   (list (list 'lv #'lv-message #'lv-delete-window)
