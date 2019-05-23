@@ -512,6 +512,19 @@ Remove :color key. And sort the plist alphabetically."
 (defvar hydra-message-timer (timer-create)
   "Timer for the hint.")
 
+(defvar hydra--no-hide nil)
+(defvar hydra--delay-hide nil)
+
+(defun hydra--hide-hint ()
+  (if hydra--delay-hide
+      (add-hook 'post-command-hook #'hydra--hide-hint)
+    (remove-hook 'post-command-hook #'hydra--hide-hint)
+    (funcall
+     (nth 2 (assoc hydra-hint-display-type hydra-hint-display-alist)))))
+
+(defun hydra--cancel-hiding-hint ()
+  (remove-hook 'post-command-hook #'hydra--hide-hint))
+
 (defvar hydra--work-around-dedicated t
   "When non-nil, assume there's no bug in `pop-to-buffer'.
 `pop-to-buffer' should not select a dedicated window.")
@@ -523,10 +536,12 @@ Remove :color key. And sort the plist alphabetically."
   (cancel-timer hydra-timeout-timer)
   (cancel-timer hydra-message-timer)
   (setq hydra-curr-map nil)
-  (unless (and hydra--ignore
+  (if (or (and hydra--ignore
                (null hydra--work-around-dedicated))
-    (funcall
-     (nth 2 (assoc hydra-hint-display-type hydra-hint-display-alist))))
+          (and hydra--no-hide
+               (eq hydra-hint-display-type 'posframe)))
+      (hydra--cancel-hiding-hint)
+    (hydra--hide-hint))
   nil)
 
 (defvar hydra-head-format "[%s]: "
@@ -879,7 +894,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
        (hydra-default-pre)
        ,@(when body-pre (list body-pre))
        ,@(if (hydra--head-property head :exit)
-             `((hydra-keyboard-quit)
+             `((let ((hydra--delay-hide t))
+                 (hydra-keyboard-quit))
                (setq hydra-curr-body-fn ',(intern (format "%S/body" name)))
                ,@(if body-after-exit
                      `((unwind-protect
@@ -890,7 +906,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                      `(,(hydra--call-interactively cmd (cadr head))))))
            (delq
             nil
-            `((let ((hydra--ignore ,(not (eq (cadr head) 'body))))
+            `((let ((hydra--ignore ,(not (eq (cadr head) 'body)))
+                    (hydra--no-hide t))
                 (hydra-keyboard-quit)
                 (setq hydra-curr-body-fn ',(intern (format "%S/body" name))))
               ,(when cmd
