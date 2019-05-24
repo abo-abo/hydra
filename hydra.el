@@ -217,8 +217,14 @@ the body or the head."
     :poshandler posframe-poshandler-window-center)
   "List of parameters passed to `posframe-show'.")
 
+(defvar hydra--posframe-timer nil
+  "Timer for hiding posframe hint.")
+
 (defun hydra-posframe-show (str)
   (require 'posframe)
+  (when hydra--posframe-timer
+    (cancel-timer hydra--posframe-timer))
+  (setq hydra--posframe-timer nil)
   (apply #'posframe-show
          " *hydra-posframe*"
          :string str
@@ -226,7 +232,12 @@ the body or the head."
 
 (defun hydra-posframe-hide ()
   (require 'posframe)
-  (posframe-hide " *hydra-posframe*"))
+  (unless hydra--posframe-timer
+    (setq hydra--posframe-timer
+          (run-with-idle-timer
+           0 nil (lambda ()
+                   (setq hydra--posframe-timer nil)
+                   (posframe-hide " *hydra-posframe*"))))))
 
 (defvar hydra-hint-display-alist
   (list (list 'lv #'lv-message #'lv-delete-window)
@@ -512,43 +523,21 @@ Remove :color key. And sort the plist alphabetically."
 (defvar hydra-message-timer (timer-create)
   "Timer for the hint.")
 
-;;; FIXME: This is needed because `hydra-keyboard-quit' calls `hydra-disable', which calls
-;;; `hydra-keyboard-quit' again.
-(defvar hydra--delay-hiding nil)
-
-(defun hydra--hide-hint (&optional delay)
-  "Hide the hint. If DELAY is non-nil, hide it in the next `post-command-hook'."
-  (if delay
-      (add-hook 'post-command-hook #'hydra--hide-hint)
-    (remove-hook 'post-command-hook #'hydra--hide-hint)
-    (funcall
-     (nth 2 (assoc hydra-hint-display-type hydra-hint-display-alist)))))
-
-(defun hydra--cancel-hiding-hint ()
-  (remove-hook 'post-command-hook #'hydra--hide-hint))
-
 (defvar hydra--work-around-dedicated t
   "When non-nil, assume there's no bug in `pop-to-buffer'.
 `pop-to-buffer' should not select a dedicated window.")
 
-(defun hydra-keyboard-quit (&optional delay-hiding)
-  "Quitting function similar to `keyboard-quit'.
-If DELAY-HIDING is non-nil, schedule for the hint to be hidden in the next run
-of `post-command-hook'. If it is the symbol `no-hiding', don't hide the hint,
-and cancel any pending hide request."
+(defun hydra-keyboard-quit ()
+  "Quitting function similar to `keyboard-quit'."
   (interactive)
-  (let ((hydra--delay-hiding delay-hiding))
-    (hydra-disable))
+  (hydra-disable)
   (cancel-timer hydra-timeout-timer)
   (cancel-timer hydra-message-timer)
   (setq hydra-curr-map nil)
-  (if (eq delay-hiding 'no-hiding)
-      (hydra--cancel-hiding-hint)
-    (if (and hydra--ignore
-             (or (null hydra--work-around-dedicated)
-                 (eq hydra-hint-display-type 'posframe)))
-        (hydra--cancel-hiding-hint)
-      (hydra--hide-hint (or delay-hiding hydra--delay-hiding))))
+  (unless (and hydra--ignore
+               (null hydra--work-around-dedicated))
+    (funcall
+     (nth 2 (assoc hydra-hint-display-type hydra-hint-display-alist))))
   nil)
 
 (defvar hydra-head-format "[%s]: "
@@ -901,21 +890,19 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
        (hydra-default-pre)
        ,@(when body-pre (list body-pre))
        ,@(if (hydra--head-property head :exit)
-             ;; Let the next command decide whether to hide the hint, as it may summon a new hydra.
-             `((hydra-keyboard-quit 'delay-hiding)
+             `((hydra-keyboard-quit)
                (setq hydra-curr-body-fn ',(intern (format "%S/body" name)))
                ,@(if body-after-exit
                      `((unwind-protect
-                           ,(when cmd
-                              (hydra--call-interactively cmd (cadr head)))
+                            ,(when cmd
+                               (hydra--call-interactively cmd (cadr head)))
                          ,body-after-exit))
                    (when cmd
                      `(,(hydra--call-interactively cmd (cadr head))))))
            (delq
             nil
             `((let ((hydra--ignore ,(not (eq (cadr head) 'body))))
-                ;; Newly summoned head/hydra means the hint should not be hidden.
-                (hydra-keyboard-quit 'no-hiding)
+                (hydra-keyboard-quit)
                 (setq hydra-curr-body-fn ',(intern (format "%S/body" name))))
               ,(when cmd
                  `(condition-case err
