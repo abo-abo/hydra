@@ -333,18 +333,19 @@ Exitable only through a blue head.")
     (around hydra-around-find-function-search-for-symbol-advice
      (symbol type library) activate)
     "Navigate to hydras with `find-function-search-for-symbol'."
-    ad-do-it
-    ;; The orignial function returns (cons (current-buffer) (point))
-    ;; if it found the point.
-    (unless (cdr ad-return-value)
-      (with-current-buffer (find-file-noselect library)
-        (let ((sn (symbol-name symbol)))
-          (when (and (null type)
-                     (string-match "\\`\\(hydra-[a-z-A-Z0-9]+\\)/\\(.*\\)\\'" sn)
-                     (re-search-forward (concat "(defhydra " (match-string 1 sn))
-                                        nil t))
-            (goto-char (match-beginning 0)))
-          (cons (current-buffer) (point)))))))
+    (prog1 ad-do-it
+      (when (symbolp symbol)
+        ;; The orignial function returns (cons (current-buffer) (point))
+        ;; if it found the point.
+        (unless (cdr ad-return-value)
+          (with-current-buffer (find-file-noselect library)
+            (let ((sn (symbol-name symbol)))
+              (when (and (null type)
+                         (string-match "\\`\\(hydra-[a-z-A-Z0-9]+\\)/\\(.*\\)\\'" sn)
+                         (re-search-forward (concat "(defhydra " (match-string 1 sn))
+                                            nil t))
+                (goto-char (match-beginning 0)))
+              (cons (current-buffer) (point)))))))))
 
 ;;* Universal Argument
 (defvar hydra-base-map
