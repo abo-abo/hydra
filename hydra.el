@@ -253,14 +253,6 @@ the body or the head."
           (const posframe))
   :group 'hydra)
 
-(define-obsolete-variable-alias
-    'hydra-lv 'hydra-hint-display-type "0.14.0"
-    "Use either `hydra-hint-display-type' or `hydra-set-property' :verbosity.")
-
-(defcustom hydra-lv t
-  "When non-nil, `lv-message' (not `message') will be used to display hints."
-  :type 'boolean)
-
 (defcustom hydra-verbose nil
   "When non-nil, hydra will issue some non essential style warnings."
   :type 'boolean)

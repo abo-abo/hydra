@@ -1322,9 +1322,9 @@ _f_ auto-fill-mode:    %`auto-fill-function
                  '((a b c d) (e f g h) (i nil nil nil)))))
 
 (ert-deftest hydra--cell ()
-  (should (equal (hydra--cell "% -75s %%`%s" '(hydra-lv hydra-verbose))
-                 "When non-nil, `lv-message' (not `message') will be used to display hints.   %`hydra-lv^^^^^
-When non-nil, hydra will issue some non essential style warnings.           %`hydra-verbose")))
+  (should (equal (hydra--cell "% -75s %%`%s" '(hydra-hint-display-type hydra-verbose))
+                 "The utility to show hydra hint                                              %`hydra-hint-display-type
+When non-nil, hydra will issue some non essential style warnings.           %`hydra-verbose^^^^^^^^^^")))
 
 (ert-deftest hydra--vconcat ()
   (should (equal (hydra--vconcat '("abc\ndef" "012\n34" "def\nabc"))
