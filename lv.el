@@ -75,6 +75,7 @@ Only the background color is significant."
           (setq window-size-fixed t)
           (setq mode-line-format nil)
           (setq header-line-format nil)
+          (setq tab-line-format nil)
           (setq cursor-type nil)
           (setq display-line-numbers nil)
           (setq display-fill-column-indicator nil)
