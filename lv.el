@@ -56,6 +56,7 @@ Only the background color is significant."
 
 (defvar display-line-numbers)
 (defvar display-fill-column-indicator)
+(defvar tab-line-format)
 
 (defun lv-window ()
   "Ensure that LV window is live and return it."
