@@ -1549,7 +1549,7 @@ y: back     | b: up
 
 ;; checked:
 ;; basic rendering
-;; column compatibility with ruby style and no colum specified
+;; column compatibility with ruby style and no column specified
 ;; column declared several time
 ;; nil column
 (ert-deftest hydra-column-basic ()
@@ -1632,7 +1632,7 @@ o: ok       | s: string
                                 ("s" split-window-below "split window" :color blue :column "Split Management")
                                 ("v" split-window-right "split window vertically" :color blue)
                                 ("d" delete-window "delete current window")
-                                ("f" follow-mode "toogle follow mode")
+                                ("f" follow-mode "toggle follow mode")
                                 ("u" winner-undo "undo window conf" :column "Undo/Redo")
                                 ("r" winner-redo "redo window conf")
                                 ("b" balance-windows "balance window height" :column "1-Sizing")
@@ -1645,7 +1645,7 @@ o: ok       | s: string
 z: ace      | s: split window            | u: undo window conf | b: balance window height
 h: ← window | v: split window vertically | r: redo window conf | m: maximize current window
 j: ↓ window | d: delete current window   |                     | M: minimize current window
-l: → window | f: toogle follow mode      |                     |
+l: → window | f: toggle follow mode      |                     |
 k: ↑ window |                            |                     |
 [q]: quit menu."
                    173 174 (face hydra-face-blue)

@@ -33,7 +33,7 @@
 ;; heads can be called in succession with only a short extension.
 ;; The Hydra is vanquished once Hercules, any binding that isn't the
 ;; Hydra's head, arrives.  Note that Hercules, besides vanquishing the
-;; Hydra, will still serve his orignal purpose, calling his proper
+;; Hydra, will still serve his original purpose, calling his proper
 ;; command.  This makes the Hydra very seamless, it's like a minor
 ;; mode that disables itself automagically.
 ;;
@@ -327,7 +327,7 @@ Exitable only through a blue head.")
     "Navigate to hydras with `find-function-search-for-symbol'."
     (prog1 ad-do-it
       (when (symbolp symbol)
-        ;; The orignial function returns (cons (current-buffer) (point))
+        ;; The original function returns (cons (current-buffer) (point))
         ;; if it found the point.
         (unless (cdr ad-return-value)
           (with-current-buffer (find-file-noselect library)
@@ -1072,7 +1072,7 @@ If CELL-FORMATS is nil, `hydra-cell-format' is used for all columns."
      (mapconcat #'identity x "    "))))
 
 (defun hydra-reset-radios (names)
-  "Set varibles NAMES to their defaults.
+  "Set variables NAMES to their defaults.
 NAMES should be defined by `defhydradio' or similar."
   (dolist (n names)
     (set n (aref (get n 'range) 0))))
@@ -1123,7 +1123,7 @@ Each head of NORMALIZED-HEADS must have a column property."
      finally return balanced-heads-groups))
 
 (defun hydra--generate-matrix (heads-groups)
-  "Return a copy of HEADS-GROUPS decorated with table formating information.
+  "Return a copy of HEADS-GROUPS decorated with table formatting information.
 Details of modification:
 2 virtual heads acting as table header were added to each heads-group.
 Each head is decorated with 2 new properties max-doc-len and max-key-len
@@ -1174,7 +1174,7 @@ representing the maximum dimension of their owning group.
 
 
 (defun hydra--hint-from-matrix (body heads-matrix)
-  "Generate a formated table-style docstring according to BODY and HEADS-MATRIX.
+  "Generate a formatted table-style docstring according to BODY and HEADS-MATRIX.
 HEADS-MATRIX is expected to be a list of heads with following features:
 Each heads must have the same length
 Each head must have a property max-key-len and max-doc-len."

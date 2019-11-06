@@ -4,7 +4,7 @@
 *** defhydra
 
 **** New :base-map option in body plist
-In case your hydra conficts with el:hydra-base-map, you can now override it.
+In case your hydra conflicts with el:hydra-base-map, you can now override it.
 
 Example:
 #+begin_src elisp

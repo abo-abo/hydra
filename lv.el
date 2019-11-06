@@ -44,7 +44,7 @@
   :type 'boolean)
 
 (defcustom lv-use-padding nil
-  "Wheter to use horizontal padding in the LV window."
+  "Whether to use horizontal padding in the LV window."
   :group 'lv
   :type 'boolean)
 
