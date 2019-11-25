@@ -516,7 +516,7 @@ Remove :color key. And sort the plist alphabetically."
 (defvar hydra-message-timer (timer-create)
   "Timer for the hint.")
 
-(defvar hydra--work-around-dedicated (version< emacs-version "26.3")
+(defvar hydra--work-around-dedicated t
   "When non-nil, assume there's no bug in `pop-to-buffer'.
 `pop-to-buffer' should not select a dedicated window.")
 
