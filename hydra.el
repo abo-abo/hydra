@@ -915,9 +915,15 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
        (require 'hydra)
        (hydra-default-pre)
        ,@(when body-pre (list body-pre))
-       ,@(if (hydra--head-property head :exit)
-             body-on-exit-t
-           body-on-exit-nil))))
+       ,@(cond ((eq (hydra--head-property head :exit) t)
+                body-on-exit-t)
+               ((eq (hydra--head-property head :exit) nil)
+                body-on-exit-nil)
+               (t
+                `((if ,(hydra--head-property head :exit)
+                      (progn
+                        ,@body-on-exit-t)
+                    ,@body-on-exit-nil)))))))
 
 (defvar hydra-props-alist nil)
 
