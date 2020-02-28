@@ -875,7 +875,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
         (hint (intern (format "%S/hint" name)))
         (body-foreign-keys (hydra--body-foreign-keys body))
         (body-timeout (plist-get body :timeout))
-        (body-idle (plist-get body :idle)))
+        (body-idle (plist-get body :idle))
+        (curr-body-fn-sym (intern (format "%S/body" name))))
     `(defun ,cmd-name ()
        ,doc
        (interactive)
@@ -884,7 +885,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
        ,@(when body-pre (list body-pre))
        ,@(if (hydra--head-property head :exit)
              `((hydra-keyboard-quit)
-               (setq hydra-curr-body-fn ',(intern (format "%S/body" name)))
+               (setq hydra-curr-body-fn ',curr-body-fn-sym)
                ,@(if body-after-exit
                      `((unwind-protect
                             ,(when cmd
@@ -896,7 +897,7 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
             nil
             `((let ((hydra--ignore ,(not (eq (cadr head) 'body))))
                 (hydra-keyboard-quit)
-                (setq hydra-curr-body-fn ',(intern (format "%S/body" name))))
+                (setq hydra-curr-body-fn ',curr-body-fn-sym))
               ,(when cmd
                  `(condition-case err
                       ,(hydra--call-interactively cmd (cadr head))
