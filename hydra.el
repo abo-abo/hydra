@@ -863,20 +863,52 @@ HEAD is one of the HEADS passed to `defhydra'.
 BODY-PRE is added to the start of the wrapper.
 BODY-BEFORE-EXIT will be called before the hydra quits.
 BODY-AFTER-EXIT is added to the end of the wrapper."
-  (let ((cmd-name (hydra--head-name head name))
-        (cmd (when (car head)
-               (hydra--make-callable
-                (cadr head))))
-        (doc (if (car head)
-                 (format "Call the head `%S' in the \"%s\" hydra.\n\n%s"
-                         (cadr head) name doc)
-               (format "Call the body in the \"%s\" hydra.\n\n%s"
-                       name doc)))
-        (hint (intern (format "%S/hint" name)))
-        (body-foreign-keys (hydra--body-foreign-keys body))
-        (body-timeout (plist-get body :timeout))
-        (body-idle (plist-get body :idle))
-        (curr-body-fn-sym (intern (format "%S/body" name))))
+  (let* ((cmd-name (hydra--head-name head name))
+         (cmd (when (car head)
+                (hydra--make-callable
+                 (cadr head))))
+         (doc (if (car head)
+                  (format "Call the head `%S' in the \"%s\" hydra.\n\n%s"
+                          (cadr head) name doc)
+                (format "Call the body in the \"%s\" hydra.\n\n%s"
+                        name doc)))
+         (hint (intern (format "%S/hint" name)))
+         (body-foreign-keys (hydra--body-foreign-keys body))
+         (body-timeout (plist-get body :timeout))
+         (body-idle (plist-get body :idle))
+         (curr-body-fn-sym (intern (format "%S/body" name)))
+         (body-on-exit-t
+          `((hydra-keyboard-quit)
+            (setq hydra-curr-body-fn ',curr-body-fn-sym)
+            ,@(if body-after-exit
+                  `((unwind-protect
+                         ,(when cmd
+                            (hydra--call-interactively cmd (cadr head)))
+                      ,body-after-exit))
+                (when cmd
+                  `(,(hydra--call-interactively cmd (cadr head)))))))
+         (body-on-exit-nil
+          (delq
+           nil
+           `((let ((hydra--ignore ,(not (eq (cadr head) 'body))))
+               (hydra-keyboard-quit)
+               (setq hydra-curr-body-fn ',curr-body-fn-sym))
+             ,(when cmd
+                `(condition-case err
+                     ,(hydra--call-interactively cmd (cadr head))
+                   ((quit error)
+                    (message (error-message-string err)))))
+             ,(if (and body-idle (eq (cadr head) 'body))
+                  `(hydra-idle-message ,body-idle ,hint ',name)
+                `(hydra-show-hint ,hint ',name))
+             (hydra-set-transient-map
+              ,keymap
+              (lambda () (hydra-keyboard-quit) ,body-before-exit)
+              ,(when body-foreign-keys
+                 (list 'quote body-foreign-keys)))
+             ,body-after-exit
+             ,(when body-timeout
+                `(hydra-timeout ,body-timeout))))))
     `(defun ,cmd-name ()
        ,doc
        (interactive)
@@ -884,36 +916,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
        (hydra-default-pre)
        ,@(when body-pre (list body-pre))
        ,@(if (hydra--head-property head :exit)
-             `((hydra-keyboard-quit)
-               (setq hydra-curr-body-fn ',curr-body-fn-sym)
-               ,@(if body-after-exit
-                     `((unwind-protect
-                            ,(when cmd
-                               (hydra--call-interactively cmd (cadr head)))
-                         ,body-after-exit))
-                   (when cmd
-                     `(,(hydra--call-interactively cmd (cadr head))))))
-           (delq
-            nil
-            `((let ((hydra--ignore ,(not (eq (cadr head) 'body))))
-                (hydra-keyboard-quit)
-                (setq hydra-curr-body-fn ',curr-body-fn-sym))
-              ,(when cmd
-                 `(condition-case err
-                      ,(hydra--call-interactively cmd (cadr head))
-                    ((quit error)
-                     (message (error-message-string err)))))
-              ,(if (and body-idle (eq (cadr head) 'body))
-                   `(hydra-idle-message ,body-idle ,hint ',name)
-                 `(hydra-show-hint ,hint ',name))
-              (hydra-set-transient-map
-               ,keymap
-               (lambda () (hydra-keyboard-quit) ,body-before-exit)
-               ,(when body-foreign-keys
-                  (list 'quote body-foreign-keys)))
-              ,body-after-exit
-              ,(when body-timeout
-                 `(hydra-timeout ,body-timeout))))))))
+             body-on-exit-t
+           body-on-exit-nil))))
 
 (defvar hydra-props-alist nil)
 
