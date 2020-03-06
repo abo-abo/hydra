@@ -716,11 +716,14 @@ The expressions can be auto-expanded according to NAME."
       (while (setq start
                    (string-match
                     (format
-                     "\\(?:%%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_%s_\\)\\|\\(?:[?]%s[?]\\)"
+                     "\\(?:%%\\( ?-?[0-9]*s?\\)\\(`[a-z-A-Z/0-9]+\\|(\\)\\)\\|\\(?:_%s_\\)\\|\\(?:[?]%s[?]\\)\\|__"
                      inner-regex
                      inner-regex)
                     docstring start))
-        (cond ((eq ?? (aref (match-string 0 docstring) 0))
+        (cond ((string= "__" (match-string 0 docstring))
+               (setq docstring (replace-match "_" nil t docstring))
+               (setq start (1- (match-end 0))))
+              ((eq ?? (aref (match-string 0 docstring) 0))
                (let* ((key (match-string 6 docstring))
                       (head (assoc key heads)))
                  (if head

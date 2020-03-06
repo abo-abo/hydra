@@ -1219,6 +1219,15 @@ _f_ auto-fill-mode:    %`auto-fill-function
        ", ")
       "."))))
 
+(ert-deftest hydra-format-11 ()
+  (should
+   (equal
+    (hydra--format nil '(nil nil :hint nil) "\n_f_ #+begin__src/#+end__src"
+                   '(("f" forward-char nil :exit nil)))
+    '(format
+      "%s #+begin_src/#+end_src"
+      #("f" 0 1 (face hydra-face-red))))))
+
 (ert-deftest hydra-format-with-sexp-1 ()
   (should (equal
            (let ((hydra-fontify-head-function
