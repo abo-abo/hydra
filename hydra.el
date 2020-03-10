@@ -139,6 +139,9 @@ warn: keep KEYMAP and issue a warning instead of running the command."
                       (t nil)))))
       (hydra-disable))))
 
+(defvar hydra--body-body-pre-called-p nil
+  "Guard for ensuring :body-pre callback is called only once.")
+
 (defvar hydra--ignore nil
   "When non-nil, don't call `hydra-curr-on-exit'.")
 
@@ -150,6 +153,7 @@ warn: keep KEYMAP and issue a warning instead of running the command."
   (setq hydra-deactivate nil)
   (remove-hook 'pre-command-hook 'hydra--clearfun)
   (unless hydra--ignore
+    (setq hydra--body-body-pre-called-p nil)
     (if (fboundp 'remove-function)
         (remove-function input-method-function #'hydra--imf)
       (when hydra--input-method-function
@@ -1410,10 +1414,19 @@ result of `defhydra'."
              ;; create defuns
              ,@(mapcar
                 (lambda (head)
-                  (hydra--make-defun name body doc head keymap-name
-                                     body-pre
-                                     body-before-exit
-                                     body-after-exit))
+                  ;; Ensure that :body-pre is called once when hydra gets
+                  ;; activated by directly calling its head.
+                  (let ((body-pre (if body-body-pre
+                                      `(progn
+                                         (unless hydra--body-body-pre-called-p
+                                           (setq hydra--body-body-pre-called-p t)
+                                           ,body-body-pre)
+                                         ,body-pre)
+                                    body-pre)))
+                    (hydra--make-defun name body doc head keymap-name
+                                       body-pre
+                                       body-before-exit
+                                       body-after-exit)))
                 heads-nodup)
              ;; free up keymap prefix
              ,@(unless (or (null body-key)
@@ -1448,7 +1461,9 @@ result of `defhydra'."
                name body doc '(nil body)
                keymap-name
                (or body-body-pre body-pre) body-before-exit
-               '(setq prefix-arg current-prefix-arg)))))
+               `(setq prefix-arg current-prefix-arg
+                      ,@(when body-body-pre
+                          '(hydra--body-body-pre-called-p t)))))))
     (error
      (hydra--complain "Error in defhydra %S: %s" name (cdr err))
      nil)))
