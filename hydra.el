@@ -241,7 +241,7 @@ the body or the head."
 
 (defvar hydra-hint-display-alist
   (list (list 'lv #'lv-message #'lv-delete-window)
-        (list 'message #'message (lambda () (message "")))
+        (list 'message (lambda (str) (message "%s" str)) (lambda () (message "")))
         (list 'posframe #'hydra-posframe-show #'hydra-posframe-hide))
   "Store the functions for `hydra-hint-display-type'.")
 
