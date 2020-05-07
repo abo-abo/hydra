@@ -33,6 +33,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (defgroup lv nil
   "The other echo area."
   :group 'minibuffer
