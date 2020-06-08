@@ -159,6 +159,7 @@ warn: keep KEYMAP and issue a warning instead of running the command."
     (with-selected-frame frame
       (when overriding-terminal-local-map
         (internal-pop-keymap hydra-curr-map 'overriding-terminal-local-map))))
+  (setq hydra-curr-map nil)
   (unless hydra--ignore
     (when hydra-curr-on-exit
       (let ((on-exit hydra-curr-on-exit))
@@ -526,7 +527,6 @@ Remove :color key. And sort the plist alphabetically."
   (hydra-disable)
   (cancel-timer hydra-timeout-timer)
   (cancel-timer hydra-message-timer)
-  (setq hydra-curr-map nil)
   (unless (and hydra--ignore
                (null hydra--work-around-dedicated))
     (funcall
