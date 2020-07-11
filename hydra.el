@@ -320,6 +320,15 @@ Exitable only through a blue head.")
       (1 font-lock-keyword-face)
       (2 font-lock-type-face)))))
 
+;;* Imenu
+(defun hydra-add-imenu ()
+  "Add this to `emacs-lisp-mode-hook' to have hydras in `imenu'."
+  (add-to-list
+   'imenu-generic-expression
+   '("Hydras"
+     "^.*(\\(defhydra\\) \\([a-zA-Z-]+\\)"
+     2)))
+
 ;;* Find Function
 (eval-after-load 'find-func
   '(defadvice find-function-search-for-symbol
