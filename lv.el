@@ -84,6 +84,7 @@ Only the background color is significant."
             (switch-to-buffer buf 'norecord)
           (switch-to-buffer " *LV*" 'norecord)
           (fundamental-mode)
+          (read-only-mode 0)
           (set-window-hscroll lv-wnd 0)
           (setq window-size-fixed t)
           (setq mode-line-format nil)
