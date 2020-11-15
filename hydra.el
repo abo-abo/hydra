@@ -887,7 +887,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
          (hint (intern (format "%S/hint" name)))
          (body-foreign-keys (hydra--body-foreign-keys body))
          (body-timeout (plist-get body :timeout))
-         (body-idle (plist-get body :idle))
+         (idle (or (and (eq (cadr head) 'body) (plist-get body :idle))
+                   (plist-get (nthcdr 3 head) :idle)))
          (curr-body-fn-sym (intern (format "%S/body" name)))
          (body-on-exit-t
           `((hydra-keyboard-quit)
@@ -910,9 +911,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                      ,(hydra--call-interactively cmd (cadr head))
                    ((quit error)
                     (message (error-message-string err)))))
-             ,(if (or (and body-idle (eq (cadr head) 'body))
-                      (setq body-idle (plist-get (nthcdr 3 head) :idle)))
-                  `(hydra-idle-message ,body-idle ,hint ',name)
+             ,(if idle
+                  `(hydra-idle-message ,idle ,hint ',name)
                 `(hydra-show-hint ,hint ',name))
              (hydra-set-transient-map
               ,keymap
