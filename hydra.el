@@ -910,7 +910,8 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
                      ,(hydra--call-interactively cmd (cadr head))
                    ((quit error)
                     (message (error-message-string err)))))
-             ,(if (and body-idle (eq (cadr head) 'body))
+             ,(if (or (and body-idle (eq (cadr head) 'body))
+                      (setq body-idle (plist-get (nthcdr 3 head) :idle)))
                   `(hydra-idle-message ,body-idle ,hint ',name)
                 `(hydra-show-hint ,hint ',name))
              (hydra-set-transient-map
