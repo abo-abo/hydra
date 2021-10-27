@@ -352,6 +352,7 @@ Exitable only through a blue head.")
 ;;* Universal Argument
 (defvar hydra-base-map
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "<f1> k") 'hydra--describe-key)
     (define-key map [?\C-u] 'hydra--universal-argument)
     (define-key map [?-] 'hydra--negative-argument)
     (define-key map [?0] 'hydra--digit-argument)
@@ -412,6 +413,15 @@ Exitable only through a blue head.")
   (setq prefix-arg (cond ((integerp arg) (- arg))
                          ((eq arg '-) nil)
                          (t '-))))
+
+(defun hydra--describe-key ()
+  "Forward to `describe-key'.
+Call order: the hydra body, `hydra--describe-key', the head."
+  (interactive)
+  (lv-delete-window)
+  (let ((hydra-hint-display-type 'message))
+    (call-interactively 'describe-key)
+    (hydra-keyboard-quit)))
 
 ;;* Repeat
 (defvar hydra-repeat--prefix-arg nil
