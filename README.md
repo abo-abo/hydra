@@ -1,6 +1,7 @@
 # Hydra
 
 [![Build Status](https://travis-ci.org/abo-abo/hydra.svg?branch=master)](https://travis-ci.org/abo-abo/hydra)
+[![GNU ELPA](https://elpa.gnu.org/packages/hydra.svg)](https://elpa.gnu.org/packages/hydra.html)
 [![MELPA](https://melpa.org/packages/hydra-badge.svg)](https://melpa.org/#/hydra)
 [![MELPA Stable](https://stable.melpa.org/packages/hydra-badge.svg)](https://stable.melpa.org/#/hydra)
 
