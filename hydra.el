@@ -848,7 +848,9 @@ HEADS is a list of heads."
    "The heads for the associated hydra are:\n\n%s\n\n%s%s."
    (mapconcat
     (lambda (x)
-      (format "\"%s\":    `%S'" (car x) (cadr x)))
+      (format "\"%s\":    %s"
+              (car x)
+              (if (cadr x) (format "`%S'" (cadr x)) "nil")))
     heads ",\n")
    (format "The body can be accessed via `%S'" body-name)
    (if body-key

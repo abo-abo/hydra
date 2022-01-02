@@ -349,7 +349,7 @@ The heads for the associated hydra are:
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
 \"a\":    `abbrev-mode',
-\"q\":    `nil'
+\"q\":    nil
 
 The body can be accessed via `hydra-toggle/body'."
          (interactive)
@@ -371,7 +371,7 @@ The heads for the associated hydra are:
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
 \"a\":    `abbrev-mode',
-\"q\":    `nil'
+\"q\":    nil
 
 The body can be accessed via `hydra-toggle/body'."
          (interactive)
@@ -393,7 +393,7 @@ The heads for the associated hydra are:
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
 \"a\":    `abbrev-mode',
-\"q\":    `nil'
+\"q\":    nil
 
 The body can be accessed via `hydra-toggle/body'."
          (interactive)
@@ -415,7 +415,7 @@ The heads for the associated hydra are:
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
 \"a\":    `abbrev-mode',
-\"q\":    `nil'
+\"q\":    nil
 
 The body can be accessed via `hydra-toggle/body'."
          (interactive)
@@ -432,7 +432,7 @@ The heads for the associated hydra are:
 \"t\":    `toggle-truncate-lines',
 \"f\":    `auto-fill-mode',
 \"a\":    `abbrev-mode',
-\"q\":    `nil'
+\"q\":    nil
 
 The body can be accessed via `hydra-toggle/body'."
          (interactive)
@@ -539,7 +539,7 @@ The heads for the associated hydra are:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
-\"q\":    `nil'
+\"q\":    nil
 
 The body can be accessed via `hydra-vi/body'."
          (interactive)
@@ -574,7 +574,7 @@ The heads for the associated hydra are:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
-\"q\":    `nil'
+\"q\":    nil
 
 The body can be accessed via `hydra-vi/body'."
          (interactive)
@@ -610,7 +610,7 @@ The heads for the associated hydra are:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
-\"q\":    `nil'
+\"q\":    nil
 
 The body can be accessed via `hydra-vi/body'."
          (interactive)
@@ -627,7 +627,7 @@ The heads for the associated hydra are:
 
 \"j\":    `next-line',
 \"k\":    `previous-line',
-\"q\":    `nil'
+\"q\":    nil
 
 The body can be accessed via `hydra-vi/body'."
          (interactive)
