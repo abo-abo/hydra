@@ -101,7 +101,8 @@
 This will be done even if the head wasn't designated for exiting.")
 
 (defvar hydra-amaranth-warn-message "An amaranth Hydra can only exit through a blue head"
-  "Amaranth Warning message.  Shown when the user tries to press an unbound/non-exit key while in an amaranth head.")
+  "Amaranth Warning message.  Shown when the user tries to press an
+unbound/non-exit key while in an amaranth head.")
 
 (defun hydra-set-transient-map (keymap on-exit &optional foreign-keys)
   "Set KEYMAP to the highest priority.
