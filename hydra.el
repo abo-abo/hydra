@@ -341,7 +341,7 @@ Exitable only through a blue head.")
         ;; The original function returns (cons (current-buffer) (point))
         ;; if it found the point.
         (unless (cdr ad-return-value)
-          (with-current-buffer (find-file-noselect library)
+          (with-current-buffer (find-file-noselect (find-library-name library))
             (let ((sn (symbol-name symbol)))
               (when (and (null type)
                          (string-match "\\`\\(hydra-[a-z-A-Z0-9]+\\)/\\(.*\\)\\'" sn)
