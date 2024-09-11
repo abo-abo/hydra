@@ -916,9 +916,10 @@ BODY-AFTER-EXIT is added to the end of the wrapper."
          (body-on-exit-nil
           (delq
            nil
-           `((let ((hydra--ignore ,(not (eq (cadr head) 'body))))
-               (hydra-keyboard-quit)
-               (setq hydra-curr-body-fn ',curr-body-fn-sym))
+           `(,@(unless (hydra--head-property head :inhibit-quit)
+                 `((let ((hydra--ignore ,(not (eq (cadr head) 'body))))
+                     (hydra-keyboard-quit))))
+             (setq hydra-curr-body-fn ',curr-body-fn-sym)
              ,(when cmd
                 `(condition-case err
                      ,(hydra--call-interactively cmd (cadr head))
