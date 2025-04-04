@@ -1376,6 +1376,10 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
   ("1" find-file)
   ("q" nil))
 
+(defhydra hydra-body-pre (global-map "C-c" :body-pre (insert ":pre:"))
+  ("x" (insert "X"))
+  ("q" nil))
+
 (defun remapable-print ()
   (interactive)
   (insert "remapable print was called"))
@@ -1459,6 +1463,18 @@ _w_ Worf:                      % -8`hydra-tng/worf^^    _h_ Set phasers to      
                                (execute-kbd-macro
                                 (kbd "C-c rq")))
                    "*remaped* print was called|")))
+
+(ert-deftest hydra-body-pre ()
+  ":body-pre callback must be called only once per hydra session"
+  (should (string= (hydra-with "|"
+                               (execute-kbd-macro
+                                (kbd "C-c xx")))
+                   ":pre:XX|"))
+  (should (string= (hydra-with "|"
+                               (hydra-body-pre/body)
+                               (execute-kbd-macro
+                                (kbd "xx")))
+                   ":pre:XX|")))
 
 (ert-deftest hydra-columns-1 ()
   (should (equal (eval
