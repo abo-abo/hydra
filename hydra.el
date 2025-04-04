@@ -1538,6 +1538,8 @@ DOC defaults to TOGGLE-NAME split and capitalized."
                    0
                  i)))))
 
+(require 'ring)
+
 (defvar hydra-pause-ring (make-ring 10)
   "Ring for paused hydras.")
 
