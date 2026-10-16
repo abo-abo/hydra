@@ -1,4 +1,4 @@
-targets/
+targets
 .travis.yml
 .dir-locals.el
 Makefile
